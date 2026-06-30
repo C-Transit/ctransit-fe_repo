@@ -6,7 +6,6 @@ import InputField from '../components/Auth/InputField';
 import PasswordInput from '../components/Auth/PasswordInput';
 import AuthButton from '../components/Auth/AuthButton';
 import SocialAuthButtons from '../components/Auth/SocialAuthButtons';
-import Toast from '../components/Toast';
 import { validateEmail } from '../utils/validation';
 import styles from './Login.page.module.css';
 

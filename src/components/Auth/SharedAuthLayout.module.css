@@ -29,6 +29,12 @@
   font-size: 24px;
 }
 
+.logoImg {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
 .logoText {
   color: #1A56DB;
   font-size: 18px;

@@ -1,4 +1,4 @@
-import { FaWifi } from 'react-icons/fa';
+import logo from '../../assets/images/c-transit-logo.svg';
 import styles from './SharedAuthLayout.module.css';
 
 /**
@@ -18,8 +18,7 @@ export default function SharedAuthLayout({
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.logoBox}>
-          <FaWifi className={styles.logoIcon} />
-          <span className={styles.logoText}>C-Transit</span>
+          <img src={logo} alt="C-Transit" className={styles.logoImg} />
         </div>
         <h2 className={styles.title}>{title}</h2>
         <p className={styles.subtitle}>{subtitle}</p>
