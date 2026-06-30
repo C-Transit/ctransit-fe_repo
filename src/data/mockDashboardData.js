@@ -1,0 +1,77 @@
+export const mockUser = {
+  firstName: "John",
+  lastName: "Doe",
+  balance: 2350.5,
+  trips: 32,
+  nfcCard: {
+    maskedNumber: "**** 5678",
+    status: "active",
+    type: "Virtual NFC Card",
+  },
+  spending: {
+    thisMonth: 4560.0,
+    trendPercent: 12,
+  },
+  recentTaps: [
+    {
+      id: "1",
+      terminal: "Victoria Island Terminal",
+      time: "Today, 9:41 AM",
+      amount: 150,
+      status: "success",
+    },
+    {
+      id: "2",
+      terminal: "Lekki Expressway Bus Stop",
+      time: "Today, 7:20 AM",
+      amount: 100,
+      status: "success",
+    },
+    {
+      id: "3",
+      terminal: "Yaba Metro Station",
+      time: "Yesterday, 6:15 PM",
+      amount: 100,
+      status: "success",
+    },
+    {
+      id: "4",
+      terminal: "Ikeja Bus Terminal",
+      time: "Yesterday, 4:10 PM",
+      amount: 200,
+      status: "success",
+    },
+    {
+      id: "5",
+      terminal: "CMS Marina",
+      time: "Yesterday, 8:10 AM",
+      amount: 150,
+      status: "success",
+    },
+  ],
+  fareData: {
+    week: [
+      { date: "Mon", amount: 150 },
+      { date: "Tue", amount: 250 },
+      { date: "Wed", amount: 100 },
+      { date: "Thu", amount: 300 },
+      { date: "Fri", amount: 200 },
+      { date: "Sat", amount: 400 },
+      { date: "Sun", amount: 160 },
+    ],
+    month: [
+      { date: "7 May", amount: 300 },
+      { date: "8 May", amount: 450 },
+      { date: "15 May", amount: 200 },
+      { date: "22 May", amount: 600 },
+      { date: "29 May", amount: 400 },
+    ],
+    year: [
+      { date: "Jan", amount: 1800 },
+      { date: "Feb", amount: 2100 },
+      { date: "Mar", amount: 1600 },
+      { date: "Apr", amount: 2800 },
+      { date: "May", amount: 4560 },
+    ],
+  },
+};

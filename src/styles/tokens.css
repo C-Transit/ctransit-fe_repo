@@ -1,0 +1,86 @@
+/* ============================================
+   DESIGN TOKENS - Dashboard Color System
+   ============================================ */
+
+:root {
+  /* Primary Colors */
+  --primary: #1A56DB;
+  --primary-dark: #1240A0;
+  --primary-light: #EBF5FF;
+  --primary-border: #BFDBFE;
+
+  /* Success Colors */
+  --success: #0E9F6E;
+  --success-light: #ECFDF5;
+
+  /* Danger/Error Colors */
+  --danger: #E02424;
+  --danger-light: #FEF2F2;
+
+  /* Warning Colors */
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+
+  /* Navy/Dark Colors */
+  --navy: #0D1B2A;
+
+  /* Text Colors */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+
+  /* Background Colors */
+  --bg-page: #F3F4F6;
+  --bg-card: #FFFFFF;
+
+  /* Border Colors */
+  --border: #E5E7EB;
+  --border-light: #F3F4F6;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* tokens.css */
+--sidebar-width: 300px;
+
+ /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+/* ============================================
+   DARK THEME OVERRIDES
+   ============================================ */
+[data-theme="dark"] {
+  --primary: #3B82F6;
+  --primary-dark: #2563EB;
+  --primary-light: #1E3A5F;
+  --primary-border: #1E40AF;
+
+  --success: #10B981;
+  --success-light: #064E3B;
+
+  --danger: #F87171;
+  --danger-light: #450A0A;
+
+  --warning: #FBBF24;
+  --warning-light: #451A03;
+
+  --navy: #0D1B2A;
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --bg-page: #0F172A;
+  --bg-card: #1E293B;
+
+  --border: #334155;
+  --border-light: #1E293B;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
