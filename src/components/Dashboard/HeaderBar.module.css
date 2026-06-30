@@ -20,7 +20,11 @@
   font-weight: 700;
   color: var(--primary);
 }
-
+.logoImg {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
 .actions {
   display: flex;
   align-items: center;

@@ -18,7 +18,6 @@ import styles from './About.module.css';
 
 /* ── Data ──────────────────────────────────────────────────────────────────── */
 const STATS = [
-  { value: 4, suffix: '+', label: 'Campuses Targeted' },
   { value: 99, suffix: '%', label: 'Uptime Goal' },
   { value: 1, suffix: ' tap', label: 'To Board a Ride' },
   { value: 0, suffix: ' cash', label: 'Required' },
@@ -33,7 +32,7 @@ const PAIN_POINTS = [
 
 const STEPS = [
   { icon: <FaUserPlus />, step: '01', title: 'Create Account', desc: 'Sign up with your student credentials in under a minute.' },
-  { icon: <FaIdCard />,   step: '02', title: 'Link Student Card', desc: 'Bind your NFC-enabled student ID to your C-Transit profile.' },
+  { icon: <FaIdCard />,   step: '02', title: 'Link Student Card', desc: 'Bind your RFID-enabled student ID to your C-Transit profile.' },
   { icon: <FaWallet />,   step: '03', title: 'Fund Wallet', desc: 'Top up once. Ride anytime — even offline.' },
   { icon: <FaBolt />,     step: '04', title: 'Tap & Ride', desc: 'One tap at the terminal. Board instantly.' },
 ];
@@ -145,9 +144,6 @@ export default function AboutPage() {
             <motion.div className={styles.heroCta} variants={heroChild}>
               <button className={styles.ctaPrimary} onClick={() => navigate('/contact')}>
                 Get in Touch <FaArrowRight />
-              </button>
-              <button className={styles.ctaGhost} onClick={() => navigate('/app')}>
-                Try the App
               </button>
             </motion.div>
           </motion.div>

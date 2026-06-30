@@ -1,0 +1,21 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect width="56" height="56" rx="14" fill="#3B9EE2"/>
+
+  <!-- C arc -->
+  <path d="M36 10 C20 10, 12 18, 12 28 C12 38, 20 46, 36 46"
+        stroke="white" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+
+  <!-- NFC tap wave 1 -->
+  <path d="M37 20 C41.5 23, 41.5 33, 37 36"
+        stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.95"/>
+
+  <!-- NFC tap wave 2 -->
+  <path d="M41 16 C47.5 20, 47.5 36, 41 40"
+        stroke="white" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- Tap dot -->
+  <circle cx="34" cy="28" r="2.8" fill="white"/>
+
+</svg>

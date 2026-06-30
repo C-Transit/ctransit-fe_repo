@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FaBars, FaWifi, FaCog, FaBell } from 'react-icons/fa';
+import { FaBars, FaCog, FaBell } from 'react-icons/fa';
+import logo from '../../assets/images/c-transit-logo.svg'; 
 import styles from './HeaderBar.module.css';
 
 export default function HeaderBar({ onMenuClick, onSettingsClick, onNotificationsClick, unreadCount = 0 }) {
@@ -12,8 +12,7 @@ export default function HeaderBar({ onMenuClick, onSettingsClick, onNotification
 
       {/* Center: Logo */}
       <div className={styles.logo}>
-        <FaWifi size={16} />
-        <span>C-Transit</span>
+        <img src={logo} alt="C-Transit" className={styles.logoImg} />
       </div>
 
       {/* Right: Action Buttons */}
