@@ -26,6 +26,7 @@ export function AuthProvider({ children }) {
     setError(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
+    localStorage.removeItem('refreshToken');
     delete axios.defaults.headers.common['Authorization'];
   }, []);
 
@@ -40,12 +41,12 @@ export function AuthProvider({ children }) {
             // Check JWT expiration safely
             const payload = JSON.parse(atob(storedToken.split('.')[1]));
             const isExpired = payload.exp * 1000 < Date.now();
-            
+
             if (isExpired) {
               clearSession();
               return;
             }
-            
+
             const userData = JSON.parse(storedUser);
             setSession(storedToken, userData);
           } catch {
@@ -70,13 +71,31 @@ export function AuthProvider({ children }) {
         password,
       });
 
-      const { token, user: userData } = response.data;
-      setSession(token, userData);
+      // Backend only returns accessToken / refreshToken / message — NOT a user object.
+      const { accessToken, refreshToken } = response.data;
+
+      if (!accessToken) {
+        throw new Error('No access token returned from server');
+      }
+
+      // Set the auth header immediately so the profile call below is authenticated
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+
+      // Fetch the actual user profile now that we have a valid token
+      const profileResponse = await axios.get(`${USER_API_URL}/users/myprofile`);
+      const userData = profileResponse.data;
+
+      setSession(accessToken, userData);
 
       return { success: true, user: userData };
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
       setError(errorMessage);
+      // Clean up any partial auth state set before the failure
+      delete axios.defaults.headers.common['Authorization'];
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -99,7 +118,7 @@ export function AuthProvider({ children }) {
       const response = await axios.post(`${AUTH_API_URL}/register`, payload);
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message 
+      const errorMessage = err.response?.data?.message
         || err.response?.data?.error
         || err.response?.data?.msg
         || 'Registration failed. Please try again.';
@@ -110,7 +129,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-// OTP verification and related functions
+  // OTP verification and related functions
   const verifyOTP = useCallback(async (email, otp) => {
     setIsLoading(true);
     setError(null);
@@ -121,7 +140,6 @@ export function AuthProvider({ children }) {
         otp: otp.trim(),
       });
 
-    
       return { success: true, data: response.data };
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'OTP verification failed. Please try again.';
@@ -137,8 +155,8 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await axios.post(`${AUTH_API_URL}/resend-otp`, { 
-        email: email.trim().toLowerCase() 
+      const response = await axios.post(`${AUTH_API_URL}/resend-otp`, {
+        email: email.trim().toLowerCase()
       });
       return { success: true, data: response.data };
     } catch (err) {
@@ -150,14 +168,14 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-// Forgot password and reset password functions
+  // Forgot password and reset password functions
   const forgotPassword = useCallback(async (email) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(`${USER_API_URL}/users/forgot-password`, { 
-        email: email.trim().toLowerCase() 
+      const response = await axios.post(`${USER_API_URL}/users/forgot-password`, {
+        email: email.trim().toLowerCase()
       });
       return { success: true, data: response.data };
     } catch (err) {
@@ -190,7 +208,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  
   const logout = useCallback(() => {
     clearSession();
   }, [clearSession]);
