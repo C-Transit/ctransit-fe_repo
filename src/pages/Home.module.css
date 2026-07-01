@@ -143,6 +143,12 @@
   color: #1A56DB;
 }
 
+.logoImg {
+  height: 75px;
+  width: auto;
+  display: block;
+}
+
 .navLinks {
   display: flex;
   gap: 32px;
@@ -191,9 +197,8 @@
 }
 
 .ghostBtn {
-  background: transparent;
-  color: white;
-  border: 1.5px solid white;
+  color: #1A56DB;
+  border: 1.5px solid #1A56DB;
   padding: 12px 24px;
   border-radius: 8px;
   font-size: 14px;
@@ -214,7 +219,151 @@
   transform: scale(0.97);
 }
 
-/* Ghost btn in navbar (dark text on white bg) */
+/* ==================== BETA WELCOME MODAL ==================== */
+.betaOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+  animation: fadeInOverlay 0.3s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.betaModal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 440px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  animation: betaPopIn 0.35s ease;
+}
+
+@keyframes betaPopIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.betaClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #F3F4F6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.betaClose:hover {
+  background: #E5E7EB;
+  color: #111827;
+}
+
+.betaBadge {
+  display: inline-flex;
+  background: #EBF5FF;
+  color: #1A56DB;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.betaTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.betaSubtitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.betaSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.betaStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.betaStepNum {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: #1A56DB;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.betaStep p {
+  font-size: 14px;
+  color: #374151;
+  margin: 0;
+  line-height: 1.5;
+  padding-top: 2px;
+}
+
+.betaReward {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 24px;
+}
+
+.betaRewardIcon {
+  color: #F59E0B;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.betaReward p {
+  font-size: 13px;
+  color: #78350F;
+  margin: 0;
+  line-height: 1.5;
+}
+
 .navbar.solid .ghostBtn {
   color: #1A56DB;
   border-color: #1A56DB;

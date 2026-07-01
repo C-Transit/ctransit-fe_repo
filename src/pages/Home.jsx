@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaWifi, FaCreditCard, FaWallet, FaBan, FaSignal, FaCoins, FaChartLine, FaShieldAlt, FaLightbulb, FaCheck, FaChartBar, FaBus, FaRedo, FaTwitter, FaInstagram, FaLinkedin, FaFacebook, FaBars, FaTimes, FaStar } from 'react-icons/fa';
+import { FaCreditCard, FaWallet, FaBan, FaSignal, FaCoins, FaChartLine, FaShieldAlt, FaLightbulb, FaCheck, FaChartBar, FaBus, FaRedo, FaTwitter, FaInstagram, FaLinkedin, FaFacebook, FaBars, FaTimes, FaStar } from 'react-icons/fa';
 import styles from './Home.module.css';
+import logo from '../assets/images/c-transit-icon.svg';
 
 // ── Count-up Hook ─────────────────────────────────────────────────────────────
 function useCountUp(target, duration = 2000, start = false) {
@@ -84,6 +85,22 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navTransparent, setNavTransparent] = useState(true);
 
+  // // ── Welcome message for beta tester ────────────────────────────────────────────────────────
+const [showBetaModal, setShowBetaModal] = useState(false);
+
+useEffect(() => {
+  const hasSeenBeta = localStorage.getItem('ctransit_beta_seen');
+  if (!hasSeenBeta) {
+    const timer = setTimeout(() => setShowBetaModal(true), 600); // slight delay feels less jarring
+    return () => clearTimeout(timer);
+  }
+}, []);
+
+const closeBetaModal = () => {
+  setShowBetaModal(false);
+  localStorage.setItem('ctransit_beta_seen', 'true');
+};
+
   // Stats animation trigger
   const statsRef = useRef(null);
   const [statsAnimated, setStatsAnimated] = useState(false);
@@ -133,14 +150,51 @@ useEffect(() => {
 
   return (
     <main className={styles.home}>
+    {showBetaModal && (
+  <div className={styles.betaOverlay} onClick={closeBetaModal}>
+    <div className={styles.betaModal} onClick={(e) => e.stopPropagation()}>
+      <button className={styles.betaClose} onClick={closeBetaModal} aria-label="Close">
+        <FaTimes />
+      </button>
 
+      <div className={styles.betaBadge}>Beta Tester Program</div>
+      <h2 className={styles.betaTitle}>Welcome aboard! 👋</h2>
+      <p className={styles.betaSubtitle}>
+        You're one of the first to try C-Transit. Help us test it and earn rewards.
+      </p>
+
+      <div className={styles.betaSteps}>
+        <div className={styles.betaStep}>
+          <span className={styles.betaStepNum}>1</span>
+          <p>Create an account and top up your wallet</p>
+        </div>
+        <div className={styles.betaStep}>
+          <span className={styles.betaStepNum}>2</span>
+          <p>Try tapping a card, checking your trip history, and exploring the dashboard</p>
+        </div>
+        <div className={styles.betaStep}>
+          <span className={styles.betaStepNum}>3</span>
+          <p>Report any bugs or feedback you find along the way</p>
+        </div>
+      </div>
+
+      <div className={styles.betaReward}>
+        <FaStar className={styles.betaRewardIcon} />
+        <p>Every action you complete earns you <strong>points</strong> — redeemable for ride credit once we launch fully.</p>
+      </div>
+
+      <button className={styles.primaryBtn} onClick={closeBetaModal} style={{ width: '100%' }}>
+        Let's Get Started
+      </button>
+    </div>
+  </div>
+)}
       {/* ── NAVBAR ── */}
       <nav className={`${styles.navbar} ${navTransparent ? styles.transparent : styles.solid}`}>
         <div className={styles.navContainer}>
-          <div className={styles.logo}>
-            <FaWifi className={styles.logoIcon} />
-            <span className={styles.logoText}>C-Transit</span>
-          </div>
+         <div className={styles.logo}>
+  <img src={logo} alt="C-Transit" className={styles.logoImg} />
+</div>
 
           <div className={styles.navLinks}>
             <a href="#how-it-works">How It Works</a>
@@ -374,10 +428,9 @@ useEffect(() => {
       <footer className={styles.footer}>
         <div className={styles.footerContainer}>
           <div className={styles.footerColumn}>
-            <div className={styles.footerLogo}>
-              <FaWifi className={styles.footerLogoIcon} />
-              <span>C-Transit</span>
-            </div>
+           <div className={styles.footerLogo}>
+  <img src={logo} alt="C-Transit" className={styles.footerLogoImg} />
+</div>
             <p className={styles.footerTagline}>The Smarter Way to Move.</p>
             <div className={styles.socialIcons}>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
