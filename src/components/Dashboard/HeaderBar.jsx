@@ -1,5 +1,5 @@
 import { FaBars, FaCog, FaBell } from 'react-icons/fa';
-import logo from '../../assets/images/c-transit-logo.svg'; 
+import logo from '../../assets/images/c-transit-icon.svg'; 
 import styles from './HeaderBar.module.css';
 
 export default function HeaderBar({ onMenuClick, onSettingsClick, onNotificationsClick, unreadCount = 0 }) {
