@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fa';
 import styles from './SettingsPage.module.css';
 import KYCModal from '../../components/KYCModal';
-import { USER_API_URL, KYC_API_URL } from '../../config/api';
+import { AUTH_API_URL, KYC_API_URL } from '../../config/api';
 
 
 export default function Settings() {
@@ -334,7 +334,7 @@ function CardLinking({ onShowInfo, onToast }) {
     setLinkError('');
 
     try {
-      // TODO(backend): replace with your real card-linking endpoint once ready
+      
       const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: 'POST',
         headers: {
@@ -355,7 +355,7 @@ function CardLinking({ onShowInfo, onToast }) {
         setCards(prev => [...prev, {
           id: Date.now(),
           uid: result.card?.uid || 'UNKNOWN',
-          label: result.card?.label || 'My NFC Card',
+          label: result.card?.label || 'My C-transit Card',
           linked: true,
           linkedAt: result.card?.linkedAt || new Date().toISOString().split('T')[0],
         }]);
@@ -386,7 +386,7 @@ function CardLinking({ onShowInfo, onToast }) {
       <div className={styles.cardSectionHeader}>
         <div>
           <h2>C-transit Card Linking</h2>
-          <p className={styles.cardSectionDesc}>Manage physical NFC transit cards linked to your account.</p>
+          <p className={styles.cardSectionDesc}>Manage physical C-transit cards linked to your account.</p>
         </div>
         <motion.button
           className={styles.linkCardBtn}
