@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaWallet, FaArrowRight, FaWifi } from 'react-icons/fa';
+import { FaWallet, FaWifi } from 'react-icons/fa';
 import styles from './DashboardHome.module.css';
 
 // ─── Status Config ────────────────────────────────────────────────────────────

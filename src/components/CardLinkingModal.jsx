@@ -43,7 +43,7 @@ export default function CardLinkingModal({ isOpen, onClose }) {
     setError('');
 
     try {
-      const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
+      const response = await fetch(`${AUTH_API_URL}/auth/confirm-card`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
