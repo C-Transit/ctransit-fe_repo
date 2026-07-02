@@ -194,6 +194,7 @@ useEffect(() => {
         <div className={styles.navContainer}>
          <div className={styles.logo}>
   <img src={logo} alt="C-Transit" className={styles.logoImg} />
+    <span> C-transit</span>
 </div>
 
           <div className={styles.navLinks}>
