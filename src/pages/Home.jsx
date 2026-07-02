@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaCreditCard, FaWallet, FaBan, FaSignal, FaCoins, FaChartLine, FaShieldAlt, FaLightbulb, FaCheck, FaChartBar, FaBus, FaRedo, FaTwitter, FaInstagram, FaLinkedin, FaFacebook, FaBars, FaTimes, FaStar } from 'react-icons/fa';
 import styles from './Home.module.css';
-import logo from '../assets/images/c-transit-logo.svg';
+import logo from '../assets/images/c-transit-icon.svg';
 
 // ── Count-up Hook ─────────────────────────────────────────────────────────────
 function useCountUp(target, duration = 2000, start = false) {
@@ -193,14 +193,13 @@ useEffect(() => {
       <nav className={`${styles.navbar} ${navTransparent ? styles.transparent : styles.solid}`}>
         <div className={styles.navContainer}>
          <div className={styles.logo}>
-  <img src={logo} alt="C-Transit" className={styles.logoImg} />
-    <span> C-transit</span>
-</div>
-
-          <div className={styles.navLinks}>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#why-ctransit">Solutions</a>
-          </div>
+          <img src={logo} alt="C-Transit" className={styles.logoImg} />
+         
+        </div>
+        <div className={styles.navLinks}>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#why-ctransit">Solutions</a>
+        </div>
 
           <div className={styles.navRight}>
             <Link to="/auth/login" className={styles.ghostBtn}>Login</Link>
@@ -431,7 +430,6 @@ useEffect(() => {
           <div className={styles.footerColumn}>
            <div className={styles.footerLogo}>
   <img src={logo} alt="C-Transit" className={styles.footerLogoImg} />
-  <span> C-transit</span>
 </div>
             <p className={styles.footerTagline}>The Smarter Way to Move.</p>
             <div className={styles.socialIcons}>
