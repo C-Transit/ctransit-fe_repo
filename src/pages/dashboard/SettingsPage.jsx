@@ -335,7 +335,7 @@ function CardLinking({ onShowInfo, onToast }) {
 
     try {
       // TODO(backend): replace with your real card-linking endpoint once ready
-      const response = await fetch(`${USER_API_URL}/confirm-card`, {
+      const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
