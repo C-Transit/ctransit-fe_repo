@@ -143,6 +143,7 @@
   color: #1A56DB;
 }
 
+/* ── REPLACE the existing .logoImg ── */
 .logoImg {
   height: 95px;
   width: auto;
@@ -1073,6 +1074,14 @@
   font-size: 20px;
 }
 
+/* ── ADD this block (no class exists for this yet) ── */
+.footerLogoImg {
+  height: 36px;   /* proportionate to the footer column width */
+  width: auto;
+  display: block;
+  max-width: 100%; /* prevents SVG overflow on any screen size */
+}
+
 .footerTagline {
   font-size: 14px;
   color: #9CA3AF;
@@ -1360,6 +1369,11 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
+
+  /* ── ADD inside the existing @media (max-width: 768px) block ── */
+.footerLogoImg {
+  height: 28px;  /* slightly smaller on mobile */
+}
 
 }
 

@@ -5,7 +5,7 @@ export default function BottomNav({ activePage = 'home', onTabChange }) {
   const tabs = [
     { id: 'home', label: 'Home', icon: FaHome },
     { id: 'history', label: 'History', icon: FaClock },
-    { id: 'card', label: 'Card', icon: FaWifi, special: true },
+    { id: '#', label: 'Card', icon: FaWifi, special: true },
     { id: 'wallet', label: 'Wallet', icon: FaCreditCard },
     { id: 'profile', label: 'Profile', icon: FaUser },
   ];

@@ -1,6 +1,9 @@
-const CACHE_NAME = "c-transit-cache-v1";
-// service-worker.js
-const API_BASE_URL = "https://c-transit-pink.vercel.app"; 
+// 1. BUMP THE CACHE VERSION TO FORCE AN UPDATE
+const CACHE_NAME = "c-transit-cache-v2";
+
+// 2. UPDATE TO YOUR PREFERRED API BEHAVIOR
+// If your API is on the same domain as the frontend, you don't need the full URL here.
+// We will just check if the path starts with '/api'.
 
 const STATIC_ASSETS = [
   "/",
@@ -38,7 +41,8 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   // 1. API calls — network only, never serve from cache
-  if (url.pathname.startsWith( API_BASE_URL)) {
+  // FIX: Check if the pathname starts with '/api' (or check url.origin if external)
+  if (url.pathname.startsWith("/api")) {
     event.respondWith(
       fetch(request).catch(() =>
         new Response(
@@ -60,18 +64,21 @@ self.addEventListener("fetch", (event) => {
   }
 
   // 3. Static assets (JS, CSS, images) — cache first, then network
-  event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((response) => {
-          // Dynamically cache valid asset responses
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-    )
-  );
+  // ONLY cache GET requests (caching POST/PUT/DELETE causes errors)
+  if (request.method === "GET") {
+    event.respondWith(
+      caches.match(request).then(
+        (cached) =>
+          cached ||
+          fetch(request).then((response) => {
+            // Dynamically cache valid asset responses
+            if (response.ok && response.type === 'basic') {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
+            return response;
+          })
+      )
+    );
+  }
 });
