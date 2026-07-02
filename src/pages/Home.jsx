@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaCreditCard, FaWallet, FaBan, FaSignal, FaCoins, FaChartLine, FaShieldAlt, FaLightbulb, FaCheck, FaChartBar, FaBus, FaRedo, FaTwitter, FaInstagram, FaLinkedin, FaFacebook, FaBars, FaTimes, FaStar } from 'react-icons/fa';
 import styles from './Home.module.css';
-import logo from '../assets/images/c-transit-icon.svg';
+import logo from '../assets/images/c-transit-logo.svg';
 
 // ── Count-up Hook ─────────────────────────────────────────────────────────────
 function useCountUp(target, duration = 2000, start = false) {
@@ -430,6 +430,7 @@ useEffect(() => {
           <div className={styles.footerColumn}>
            <div className={styles.footerLogo}>
   <img src={logo} alt="C-Transit" className={styles.footerLogoImg} />
+  <span> C-transit</span>
 </div>
             <p className={styles.footerTagline}>The Smarter Way to Move.</p>
             <div className={styles.socialIcons}>
