@@ -3,17 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   FaArrowLeft,
-  FaShieldAlt,
   FaTrash,
-  FaCog,
-  FaBell,
   FaDownload,
   FaCheckCircle,
   FaLock,
   FaUsers,
   FaInfoCircle,
   FaIdCard,
-  FaCreditCard,
   FaArrowRight,
   FaWifi,
   FaTimesCircle,
@@ -37,7 +33,7 @@ export default function Settings() {
     currency: 'NGN',
     emailNotif: true,
     pushNotif: true,
-    smsNotif: false,
+  /* ──  ───────────────────  smsNotif: false,────────────────── */
     busAlerts: true,
     paymentAlerts: true,
     tripReminders: true,
@@ -231,7 +227,7 @@ function NotificationSettings({ preferences, onSave }) {
   const methods = [
     { key: 'emailNotif', label: 'Email Notifications', desc: 'Receive updates via email' },
     { key: 'pushNotif',  label: 'Push Notifications',  desc: 'Receive app notifications' },
-    { key: 'smsNotif',   label: 'SMS Alerts',           desc: 'Receive text messages' },
+  /* ──  ───────────────────  { key: 'smsNotif',   label: 'SMS Alerts',           desc: 'Receive text messages' },──────────────────────────────── */
   ];
 
   const types = [
@@ -280,7 +276,7 @@ function NotificationSettings({ preferences, onSave }) {
   );
 }
 
-/* ── Card Linking ──────────────────────────────────────────────────────────── */
+/* ──────────────────────────── Card Linking ──────────────────────────────────────────────────────────── */
 const OTP_LENGTH = 6;
 
 function CardLinking({ onShowInfo, onToast }) {
@@ -334,12 +330,12 @@ function CardLinking({ onShowInfo, onToast }) {
     setLinkError('');
 
     try {
-      
+      console.log('token:', localStorage.getItem('authToken'));
       const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authtoken')}`,
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({ otp: code }),
       });

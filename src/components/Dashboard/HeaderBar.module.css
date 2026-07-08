@@ -24,6 +24,7 @@
   height: 75px;
   width: auto;
   object-fit: contain;
+  /* filter: brightness(0) invert(1); */
 }
 .actions {
   display: flex;
@@ -54,9 +55,9 @@
   right: 6px;
   width: 8px;
   height: 8px;
-  background-color: var(--danger);
   border-radius: 50%;
   border: 1.5px solid white;
+  background-color:var() ;
 }
 
 .menuBtn {

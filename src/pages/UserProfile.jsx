@@ -11,17 +11,7 @@ import styles from './UserProfile.module.css';
 
 /**
  * UserProfile Component
- * 
- * Shows user's profile information including:
- * - Personal info (name, email, matric number, phone)
- * - Account statistics
- * - Edit profile button
- * - Change password button
- * 
- * BACKEND INTEGRATION:
- * - GET /api/users/myprofile (get current profile data)
- * - PUT /api/users/update-profile (update profile: name, phone)
- * - POST /api/users/change-password (change password)
+
  */
 export default function UserProfile() {
   const navigate = useNavigate();
@@ -48,7 +38,7 @@ export default function UserProfile() {
   });
 
   // Fetch user profile on mount
-  // GET /api/users/myprofile
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -105,8 +95,8 @@ export default function UserProfile() {
     fetchUserProfile();
   }, [navigate]);
 
-  // BACKEND: PUT /api/users/update-profile
-  // Send: { firstname, lastname, phone }
+
+ 
   // Response: { success: true, user: {...updatedUserData} }
   const handleSaveProfile = async () => {
     try {
@@ -132,8 +122,6 @@ export default function UserProfile() {
     }
   };
 
-  // BACKEND: POST /api/users/change-password
-  // Send: { currentPassword, newPassword, confirmPassword }
   // Response: { success: true, message: "Password changed" }
   const handleChangePassword = async (currentPass, newPass, confirmPass) => {
     try {

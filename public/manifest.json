@@ -3,13 +3,13 @@
   "name": "Campus Transit",
   "icons": [
     {
-      "src": "/icons/icon-192x192.svg",
+      "src": "../src/assets/images/c-transit-icon.svg",
       "type": "image/svg+xml",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512x512.svg",
+      "src": "../src/assets/images/c-transit-icon.svg",
       "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any"
@@ -22,7 +22,7 @@
   "description": "A Progressive Web App for Campus Transit.",
   "splash_screens": [
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "../src/assets/images/c-transit-icon.svg",
       "sizes": "512x512",
       "type": "image/png"
     }

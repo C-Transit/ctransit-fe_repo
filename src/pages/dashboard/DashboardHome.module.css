@@ -12,7 +12,7 @@
   width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
-  background-color: var(--bg-base, #f5f7fa);
+  background-color: var(--bg-base);
 }
 
 /* ── Greeting ─────────────────────────────────────────────────────────────── */
@@ -163,13 +163,13 @@
 }
 
 .green {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: var(--bg-success-badge, rgba(16, 185, 129, 0.15));
+  color: var(--text-success-badge, #34d399);
 }
 
 .red {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: var(--bg-danger-badge, rgba(239, 68, 68, 0.15));
+  color: var(--text-danger-badge, #f87171);
 }
 
 /* Trend indicators */
@@ -340,19 +340,20 @@
 }
 
 .statusSuccess {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: var(--bg-success-badge, rgba(16, 185, 129, 0.15));
+  color: var(--text-success-badge, #34d399);
 }
 
 .statusFailed {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: var(--bg-danger-badge, rgba(239, 68, 68, 0.15));
+  color: var(--text-danger-badge, #f87171);
 }
 
 .statusPending {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: var(--bg-warning-badge, rgba(245, 158, 11, 0.15));
+  color: var(--text-warning-badge, #fbbf24);
 }
+
 
 /* ── Chart Card ───────────────────────────────────────────────────────────── */
 .chartCard {
