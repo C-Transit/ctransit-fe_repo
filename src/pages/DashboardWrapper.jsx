@@ -115,6 +115,7 @@ const pageProps = {
     onTransfer: () => handleNavigate('wallet'),
     onViewAll: () => handleNavigate('history'),
     onContactSupport: () => handleNavigate('contact'),
+    onBalanceUpdate: (newBalance) => setWalletBalance(newBalance),
   };
   const renderPage = () => {
     switch (currentPage) {

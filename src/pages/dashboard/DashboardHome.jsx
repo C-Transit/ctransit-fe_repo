@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { FaWallet, FaWifi } from 'react-icons/fa';
+import { USER_API_URL } from '../../config/api';
 import styles from './DashboardHome.module.css';
 
 // ─── Status Config ────────────────────────────────────────────────────────────
@@ -63,12 +65,40 @@ function TapRow({ tap }) {
 // ─── Main Dashboard Component ─────────────────────────────────────────────────
 export default function DashboardHome({
   userData,
-  walletBalance,
   recentTaps,
   onFundWallet,
   onViewAll,
 }) {
   const [activeChartData, setActiveChartData] = useState([]);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+
+  // ─── Auth header helper (matches WalletPage's pattern) ───────────────────
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('authToken');
+    return { Authorization: `Bearer ${token}` };
+  }, []);
+
+  // ─── Fetch wallet balance directly (self-contained, like WalletPage) ─────
+  const fetchWalletBalance = useCallback(async () => {
+    try {
+      const res = await axios.get(`${USER_API_URL}/api/wallets/balance`, {
+        headers: authHeaders(),
+      });
+      setWalletBalance(res.data.balance || 0);
+      // Note: response also includes matricNumber, but userData.matricNumber
+      // (passed down from parent) already covers display needs here, so we
+      // don't overwrite it — avoids a second source of truth for that field.
+    } catch (err) {
+      console.error('Failed to fetch wallet balance:', err);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => {
+    fetchWalletBalance();
+  }, [fetchWalletBalance]);
 
   // Generate dynamic, real analytics points based on the actual history payload
   useEffect(() => {
@@ -104,7 +134,9 @@ export default function DashboardHome({
       <div className={styles.walletCard}>
         <p className={styles.walletLabel}>Wallet Balance</p>
         <p className={styles.walletBalance}>
-          ₦{(walletBalance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+          {balanceLoading
+            ? 'Loading...'
+            : `₦${(walletBalance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`}
         </p>
         <p className={styles.walletAvailable}>Available Balance</p>
         <div className={styles.walletActions}>

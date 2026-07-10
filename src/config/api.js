@@ -6,3 +6,4 @@ export const AUTH_API_URL = `${baseApiUrl}/api/auth`;
 export const USER_API_URL = `${baseApiUrl}/api`;
 export const KYC_API_URL = `${baseApiUrl}/api/kyc`;
 export const NOT_API_URL = `${baseApiUrl}/api/notifications`;
+export const WALLET_API_URL = `${baseApiUrl}/api/wallet`
