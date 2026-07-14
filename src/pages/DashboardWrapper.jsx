@@ -25,13 +25,14 @@ export default function DashboardWrapper() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //  Defined first so fetchDashboardData can reference it
+  // ─── Handle Logout ──────────────────────────────────────────────────────────
   const handleLogout = useCallback(() => {
     localStorage.removeItem('authToken');
     logout();
     navigate('/auth/login');
   }, [logout, navigate]);
 
+  // ─── Fetch Dashboard Data ──────────────────────────────────────────────────
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -47,7 +48,7 @@ export default function DashboardWrapper() {
         Authorization: `Bearer ${token}`,
       };
 
-      // 1. Fetch Profile Data (Core requirement)
+      // 1. Fetch Profile Data
       const userResponse = await axios.get(
         `${USER_API_URL}/users/myprofile`,
         { headers }
@@ -57,29 +58,26 @@ export default function DashboardWrapper() {
   
       setUserData(profile);
       setWalletBalance(profile?.wallet?.balance || 0);
-      setError(null); // Profile loaded successfully, clear global error
+      setError(null);
 
-      // 2. Fetch Trip History (Isolated so a backend 404 won't break the dashboard)
+      // 2. Fetch Trip History
       try {
         const tripsResponse = await axios.get(
           `${USER_API_URL}/transactions/history`,
           { headers }
         );
 
-       const tripsData = tripsResponse.data.data.transactions;
-       const normalized = tripsData.map(t => ({
-  ...t,
-  createdAt: t.synced_at,
-  terminal: t.terminal_id,
-  status: t.type === 'RIDE' ? 'success' : 'pending',
-}));
+        const tripsData = tripsResponse.data.data.transactions;
+        const normalized = tripsData.map(t => ({
+          ...t,
+          createdAt: t.synced_at,
+          terminal: t.terminal_id,
+          status: t.type === 'RIDE' ? 'success' : 'pending',
+        }));
 
-setRecentTaps(normalized.slice(0, 5));
-
-
+        setRecentTaps(normalized.slice(0, 5));
        
       } catch (tripErr) {
-        // Log the 404 warning silently and fallback to an empty array
         console.warn('Trip history endpoint not found/available yet:', tripErr.message);
         setRecentTaps([]); 
       }
@@ -102,11 +100,18 @@ setRecentTaps(normalized.slice(0, 5));
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // ─── Navigation Handlers ──────────────────────────────────────────────────
   const handleNavigate = (page) => {
     setCurrentPage(page);
   };
 
-const pageProps = {
+  // ─── Handle Balance Update ────────────────────────────────────────────────
+  const handleBalanceUpdate = (newBalance) => {
+    setWalletBalance(newBalance);
+  };
+
+  // ─── Page Props ────────────────────────────────────────────────────────────
+  const pageProps = {
     userData,
     walletBalance,
     recentTaps,
@@ -115,8 +120,10 @@ const pageProps = {
     onTransfer: () => handleNavigate('wallet'),
     onViewAll: () => handleNavigate('history'),
     onContactSupport: () => handleNavigate('contact'),
-    onBalanceUpdate: (newBalance) => setWalletBalance(newBalance),
+    onBalanceUpdate: handleBalanceUpdate,
   };
+
+  // ─── Render Page ──────────────────────────────────────────────────────────
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
@@ -129,7 +136,7 @@ const pageProps = {
         return <NotificationsPage {...pageProps} />;
       case 'profile':
         return <ProfilePage {...pageProps} />;
-    case 'settings':
+      case 'settings':
         return <SettingsPage {...pageProps} />;
       case 'help':
         return <HelpCenter {...pageProps} />;
@@ -159,7 +166,7 @@ const pageProps = {
 
   return (
     <DashboardLayout
-      activeTab={currentPage}
+      activePage={currentPage}  // ← FIXED: Changed from activeTab to activePage
       onNavigate={handleNavigate}
       onLogout={handleLogout}
       UserData={userData}

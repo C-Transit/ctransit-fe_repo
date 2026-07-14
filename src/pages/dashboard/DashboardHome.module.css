@@ -228,6 +228,227 @@
   text-decoration: underline;
 }
 
+/* ─── Modal Styles ────────────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalContainer {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modalCloseBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #6B7280;
+  transition: color 0.2s;
+}
+
+.modalCloseBtn:hover {
+  color: #111827;
+}
+
+.modalBody {
+  margin-bottom: 20px;
+}
+
+.modalDescription {
+  color: #6B7280;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.inputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.currencySymbol {
+  position: absolute;
+  left: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.amountInput {
+  width: 100%;
+  padding: 14px 16px 14px 40px;
+  font-size: 24px;
+  font-weight: 600;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #111827;
+}
+
+.amountInput:focus {
+  border-color: #1A56DB;
+}
+
+.amountInput::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.quickAmounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quickAmountBtn {
+  padding: 10px 8px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quickAmountBtn:hover {
+  background: #1A56DB;
+  color: white;
+  border-color: #1A56DB;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 12px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 12px;
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #E5E7EB;
+}
+
+.topUpBtn {
+  flex: 2;
+  padding: 12px;
+  background: #1A56DB;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.topUpBtn:hover:not(:disabled) {
+  background: #1E40AF;
+}
+
+.topUpBtn:disabled {
+  background: #93A3C4;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ─── Success Content ────────────────────────────────────────────────────── */
+.successContent {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.successIconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.successTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.successAmount {
+  margin: 8px 0 0 0;
+  color: #6B7280;
+  font-size: 14px;
+}
+
+/* ─── Error Content ──────────────────────────────────────────────────────── */
+.errorContent {
+  padding: 12px;
+  background: #FEF2F2;
+  border-radius: 8px;
+  color: #DC2626;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 /* ── Tabs ─────────────────────────────────────────────────────────────────── */
 .tabs {
   display: flex;

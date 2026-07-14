@@ -4,7 +4,12 @@ import HeaderBar from './HeaderBar';
 import BottomNav from './BottomNav';
 import styles from './DashboardLayout.module.css';
 
-export default function DashboardLayout({ children, activePage = 'home', onNavigate, onLogout, UserData }) {
+export default function DashboardLayout({ 
+  children, 
+  activePage = 'home',  // ← Keep as activePage
+  onNavigate, 
+  UserData 
+}) {
     
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -14,7 +19,7 @@ export default function DashboardLayout({ children, activePage = 'home', onNavig
       <SidebarDrawer
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        activePage={activePage}
+        activePage={activePage}  // ← Pass activePage correctly
         onNavigate={(page) => {
           onNavigate(page);
           setSidebarOpen(false);
@@ -32,9 +37,9 @@ export default function DashboardLayout({ children, activePage = 'home', onNavig
 
       {/* Fixed Top Header */}
       <HeaderBar
-      onMenuClick={() => setSidebarOpen(true)}
-      onSettingsClick={() => onNavigate('settings')}
-      onNotificationsClick={() => onNavigate('notifications')}
+        onMenuClick={() => setSidebarOpen(true)}
+        onSettingsClick={() => onNavigate('settings')}
+        onNotificationsClick={() => onNavigate('notifications')}
         unreadCount={1}
       />
 

@@ -22,7 +22,7 @@ import HelpCenter from './pages/HelpPage';
 // New Auth Screens
 import LoginPage from './pages/Login.page';
 import RegisterPage from './pages/Register.page';
-import VerifyPhonePage from './pages/VerifyPhone.page'; // Your OTP page
+import VerifyPhonePage from './pages/VerifyPhone.page';
 import ForgotPasswordPage from './pages/ForgotPassword.page';
 import ResetPasswordPage from './pages/ResetPassword.page';
 import AuthGuard from './components/Auth/AuthGuard';
@@ -82,8 +82,6 @@ function App() {
                 </PublicAuthRoute>
               }
             />
-            
-         
             <Route
               path="/auth/verify-phone"
               element={<VerifyPhonePage />}
@@ -121,7 +119,6 @@ function App() {
                 </AuthGuard>
               }
             />
-           
             <Route
               path="/card-linking"
               element={<Navigate to="/dashboard" replace />}

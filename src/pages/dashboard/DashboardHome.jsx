@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaWallet, FaWifi } from 'react-icons/fa';
+import { FaWallet, FaWifi, FaTimes } from 'react-icons/fa';
 import { USER_API_URL } from '../../config/api';
 import styles from './DashboardHome.module.css';
 
@@ -44,7 +44,6 @@ function TapRow({ tap }) {
         <FaWifi />
       </div>
       <div className={styles.tapInfo}>
-        {/* Real Dynamic Terminal Locations from API */}
         <p className={styles.tapTerminal}>{tap.terminal || tap.location || 'Transit Terminal'}</p>
         <p className={styles.tapTime}>
           {tap.createdAt ? new Date(tap.createdAt).toLocaleDateString('en-NG') : tap.time || 'Recent'}
@@ -66,56 +65,155 @@ function TapRow({ tap }) {
 export default function DashboardHome({
   userData,
   recentTaps,
-  onFundWallet,
   onViewAll,
+  onBalanceUpdate,
 }) {
   const [activeChartData, setActiveChartData] = useState([]);
   const [walletBalance, setWalletBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(true);
+  const [balanceError, setBalanceError] = useState(null);
+  
+  // ─── Top Up Modal States ──────────────────────────────────────────────────
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState('');
+  const [topUpLoading, setTopUpLoading] = useState(false);
+  const [topUpError, setTopUpError] = useState(null);
+  const [topUpSuccess, setTopUpSuccess] = useState(false);
 
-  // ─── Auth header helper (matches WalletPage's pattern) ───────────────────
+  // ─── Auth header helper ───────────────────────────────────────────────────
   const authHeaders = useCallback(() => {
     const token = localStorage.getItem('authToken');
+    if (!token) {
+      return {};
+    }
     return { Authorization: `Bearer ${token}` };
   }, []);
 
-  // ─── Fetch wallet balance directly (self-contained, like WalletPage) ─────
+  // ─── Fetch wallet balance ──────────────────────────────────────────────────
   const fetchWalletBalance = useCallback(async () => {
     try {
-      const res = await axios.get(`${USER_API_URL}/api/wallets/balance`, {
+      setBalanceLoading(true);
+      setBalanceError(null);
+      
+      const url = `${USER_API_URL}/wallets/details`;
+      
+      const res = await axios.get(url, {
         headers: authHeaders(),
       });
-      setWalletBalance(res.data.balance || 0);
-      // Note: response also includes matricNumber, but userData.matricNumber
-      // (passed down from parent) already covers display needs here, so we
-      // don't overwrite it — avoids a second source of truth for that field.
+      
+      const balance = res.data?.balance || res.data?.data?.balance || 0;
+      setWalletBalance(balance);
+      
+      if (onBalanceUpdate) {
+        onBalanceUpdate(balance);
+      }
+      
     } catch (err) {
-      console.error('Failed to fetch wallet balance:', err);
+      if (err.response?.status === 401) {
+        setBalanceError('Session expired. Please login again.');
+      } else if (err.response?.status === 403) {
+        setBalanceError('Please complete your KYC verification to access your wallet.');
+      } else if (err.response?.status === 404) {
+        setWalletBalance(0);
+        setBalanceError(null);
+      } else if (err.response?.status === 500) {
+        setBalanceError('Server error. Please try again later.');
+      } else {
+        setBalanceError('Could not fetch balance. Please refresh the page.');
+      }
     } finally {
       setBalanceLoading(false);
     }
-  }, [authHeaders]);
+  }, [authHeaders, onBalanceUpdate]);
 
+  // ─── Handle Top Up ──────────────────────────────────────────────────────────
+  const handleTopUp = async () => {
+    // Validate amount
+    const amount = parseFloat(topUpAmount);
+    if (!topUpAmount || isNaN(amount) || amount <= 0) {
+      setTopUpError('Please enter a valid amount');
+      return;
+    }
+
+    setTopUpLoading(true);
+    setTopUpError(null);
+    setTopUpSuccess(false);
+
+    try {
+      const headers = authHeaders();
+      const url = `${USER_API_URL}/payments/topup`;
+      
+      const response = await axios.post(
+        url,
+        { amount: amount },
+        { headers }
+      );
+
+      // Update balance with new balance from response
+      const newBalance = response.data?.balance || response.data?.data?.balance || walletBalance + amount;
+      setWalletBalance(newBalance);
+      
+      if (onBalanceUpdate) {
+        onBalanceUpdate(newBalance);
+      }
+
+      setTopUpSuccess(true);
+      setTopUpAmount('');
+      
+      // Close modal after 2 seconds on success
+      setTimeout(() => {
+        setShowTopUpModal(false);
+        setTopUpSuccess(false);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Top up failed:', err);
+      if (err.response?.status === 403) {
+        setTopUpError('Please complete your KYC verification to top up your wallet.');
+      } else if (err.response?.status === 401) {
+        setTopUpError('Session expired. Please login again.');
+      } else if (err.response?.status === 404) {
+        setTopUpError('Top up service is currently unavailable.');
+      } else if (err.response?.status === 500) {
+        setTopUpError('Server error. Please try again later.');
+      } else {
+        setTopUpError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      }
+    } finally {
+      setTopUpLoading(false);
+    }
+  };
+
+  // ─── Load balance on mount ──────────────────────────────────────────────────
   useEffect(() => {
     fetchWalletBalance();
   }, [fetchWalletBalance]);
 
-  // Generate dynamic, real analytics points based on the actual history payload
+  // ─── Refresh balance when returning to page ───────────────────────────────
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchWalletBalance();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchWalletBalance]);
+
+  // Generate dynamic analytics points
   useEffect(() => {
     const safeTaps = Array.isArray(recentTaps) ? recentTaps : [];
     
-    // Map real tap records into the chart system structure
     const dynamicPoints = safeTaps.map(tap => ({
       date: tap.createdAt ? new Date(tap.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' }) : 'Tap',
       amount: Number(tap.amount || 0)
-    })).reverse(); // Reverse so older items show up on the left side
+    })).reverse();
 
     setActiveChartData(dynamicPoints);
   }, [recentTaps]);
 
   const safeTaps = Array.isArray(recentTaps) ? recentTaps : [];
-
- 
   const totalTripsThisMonth = safeTaps.length;
   const totalSpendingThisMonth = safeTaps.reduce((sum, current) => sum + Number(current.amount || 0), 0);
 
@@ -134,15 +232,22 @@ export default function DashboardHome({
       <div className={styles.walletCard}>
         <p className={styles.walletLabel}>Wallet Balance</p>
         <p className={styles.walletBalance}>
-          {balanceLoading
-            ? 'Loading...'
-            : `₦${(walletBalance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`}
+          {balanceLoading ? (
+            'Loading...'
+          ) : balanceError ? (
+            <span style={{ color: '#EF4444', fontSize: '14px' }}>{balanceError}</span>
+          ) : (
+            `₦${(walletBalance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`
+          )}
         </p>
         <p className={styles.walletAvailable}>Available Balance</p>
         <div className={styles.walletActions}>
-          <button className={styles.fundBtn} onClick={onFundWallet ?? (() => {})}>
+          <button 
+            className={styles.fundBtn} 
+            onClick={() => setShowTopUpModal(true)}
+          >
             <FaWallet size={14} />
-            Fund Wallet
+            Top Up
           </button>
         </div>
       </div>
@@ -220,6 +325,123 @@ export default function DashboardHome({
         </div>
       </div>
 
+      {/* ─── TOP UP MODAL ────────────────────────────────────────────────────── */}
+      {showTopUpModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Top Up Wallet</h3>
+              <button 
+                onClick={() => {
+                  setShowTopUpModal(false);
+                  setTopUpError(null);
+                  setTopUpAmount('');
+                  setTopUpSuccess(false);
+                }} 
+                className={styles.modalCloseBtn}
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {topUpSuccess ? (
+              <div className={styles.successContent}>
+                <div className={styles.successIconWrapper}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h4 className={styles.successTitle}>Top Up Successful!</h4>
+                <p className={styles.successAmount}>
+                  ₦{parseFloat(topUpAmount).toLocaleString('en-NG', { minimumFractionDigits: 2 })} added to your wallet
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className={styles.modalBody}>
+                  <p className={styles.modalDescription}>
+                    Enter the amount you want to add to your wallet
+                  </p>
+                  
+                  <div className={styles.inputGroup}>
+                    <span className={styles.currencySymbol}>₦</span>
+                    <input
+                      type="number"
+                      className={styles.amountInput}
+                      placeholder="0.00"
+                      value={topUpAmount}
+                      onChange={(e) => {
+                        setTopUpAmount(e.target.value);
+                        setTopUpError(null);
+                      }}
+                      min="0"
+                      step="100"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className={styles.quickAmounts}>
+                    <button 
+                      className={styles.quickAmountBtn}
+                      onClick={() => {
+                        setTopUpAmount('1000');
+                        setTopUpError(null);
+                      }}
+                    >
+                      ₦1,000
+                    </button>
+                    <button 
+                      className={styles.quickAmountBtn}
+                      onClick={() => {
+                        setTopUpAmount('2000');
+                        setTopUpError(null);
+                      }}
+                    >
+                      ₦2,000
+                    </button>
+                    <button 
+                      className={styles.quickAmountBtn}
+                      onClick={() => {
+                        setTopUpAmount('5000');
+                        setTopUpError(null);
+                      }}
+                    >
+                      ₦5,000
+                    </button>
+                    
+                  </div>
+
+                  {topUpError && (
+                    <div className={styles.errorContent}>
+                      {topUpError}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.modalFooter}>
+                  <button
+                    className={styles.cancelBtn}
+                    onClick={() => {
+                      setShowTopUpModal(false);
+                      setTopUpError(null);
+                      setTopUpAmount('');
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className={styles.topUpBtn}
+                    onClick={handleTopUp}
+                    disabled={topUpLoading || !topUpAmount}
+                  >
+                    {topUpLoading ? 'Processing...' : 'Top Up'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
