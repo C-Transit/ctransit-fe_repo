@@ -1,5 +1,5 @@
 // 1. BUMP THE CACHE VERSION TO FORCE AN UPDATE
-const CACHE_NAME = "c-transit-cache-v2";
+const CACHE_NAME = "c-transit-cache-v3";
 
 // 2. UPDATE TO YOUR PREFERRED API BEHAVIOR
 // If your API is on the same domain as the frontend, you don't need the full URL here.
