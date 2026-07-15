@@ -104,7 +104,125 @@
   font-weight: 600;
   cursor: pointer;
 }
+/* ─── Success State Styles ────────────────────────────────────────────────── */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 300px;
+}
 
+.successIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 24px;
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.successContainer h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #16A34A;
+  margin-bottom: 12px;
+}
+
+.successContainer p {
+  font-size: 16px;
+  color: #4B5563;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.successSubtext {
+  font-size: 14px !important;
+  color: #6B7280 !important;
+  margin-top: 4px;
+}
+
+.successSubtext strong {
+  color: #CA8A04;
+  font-weight: 600;
+}
+
+.successBadge {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #FEF9C3;
+  color: #CA8A04;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #FDE68A;
+}
+
+/* ─── Upload Box Dragging State ──────────────────────────────────────────── */
+.dragging {
+  border-color: #1A56DB !important;
+  background: #EFF6FF !important;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+/* ─── Button States ──────────────────────────────────────────────────────── */
+.primaryBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.changeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── File Input ─────────────────────────────────────────────────────────── */
+.fileInput {
+  display: none;
+}
+
+/* ─── Camera Button ──────────────────────────────────────────────────────── */
+.cameraBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #F3F4F6;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cameraBtn:hover {
+  background: #E5E7EB;
+  border-color: #9CA3AF;
+}
 .cameraBtn:hover {
   background: #1d4ed8;
 }

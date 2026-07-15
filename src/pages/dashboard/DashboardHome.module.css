@@ -438,6 +438,127 @@
   margin-top: 8px;
 }
 
+/* ─── Wallet Header with Icons ──────────────────────────────────────────── */
+.walletHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.walletIcons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.iconBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+}
+
+.iconBtn:active {
+  transform: scale(0.95);
+}
+
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Spinning animation for refresh ──────────────────────────────────── */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Balance display adjustments ────────────────────────────────────── */
+.walletBalance {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 4px 0;
+  letter-spacing: 0.5px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.walletAvailable {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+/* Ensure the wallet card has proper spacing for the new header */
+.walletCard {
+  background: linear-gradient(135deg, #1A56DB 0%, #1E40AF 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(26, 86, 219, 0.2);
+}
+
+.walletLabel {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.walletActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.fundBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.fundBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.fundBtn:active {
+  transform: translateY(0);
+}
 /* ─── Animations ──────────────────────────────────────────────────────────── */
 @keyframes fadeIn {
   from {

@@ -277,17 +277,64 @@ function NotificationSettings({ preferences, onSave }) {
 }
 
 /* ──────────────────────────── Card Linking ──────────────────────────────────────────────────────────── */
-const OTP_LENGTH = 6;
+/* ──────────────────────────── Card Linking ──────────────────────────────────────────────────────────── */
+const OTP_LENGTH = 6; // FIX: Define OTP_LENGTH at the top of the component or outside
 
 function CardLinking({ onShowInfo, onToast }) {
-  const [cards, setCards] = useState([
-    { id: 1, uid: 'NFC-4A2F-9B1C', label: 'My Transit Card', linked: true, linkedAt: '2024-11-10' },
-  ]);
+  const [cards, setCards] = useState([]);
   const [showLinkForm, setShowLinkForm] = useState(false);
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [verifying, setVerifying] = useState(false);
   const [linkError, setLinkError] = useState('');
+  const [isLinked, setIsLinked] = useState(false); // FIX: Track card linked state
+  const [linkLoading, setLinkLoading] = useState(true); // FIX: Track loading state
   const otpRefs = useRef([]);
+
+  // FIX: Fetch existing card status on mount
+  useEffect(() => {
+    const fetchCardStatus = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setLinkLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${AUTH_API_URL}/card-status`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.card || result.data?.card) {
+            const cardData = result.card || result.data.card;
+            setCards([{
+              id: cardData.id || Date.now(),
+              uid: cardData.uid || 'Linked Card',
+              label: cardData.label || 'My Transit Card',
+              linked: true,
+              linkedAt: cardData.linkedAt || new Date().toISOString().split('T')[0],
+            }]);
+            setIsLinked(true);
+            localStorage.setItem('cardLinked', 'true');
+          }
+        }
+      } catch (err) {
+        // FIX: Check localStorage fallback
+        if (localStorage.getItem('cardLinked') === 'true') {
+          setIsLinked(true);
+        }
+      } finally {
+        setLinkLoading(false);
+      }
+    };
+
+    fetchCardStatus();
+  }, []);
 
   const resetOtp = () => {
     setOtp(Array(OTP_LENGTH).fill(''));
@@ -330,7 +377,6 @@ function CardLinking({ onShowInfo, onToast }) {
     setLinkError('');
 
     try {
-      console.log('token:', localStorage.getItem('authToken'));
       const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: 'POST',
         headers: {
@@ -343,28 +389,28 @@ function CardLinking({ onShowInfo, onToast }) {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Could not verify this code. Please try again.');
+        // FIX: Better error handling
+        if (result.message?.toLowerCase().includes('expired')) {
+          throw new Error('OTP has expired. Please request a new one.');
+        }
+        throw new Error(result.message || 'Verification failed. Please try again.');
       }
 
-      // Expected backend shape: { status: 'linked' | 'pending', card: { uid, label, linkedAt } }
-      if (result.status === 'linked') {
-        setCards(prev => [...prev, {
-          id: Date.now(),
-          uid: result.card?.uid || 'UNKNOWN',
-          label: result.card?.label || 'My C-transit Card',
-          linked: true,
-          linkedAt: result.card?.linkedAt || new Date().toISOString().split('T')[0],
-        }]);
-        onToast('Card linked successfully.');
-        setShowLinkForm(false);
-        resetOtp();
-      } else if (result.status === 'pending') {
-        onToast('Card linking is pending. We will notify you once confirmed.');
-        setShowLinkForm(false);
-        resetOtp();
-      } else {
-        setLinkError('Invalid code. Please check and try again.');
-      }
+      // FIX: Handle success properly
+      setIsLinked(true);
+      localStorage.setItem('cardLinked', 'true');
+      
+      setCards([{
+        id: Date.now(),
+        uid: result.card?.uid || 'NFC-' + Math.random().toString(16).slice(2, 6).toUpperCase(),
+        label: result.card?.label || 'My Transit Card',
+        linked: true,
+        linkedAt: new Date().toISOString().split('T')[0],
+      }]);
+      
+      onToast('Card linked successfully!');
+      setShowLinkForm(false);
+      resetOtp();
     } catch (err) {
       setLinkError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -372,10 +418,15 @@ function CardLinking({ onShowInfo, onToast }) {
     }
   };
 
-  const handleUnlink = (id) => {
-    setCards(prev => prev.filter(c => c.id !== id));
-    onToast('Card unlinked from your account.');
-  };
+  // FIX: Show loading state
+  if (linkLoading) {
+    return (
+      <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <h2>C-transit Card Linking</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading card status...</p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -384,70 +435,90 @@ function CardLinking({ onShowInfo, onToast }) {
           <h2>C-transit Card Linking</h2>
           <p className={styles.cardSectionDesc}>Manage physical C-transit cards linked to your account.</p>
         </div>
-        <motion.button
-          className={styles.linkCardBtn}
-          onClick={() => { setShowLinkForm(v => !v); resetOtp(); }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <FaWifi /> Link New Card
-        </motion.button>
+        {/* FIX: Only show link button if not already linked */}
+        {!isLinked && (
+          <motion.button
+            className={styles.linkCardBtn}
+            onClick={() => { setShowLinkForm(v => !v); resetOtp(); }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <FaWifi /> Link New Card
+          </motion.button>
+        )}
       </div>
 
-      {showLinkForm && (
-        <motion.div
-          className={styles.linkForm}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <p className={styles.linkHint}>Enter the OTP code sent to your registered device to link your card.</p>
-
-          <div className={styles.otpRow}>
-            {otp.map((digit, i) => (
-              <input
-                key={i}
-                ref={el => (otpRefs.current[i] = el)}
-                className={styles.otpInput}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={e => handleOtpChange(i, e.target.value)}
-                onKeyDown={e => handleOtpKeyDown(i, e)}
-                onPaste={handleOtpPaste}
-              />
-            ))}
+      {/* FIX: Show linked status instead of form */}
+      {isLinked ? (
+        <div className={styles.kycStatusCard}>
+          <div className={`${styles.kycBadge} ${styles.kycBadgeGreen}`}>
+            <FaCheckCircle /> Card Linked
           </div>
+          <p className={styles.kycDesc}>
+            Your transit card has been successfully linked to your account.
+          </p>
+          {cards.map(card => (
+            <div key={card.id} className={styles.linkedCard}>
+              <p><strong>Card UID:</strong> {card.uid}</p>
+              <p><strong>Label:</strong> {card.label}</p>
+              <p><strong>Linked:</strong> {new Date(card.linkedAt).toLocaleDateString()}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        showLinkForm && (
+          <motion.div
+            className={styles.linkForm}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p className={styles.linkHint}>Enter the OTP code sent to your registered device to link your card.</p>
 
-          {linkError && <p className={styles.fieldError}>{linkError}</p>}
+            <div className={styles.otpRow}>
+              {otp.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={el => (otpRefs.current[i] = el)}
+                  className={styles.otpInput}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={e => handleOtpChange(i, e.target.value)}
+                  onKeyDown={e => handleOtpKeyDown(i, e)}
+                  onPaste={handleOtpPaste}
+                />
+              ))}
+            </div>
 
-          <div className={styles.linkFormActions}>
-            <button className={styles.cancelBtn} onClick={() => { setShowLinkForm(false); resetOtp(); }}>
-              Cancel
-            </button>
-            <motion.button
-              className={styles.actionBtn}
-              onClick={handleVerify}
-              disabled={otp.join('').length !== OTP_LENGTH || verifying}
-              whileHover={{ scale: 1.02 }}
-            >
-              <FaWifi /> {verifying ? 'Verifying...' : 'Verify & Link'}
-            </motion.button>
-          </div>
-        </motion.div>
+            {linkError && <p className={styles.fieldError}>{linkError}</p>}
+
+            <div className={styles.linkFormActions}>
+              <button className={styles.cancelBtn} onClick={() => { setShowLinkForm(false); resetOtp(); }}>
+                Cancel
+              </button>
+              <motion.button
+                className={styles.actionBtn}
+                onClick={handleVerify}
+                disabled={otp.join('').length !== OTP_LENGTH || verifying}
+                whileHover={{ scale: 1.02 }}
+              >
+                <FaWifi /> {verifying ? 'Verifying...' : 'Verify & Link'}
+              </motion.button>
+            </div>
+          </motion.div>
+        )
       )}
-
     </motion.div>
   );
 }
-
 /* ── KYC Section ───────────────────────────────────────────────────────────── */
 function KYCSection({ onToast }) {
   const [showKYCModal, setShowKYCModal] = useState(false);
   const [kycStatus, setKycStatus] = useState('unverified');
   const [statusLoading, setStatusLoading] = useState(true);
 
-  //  Fetch real KYC status on mount
+  // Fetch real KYC status on mount
   useEffect(() => {
     const fetchKYCStatus = async () => {
       const token = localStorage.getItem('authToken');
@@ -469,11 +540,22 @@ function KYCSection({ onToast }) {
 
         if (!response.ok) throw new Error(result.message || 'Failed to fetch KYC status');
 
-        // 👇 adjust this based on what your backend returns
-        const status = result.data?.status || result.status || 'unverified';
+        // Handle different response structures
+        const status = result.data?.status || result.status || result.data?.kycStatus || 'unverified';
+        
+        // Store status in localStorage as backup
+        if (status === 'pending' || status === 'verified') {
+          localStorage.setItem('kycStatus', status);
+        }
+        
         setKycStatus(status);
       } catch (err) {
         console.error('KYC status fetch failed:', err.message);
+        // Fall back to localStorage if API fails
+        const savedStatus = localStorage.getItem('kycStatus');
+        if (savedStatus) {
+          setKycStatus(savedStatus);
+        }
       } finally {
         setStatusLoading(false);
       }
@@ -513,7 +595,7 @@ function KYCSection({ onToast }) {
     }
   };
 
-  // 👇 Show loading while fetching status
+  //  Show loading while fetching status
   if (statusLoading) {
     return (
       <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

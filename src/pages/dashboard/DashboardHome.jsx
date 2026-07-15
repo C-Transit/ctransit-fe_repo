@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaWallet, FaWifi, FaTimes } from 'react-icons/fa';
+import { FaWallet, FaWifi, FaTimes, FaEye, FaEyeSlash, FaSync } from 'react-icons/fa';
 import { USER_API_URL } from '../../config/api';
 import styles from './DashboardHome.module.css';
 
@@ -72,6 +72,8 @@ export default function DashboardHome({
   const [walletBalance, setWalletBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [balanceError, setBalanceError] = useState(null);
+  const [hideBalance, setHideBalance] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   // ─── Top Up Modal States ──────────────────────────────────────────────────
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -125,6 +127,13 @@ export default function DashboardHome({
       setBalanceLoading(false);
     }
   }, [authHeaders, onBalanceUpdate]);
+
+  // ─── Refresh balance function ───────────────────────────────────────────────
+  const refreshBalance = async () => {
+    setRefreshing(true);
+    await fetchWalletBalance();
+    setRefreshing(false);
+  };
 
   // ─── Handle Top Up ──────────────────────────────────────────────────────────
   const handleTopUp = async () => {
@@ -230,12 +239,34 @@ export default function DashboardHome({
 
       {/* ── Wallet Card ── */}
       <div className={styles.walletCard}>
-        <p className={styles.walletLabel}>Wallet Balance</p>
+        <div className={styles.walletHeader}>
+          <p className={styles.walletLabel}>Wallet Balance</p>
+          <div className={styles.walletIcons}>
+            <button 
+              className={styles.iconBtn}
+              onClick={() => setHideBalance(!hideBalance)}
+              title={hideBalance ? "Show Balance" : "Hide Balance"}
+            >
+              {hideBalance ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+            </button>
+            <button 
+              className={styles.iconBtn}
+              onClick={refreshBalance}
+              disabled={refreshing}
+              title="Refresh Balance"
+            >
+              <FaSync size={16} className={refreshing ? styles.spinning : ''} />
+            </button>
+          </div>
+        </div>
+        
         <p className={styles.walletBalance}>
           {balanceLoading ? (
             'Loading...'
           ) : balanceError ? (
             <span style={{ color: '#EF4444', fontSize: '14px' }}>{balanceError}</span>
+          ) : hideBalance ? (
+            '••••••'
           ) : (
             `₦${(walletBalance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`
           )}

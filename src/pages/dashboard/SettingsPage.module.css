@@ -612,7 +612,20 @@ input:checked + .slider:before { transform: translateX(22px); }
   font-weight: 500;
 }
 
+.kycBadgeGreen {
+  background: #dcfce7;
+  color: #16a34a;
+}
 
+.kycBadgeYellow {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.kycBadgeRed {
+  background: #fee2e2;
+  color: #dc2626;
+}
 
 .formGroup { display: flex; flex-direction: column; gap: 0.4rem; }
 
