@@ -1,6 +1,6 @@
 import { FaChartPie, FaUserShield, FaUsers, FaMoneyCheckAlt, FaBell, FaUserCog, FaChevronLeft, FaChevronRight, FaTimes, FaIdCard, FaCar } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import styles from '../../styles/agent/AgentSidebar.module.css';
+import styles from './Sidebar.module.css';
 
 const navItems = [
   { id: 'overview', label: 'Overview', icon: FaChartPie },

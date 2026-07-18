@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AgentSidebar from './AgentSidebar';
-import AgentHeader from './AgentHeader';
-import styles from '../../styles/agent/AgentLayout.module.css';
+import AgentSidebar from './Sidebar';
+import AgentHeader from './Header';
+import styles from './agentLayout.module.css';
 
 export default function AgentLayout({ children, activeTab, onTabChange, agentData }) {
   const navigate = useNavigate();

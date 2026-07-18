@@ -1,5 +1,5 @@
 import { FaBars, FaBell, FaSignOutAlt } from 'react-icons/fa';
-import styles from '../../styles/agent/AgentHeader.module.css';
+import styles from './Header.module.css';
 
 export default function AgentHeader({ onMenuClick, agentData, onLogout }) {
   return (

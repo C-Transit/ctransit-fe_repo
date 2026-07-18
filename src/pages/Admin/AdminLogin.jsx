@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLock, FaShieldAlt, FaUserTie, FaArrowRight } from 'react-icons/fa';
 
-import PrimaryButton from '../components/Admin/PrimaryButton';
-import { ADMIN_PLACEHOLDER_CREDENTIALS, setAdminSession } from '../config/adminAuth';
+import PrimaryButton from '../../components/Admin/PrimaryButton';
+import { ADMIN_PLACEHOLDER_CREDENTIALS, setAdminSession } from '../../config/adminAuth';
 
 import styles from './AdminLogin.module.css';
 

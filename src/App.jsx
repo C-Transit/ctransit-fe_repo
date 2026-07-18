@@ -9,8 +9,8 @@ import DashboardWrapper from './pages/DashboardWrapper';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/dashboard/SettingsPage';
 import TransferHistory from './pages/TransferHistory';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/Admin/AdminLogin';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 import TermsPage from './pages/Terms.page';
 import PrivacyPage from './pages/Privacy.page';
 import AboutPage from './pages/About';
@@ -18,8 +18,8 @@ import ContactSupport from './pages/Contact';
 import HelpCenter from './pages/HelpPage';
 
 // Agent Imports - CORRECT PATH
-import AgentLogin from './pages/agent/AgentLogin';
-import AgentDashboard from './pages/agent/AgentDashboard';
+import AgentLogin from './pages/Agent/AgentLogin';
+import AgentDashboard from './pages/Agent/AgentDashboard';
 
 // New Auth Screens
 import LoginPage from './pages/Login.page';
