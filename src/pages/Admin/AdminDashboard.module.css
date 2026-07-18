@@ -261,7 +261,6 @@
 /* New Sections Styling */
 .overviewSection,
 .usersSection,
-.agentsSection,
 .notificationsSection,
 .supportSection,
 .paymentsSection,
@@ -277,7 +276,6 @@
 
 .overviewSection h2,
 .usersSection h2,
-.agentsSection h2,
 .notificationsSection h2,
 .supportSection h2,
 .paymentsSection h2,
@@ -354,38 +352,7 @@
   font-weight: 600;
 }
 
-.agentsTable {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--bg-alt);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 0.65rem;
-  overflow: hidden;
-}
 
-.agentsTable thead {
-  background: rgba(37, 99, 235, 0.08);
-}
-
-.agentsTable th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  color: var(--text);
-  font-weight: 600;
-  font-size: 0.85rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.agentsTable td {
-  padding: 0.75rem 1rem;
-  color: var(--text);
-  font-size: 0.9rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-}
-
-.agentsTable tbody tr:hover {
-  background: rgba(37, 99, 235, 0.04);
-}
 
 .notificationsList {
   list-style: none;
@@ -601,15 +568,207 @@
   border-radius: 0.4rem;
   margin: 0.5rem 0;
 }
-
-.agentsListWrapper {
-  overflow-x: auto;
+/* Agent Management Section Styles */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.noAgents {
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.searchInput {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  min-width: 200px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.refreshBtn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusBadge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.statusBadge.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.statusBadge.suspended {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Role Badges */
+.roleBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.roleBadge.field_agent {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.roleBadge.supervisor {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.roleBadge.manager {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+/* Action Buttons */
+.viewBtn {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.viewBtn:hover {
+  background: #bfdbfe;
+}
+
+.suspendBtn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.suspendBtn:hover {
+  background: #fecaca;
+}
+
+.activateBtn {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.activateBtn:hover {
+  background: #bbf7d0;
+}
+
+.deactivateBtn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.deactivateBtn:hover {
+  background: #fde68a;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.pageBtn {
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Agent Detail Modal */
+.agentDetailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.agentDetailRow:last-of-type {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-weight: 600;
   color: var(--muted);
+}
+
+/* Loading State */
+.loadingState {
   text-align: center;
   padding: 2rem;
+  color: var(--muted);
   font-weight: 600;
 }
 

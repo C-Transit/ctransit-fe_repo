@@ -238,19 +238,207 @@ const UsersSection = () => {
   );
 };
 
+// Replace the AgentsSection in AdminDashboard.jsx with this:
+
 const AgentsSection = ({ agents, onAddAgent, onAgentAction, formData, setFormData, showForm, setShowForm }) => {
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('ACTIVE');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState(null);
+
+  // Fetch agents with pagination and filters
+  const fetchAgents = async (pageNum = page, status = statusFilter) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(
+        `/api/admin/agents/?status=${status}&page=${pageNum}&limit=20`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.data) {
+          // Update agents list
+          onAgentsUpdate(data.data.agents || []);
+          setTotalPages(data.data.totalPages || 1);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch agents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create new agent
+  const handleCreateAgent = async () => {
+    if (!formData.name || !formData.email || !formData.phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/admin/agents', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          dob: formData.dob,
+          idNumber: formData.idNumber,
+          role: formData.role,
+          accountNumber: formData.accountNumber,
+          affiliate: formData.affiliate,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuccessMessage('Agent created successfully!');
+        setShowForm(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          dob: '',
+          idNumber: '',
+          role: 'FIELD_AGENT',
+          accountNumber: '',
+          affiliate: '',
+        });
+        // Refresh list
+        fetchAgents(1, statusFilter);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to create agent');
+      }
+    } catch (error) {
+      console.error('Failed to create agent:', error);
+      alert('Failed to create agent. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update agent status (activate/deactivate)
+  const handleStatusChange = async (agentId, newStatus) => {
+    if (!window.confirm(`Are you sure you want to ${newStatus} this agent?`)) return;
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/agents/${agentId}/status`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuccessMessage(`Agent ${newStatus.toLowerCase()}d successfully!`);
+        fetchAgents(page, statusFilter);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to update agent status');
+      }
+    } catch (error) {
+      console.error('Failed to update agent status:', error);
+      alert('Failed to update agent status. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // View agent details
+  const handleViewAgent = async (agentId) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/agents/${agentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedAgent(data.data);
+        setShowViewModal(true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch agent details:', error);
+    }
+  };
+
   return (
     <section className={styles.agentsSection}>
-      <h2>Agents</h2>
+      <div className={styles.sectionHeader}>
+        <h2>Agent Management</h2>
+        <div className={styles.filterContainer}>
+          <select 
+            value={statusFilter} 
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              fetchAgents(1, e.target.value);
+            }}
+            className={styles.filterSelect}
+          >
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="SUSPENDED">Suspended</option>
+            <option value="ALL">All</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Search agents..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+          <button 
+            className={styles.refreshBtn}
+            onClick={() => fetchAgents(page, statusFilter)}
+          >
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <h3>Total Agents / Active Agents</h3>
-          <p>{agents.length} / {agents.filter(a => a.role === 'Supervisor').length}</p>
+          <h3>Total Agents</h3>
+          <p>{agents.length}</p>
         </div>
         <div className={styles.statCard}>
-          <h3>Monnify Pool Stats</h3>
-          <p>Total Funds: ₦5,000,000</p>
-          <p>Total Revenue: ₦1,000,000</p>
+          <h3>Active Agents</h3>
+          <p>{agents.filter(a => a.status === 'ACTIVE').length}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3>Inactive Agents</h3>
+          <p>{agents.filter(a => a.status === 'INACTIVE').length}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3>Suspended Agents</h3>
+          <p>{agents.filter(a => a.status === 'SUSPENDED').length}</p>
         </div>
       </div>
 
@@ -261,15 +449,39 @@ const AgentsSection = ({ agents, onAddAgent, onAgentAction, formData, setFormDat
         </button>
 
         {showForm && (
-          <form className={styles.agentForm}>
+          <form className={styles.agentForm} onSubmit={(e) => { e.preventDefault(); handleCreateAgent(); }}>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>Full Name</label>
+                <label>Full Name *</label>
                 <input
                   type="text"
                   placeholder="Enter agent name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Email *</label>
+                <input
+                  type="email"
+                  placeholder="agent@email.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Phone *</label>
+                <input
+                  type="tel"
+                  placeholder="08012345678"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
                 />
               </div>
               <div className={styles.formGroup}>
@@ -284,32 +496,35 @@ const AgentsSection = ({ agents, onAddAgent, onAgentAction, formData, setFormDat
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>ID Verification</label>
+                <label>ID Number</label>
                 <input
                   type="text"
                   placeholder="Enter ID number"
-                  value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                  value={formData.idNumber}
+                  onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
                 />
               </div>
               <div className={styles.formGroup}>
                 <label>Role</label>
-                <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })}>
-                  <option>Field Agent</option>
-                  <option>Supervisor</option>
-                  <option>Manager</option>
+                <select 
+                  value={formData.role} 
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                >
+                  <option value="FIELD_AGENT">Field Agent</option>
+                  <option value="SUPERVISOR">Supervisor</option>
+                  <option value="MANAGER">Manager</option>
                 </select>
               </div>
             </div>
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>Account Details</label>
+                <label>Account Number</label>
                 <input
                   type="text"
                   placeholder="Enter account number"
-                  value={formData.account}
-                  onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+                  value={formData.accountNumber}
+                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
                 />
               </div>
               <div className={styles.formGroup}>
@@ -323,8 +538,8 @@ const AgentsSection = ({ agents, onAddAgent, onAgentAction, formData, setFormDat
               </div>
             </div>
 
-            <button type="button" className={styles.submitBtn} onClick={onAddAgent}>
-              Register Agent
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Registering...' : 'Register Agent'}
             </button>
           </form>
         )}
@@ -333,65 +548,160 @@ const AgentsSection = ({ agents, onAddAgent, onAgentAction, formData, setFormDat
       {/* Agents List */}
       <div className={styles.tableContainer}>
         <h3>Agents List</h3>
-        <div className={styles.agentsListWrapper}>
-          {agents.length === 0 ? (
-            <p className={styles.noAgents}>No agents registered yet.</p>
-          ) : (
-            <table className={styles.agentsTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>DOB</th>
-                  <th>ID</th>
-                  <th>Role</th>
-                  <th>Account</th>
-                  <th>Affiliate</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agents.map((agent, index) => (
-                  <tr key={index}>
-                    <td>{agent.name}</td>
-                    <td>{agent.dob}</td>
-                    <td>{agent.id}</td>
-                    <td><span className={styles.roleBadge}>{agent.role}</span></td>
-                    <td>{agent.account}</td>
-                    <td>{agent.affiliate}</td>
-                    <td>
-                      <div className={styles.actionButtons}>
-                        {agent.role !== 'Supervisor' && (
-                          <button
-                            className={`${styles.actionBtn} ${styles.promoteBtn}`}
-                            onClick={() => onAgentAction(agent, 'promote')}
-                            title="Promote agent"
-                          >
-                            ↑ Promote
-                          </button>
-                        )}
-                        <button
-                          className={`${styles.actionBtn} ${styles.complaintBtn}`}
-                          onClick={() => onAgentAction(agent, 'complaint')}
-                          title="File complaint"
-                        >
-                          ⚠ Complaint
-                        </button>
-                        <button
-                          className={`${styles.actionBtn} ${styles.removeBtn}`}
-                          onClick={() => onAgentAction(agent, 'remove')}
-                          title="Remove agent"
-                        >
-                          ✕ Remove
-                        </button>
-                      </div>
-                    </td>
+        {loading ? (
+          <div className={styles.loadingState}>Loading agents...</div>
+        ) : agents.length === 0 ? (
+          <p className={styles.noAgents}>No agents found.</p>
+        ) : (
+          <>
+            <div className={styles.agentsListWrapper}>
+              <table className={styles.agentsTable}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody>
+                  {agents.map((agent, index) => (
+                    <tr key={agent.id || index}>
+                      <td><strong>{agent.name}</strong></td>
+                      <td>{agent.email}</td>
+                      <td>{agent.phone}</td>
+                      <td>
+                        <span className={`${styles.roleBadge} ${styles[agent.role?.toLowerCase() || 'field_agent']}`}>
+                          {agent.role?.replace('_', ' ') || 'Field Agent'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${styles[agent.status?.toLowerCase() || 'active']}`}>
+                          {agent.status || 'Active'}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={`${styles.actionBtn} ${styles.viewBtn}`}
+                            onClick={() => handleViewAgent(agent.id)}
+                            title="View details"
+                          >
+                            👁️ View
+                          </button>
+                          {agent.status === 'ACTIVE' && (
+                            <button
+                              className={`${styles.actionBtn} ${styles.suspendBtn}`}
+                              onClick={() => handleStatusChange(agent.id, 'SUSPENDED')}
+                              title="Suspend agent"
+                            >
+                              ⛔ Suspend
+                            </button>
+                          )}
+                          {agent.status === 'SUSPENDED' && (
+                            <button
+                              className={`${styles.actionBtn} ${styles.activateBtn}`}
+                              onClick={() => handleStatusChange(agent.id, 'ACTIVE')}
+                              title="Activate agent"
+                            >
+                              ✅ Activate
+                            </button>
+                          )}
+                          {agent.status !== 'INACTIVE' && (
+                            <button
+                              className={`${styles.actionBtn} ${styles.deactivateBtn}`}
+                              onClick={() => handleStatusChange(agent.id, 'INACTIVE')}
+                              title="Deactivate agent"
+                            >
+                              ⚠️ Deactivate
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <button 
+                  onClick={() => fetchAgents(page - 1, statusFilter)}
+                  disabled={page <= 1}
+                  className={styles.pageBtn}
+                >
+                  Previous
+                </button>
+                <span className={styles.pageInfo}>
+                  Page {page} of {totalPages}
+                </span>
+                <button 
+                  onClick={() => fetchAgents(page + 1, statusFilter)}
+                  disabled={page >= totalPages}
+                  className={styles.pageBtn}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* View Agent Modal */}
+      {selectedAgent && (
+        <Modal open={true} title="Agent Details" onClose={() => setSelectedAgent(null)}>
+          <div className={styles.modalContent}>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Name:</span>
+              <span>{selectedAgent.name}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Email:</span>
+              <span>{selectedAgent.email}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Phone:</span>
+              <span>{selectedAgent.phone}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Role:</span>
+              <span>{selectedAgent.role?.replace('_', ' ') || 'Field Agent'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Status:</span>
+              <span className={`${styles.statusBadge} ${styles[selectedAgent.status?.toLowerCase() || 'active']}`}>
+                {selectedAgent.status || 'Active'}
+              </span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>ID Number:</span>
+              <span>{selectedAgent.idNumber || 'N/A'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Account Number:</span>
+              <span>{selectedAgent.accountNumber || 'N/A'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Affiliate:</span>
+              <span>{selectedAgent.affiliate || 'N/A'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Created:</span>
+              <span>{selectedAgent.createdAt ? new Date(selectedAgent.createdAt).toLocaleString() : 'N/A'}</span>
+            </div>
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" onClick={() => setSelectedAgent(null)}>
+                Close
+              </PrimaryButton>
+            </div>
+          </div>
+        </Modal>
+      )}
     </section>
   );
 };

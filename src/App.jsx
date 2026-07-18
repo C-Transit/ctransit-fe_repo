@@ -11,13 +11,15 @@ import Settings from './pages/dashboard/SettingsPage';
 import TransferHistory from './pages/TransferHistory';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import AgentLogin from './pages/AgentLogin';
-import AgentDashboard from './pages/AgentDashboard';
 import TermsPage from './pages/Terms.page';
 import PrivacyPage from './pages/Privacy.page';
 import AboutPage from './pages/About';
 import ContactSupport from './pages/Contact';
 import HelpCenter from './pages/HelpPage';
+
+// Agent Imports - CORRECT PATH
+import AgentLogin from './pages/agent/AgentLogin';
+import AgentDashboard from './pages/agent/AgentDashboard';
 
 // New Auth Screens
 import LoginPage from './pages/Login.page';
@@ -58,12 +60,39 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactSupport />} />
             <Route path="/help" element={<HelpCenter />} />
+
+            {/* Agent Routes - Public and Protected */}
+            <Route
+              path="/agent/login"
+              element={
+                <PublicAgentRoute>
+                  <AgentLogin />
+                </PublicAgentRoute>
+              }
+            />
+            <Route
+              path="/agent/dashboard"
+              element={
+                <ProtectedAgentRoute>
+                  <AgentDashboard />
+                </ProtectedAgentRoute>
+              }
+            />
+            <Route
+              path="/agent"
+              element={
+                <PublicAgentRoute>
+                  <Navigate to="/agent/dashboard" replace />
+                </PublicAgentRoute>
+              }
+            />
 
             {/* New Auth Routes */}
             <Route
@@ -86,7 +115,6 @@ function App() {
               path="/auth/verify-phone"
               element={<VerifyPhonePage />}
             />
-            
             <Route
               path="/auth/forgot-password"
               element={
@@ -174,32 +202,7 @@ function App() {
               }
             />
 
-            {/* Agent Routes */}
-            <Route
-              path="/agent/login"
-              element={
-                <PublicAgentRoute>
-                  <AgentLogin />
-                </PublicAgentRoute>
-              }
-            />
-            <Route
-              path="/agent/dashboard"
-              element={
-                <ProtectedAgentRoute>
-                  <AgentDashboard />
-                </ProtectedAgentRoute>
-              }
-            />
-            <Route
-              path="/agent"
-              element={
-                <PublicAgentRoute>
-                  <Navigate to="/agent/dashboard" replace />
-                </PublicAgentRoute>
-              }
-            />
-
+            {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
