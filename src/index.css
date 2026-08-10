@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap");
+
+:root {
+  font-family: "Source Sans 3", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: #0b1f3a;
+  background-color: #f4f8ff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark theme variables applied to the HTML element */
+html[data-theme="dark"] {
+  --bg: #071022;
+  --surface: #0b1220;
+  --muted: #94a3b8;
+  --text: #e6eef8;
+  --card: #0f1724;
+  --border: rgba(148, 163, 184, 0.12);
+  color-scheme: dark;
+}
+
+/* Apply basic dark-mode styles globally */
+html[data-theme="dark"] body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .infoCard,
+html[data-theme="dark"] section,
+html[data-theme="dark"] .settingsCard,
+html[data-theme="dark"] .profileCard {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] select,
+html[data-theme="dark"] option,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea {
+  background: #071428;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

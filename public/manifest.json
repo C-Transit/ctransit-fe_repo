@@ -1,0 +1,30 @@
+{
+  "short_name": "CTransit",
+  "name": "Campus Transit",
+  "icons": [
+    {
+      "src": "../src/assets/images/c-transit-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "../src/assets/images/c-transit-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b2c5a",
+  "description": "A Progressive Web App for Campus Transit.",
+  "splash_screens": [
+    {
+      "src": "../src/assets/images/c-transit-icon.svg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
