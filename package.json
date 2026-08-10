@@ -10,7 +10,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "engines": {
-    "node": "18.x || 20.x || 21.x"
+    "node": "24.x"
   },
   "dependencies": {
     "axios": "^1.13.5",
