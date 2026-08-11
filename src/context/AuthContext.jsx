@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from "react";
 import axios from "axios";
-import { AUTH_API_URL, USER_API_URL } from "../config/api";
+import { AUTH_API_URL, USER_API_URL } from "../api/api";
 
 export const AuthContext = createContext();
 

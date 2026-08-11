@@ -1,0 +1,139 @@
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.otpWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.otpContainer {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.otpContainer.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.otpBox {
+  width: 48px;
+  height: 56px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  color: #111827;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  font-family: "Courier New", monospace;
+  -moz-appearance: textfield;
+}
+
+.otpBox::-webkit-inner-spin-button,
+.otpBox::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.otpBox:focus {
+  outline: none;
+  border-color: #1a56db;
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
+}
+
+.otpBox.filled {
+  background: #f0f7ff;
+  border-color: #1a56db;
+}
+
+.otpBox.errorBox {
+  border-color: #e02424;
+  box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.15);
+}
+
+.otpBox:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+}
+
+/* Error State */
+.otpContainer.errorState {
+  animation: shake 0.5s ease-in-out;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: #e02424;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.demoHint {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  margin: 0;
+  padding: 8px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.demoHint code {
+  font-family: "Courier New", monospace;
+  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+/* Success State */
+.otpContainer.success {
+  opacity: 1;
+}
+
+.otpBox.success {
+  background: #ecfdf5;
+  border-color: #0e9f6e;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .otpBox {
+    width: 44px;
+    height: 52px;
+    font-size: 20px;
+    border-radius: 8px;
+  }
+
+  .otpContainer {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .otpBox {
+    width: 40px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .otpContainer {
+    gap: 4px;
+  }
+}

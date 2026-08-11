@@ -4,32 +4,32 @@ import './App.css';
 import './styles/designSystem.css';
 import ToastProvider from './context/ToastProvider';
 import { AuthProvider } from './context/AuthContext';
-import Home from './pages/Home';
-import DashboardWrapper from './pages/DashboardWrapper';
-import UserProfile from './pages/UserProfile';
-import Settings from './pages/dashboard/SettingsPage';
-import TransferHistory from './pages/TransferHistory';
-import AdminLogin from './pages/Admin/AdminLogin';
-import AdminDashboard from './pages/Admin/AdminDashboard';
-import TermsPage from './pages/Terms.page';
-import PrivacyPage from './pages/Privacy.page';
-import AboutPage from './pages/About';
-import ContactSupport from './pages/Contact';
-import HelpCenter from './pages/HelpPage';
+import Home from './features/public/Home';
+import DashboardWrapper from './features/dashboard/DashboardWrapper';
+import UserProfile from './features/dashboard/UserProfile';
+import Settings from './features/dashboard/pages/SettingsPage';
+import TransferHistory from './features/dashboard/TransferHistory';
+import AdminLogin from './features/admin/AdminLogin';
+import AdminDashboard from './features/admin/AdminDashboard';
+import TermsPage from './features/public/TermsPage';
+import PrivacyPage from './features/public/PrivacyPage';
+import AboutPage from './features/public/About';
+import ContactSupport from './features/public/Contact';
+import HelpCenter from './features/public/HelpPage';
 
-// Agent Imports - CORRECT PATH
-import AgentLogin from './pages/Agent/AgentLogin';
-import AgentDashboard from './pages/Agent/AgentDashboard';
+// Agent Imports
+import AgentLogin from './features/agent/AgentLogin';
+import AgentDashboard from './features/agent/AgentDashboard';
 
-// New Auth Screens
-import LoginPage from './pages/Login.page';
-import RegisterPage from './pages/Register.page';
-import VerifyPhonePage from './pages/VerifyPhone.page';
-import ForgotPasswordPage from './pages/ForgotPassword.page';
-import ResetPasswordPage from './pages/ResetPassword.page';
-import AuthGuard from './components/Auth/AuthGuard';
+// Auth Screens
+import LoginPage from './features/auth/LoginPage';
+import RegisterPage from './features/auth/RegisterPage';
+import VerifyPhonePage from './features/auth/VerifyPhonePage';
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/ResetPasswordPage';
+import AuthGuard from './components/guards/AuthGuard';
 
-import { isAdminAuthenticated } from './config/adminAuth';
+import { isAdminAuthenticated } from './api/adminAuth';
 
 const safeGetItem = (key) => {
   try {

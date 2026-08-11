@@ -1,0 +1,94 @@
+.wrapper {
+  min-height: 100vh;
+  background: #F9FAFB;
+  padding: 40px 24px;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #1A56DB;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1240A0;
+}
+
+.header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.meta {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.content h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 32px 0 12px;
+}
+
+.content p {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.8;
+  margin: 0 0 16px;
+}
+.progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #E5E7EB;
+  z-index: 100;
+}
+
+.progressFill {
+  height: 100%;
+  background: #1A56DB;
+  transition: width 0.1s ease;
+}
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 24px 16px;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .content h2 {
+    font-size: 16px;
+  }
+
+  .content p {
+    font-size: 14px;
+  }
+}
