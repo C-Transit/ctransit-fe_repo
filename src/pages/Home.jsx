@@ -69,12 +69,29 @@ function useFadeInOnScroll() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.15 }
+      ([entry]) => {
+        if (entry.isIntersecting || entry.intersectionRatio > 0) {
+          setVisible(true);
+        }
+      },
+      { threshold: 0.01, rootMargin: '50px 0px 50px 0px' }
     );
+
     if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+
+    // Fallback timer ensures mobile views never stay blank if observer fails
+    const timer = setTimeout(() => setVisible(true), 1000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, []);
 
   return [ref, visible];
@@ -85,21 +102,29 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navTransparent, setNavTransparent] = useState(true);
 
-  // // ── Welcome message for beta tester ────────────────────────────────────────────────────────
-const [showBetaModal, setShowBetaModal] = useState(false);
+  // ── Welcome message for beta tester ──────────────────────────────────────────
+  const [showBetaModal, setShowBetaModal] = useState(false);
 
-useEffect(() => {
-  const hasSeenBeta = localStorage.getItem('ctransit_beta_seen');
-  if (!hasSeenBeta) {
-    const timer = setTimeout(() => setShowBetaModal(true), 600); // slight delay feels less jarring
-    return () => clearTimeout(timer);
-  }
-}, []);
+  useEffect(() => {
+    try {
+      const hasSeenBeta = localStorage.getItem('ctransit_beta_seen');
+      if (!hasSeenBeta) {
+        const timer = setTimeout(() => setShowBetaModal(true), 600);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // Ignore storage access restrictions on mobile
+    }
+  }, []);
 
-const closeBetaModal = () => {
-  setShowBetaModal(false);
-  localStorage.setItem('ctransit_beta_seen', 'true');
-};
+  const closeBetaModal = () => {
+    setShowBetaModal(false);
+    try {
+      localStorage.setItem('ctransit_beta_seen', 'true');
+    } catch {
+      // Ignore storage error
+    }
+  };
 
   // Stats animation trigger
   const statsRef = useRef(null);
@@ -125,25 +150,38 @@ const closeBetaModal = () => {
   const [howRef, howVisible]                 = useFadeInOnScroll();
   const [testimonialsRef, testimonialsVisible] = useFadeInOnScroll();
 
+  const [showScrollTop, setShowScrollTop] = useState(false); 
 
-   const [showScrollTop, setShowScrollTop] = useState(false); 
   // Navbar scroll
-useEffect(() => {
-  const handleScroll = () => {
-    setNavTransparent(window.scrollY < 50);
-    setShowScrollTop(window.scrollY > 400);
-  };
-  window.addEventListener('scroll', handleScroll);
-  return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      setNavTransparent(window.scrollY < 50);
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Stats trigger
   useEffect(() => {
+    if (!('IntersectionObserver' in window)) {
+      setStatsAnimated(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && !statsAnimated) setStatsAnimated(true); },
-      { threshold: 0.3 }
+      ([entry]) => { if ((entry.isIntersecting || entry.intersectionRatio > 0) && !statsAnimated) setStatsAnimated(true); },
+      { threshold: 0.05, rootMargin: '50px 0px' }
     );
+
     if (statsRef.current) observer.observe(statsRef.current);
-    return () => observer.disconnect();
+
+    const timer = setTimeout(() => setStatsAnimated(true), 1200);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, [statsAnimated]);
 
  

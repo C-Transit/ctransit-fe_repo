@@ -31,10 +31,18 @@ import AuthGuard from './components/Auth/AuthGuard';
 
 import { isAdminAuthenticated } from './config/adminAuth';
 
-const isAgentAuthenticated = () => Boolean(localStorage.getItem('agentSession'));
+const safeGetItem = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const isAgentAuthenticated = () => Boolean(safeGetItem('agentSession'));
 
 function PublicAuthRoute({ children }) {
-  const isAuthenticated = Boolean(localStorage.getItem('authToken'));
+  const isAuthenticated = Boolean(safeGetItem('authToken'));
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
 }
 

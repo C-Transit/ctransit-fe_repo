@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [react()],
 
   server: {
-    // historyApiFallback is a webpack-dev-server option — not valid in Vite.
-    // Vite handles SPA fallback automatically in dev; for production,
-    // vercel.json rewrites handle this.
+    host: "0.0.0.0",
+    port: 3000,
+    allowedHosts: true,
   },
 
   optimizeDeps: {

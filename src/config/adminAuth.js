@@ -4,14 +4,27 @@ import { AUTH_API_URL } from "./api";
 export const ADMIN_TOKEN_KEY = "admin_token";
 export const ADMIN_PROFILE_KEY = "admin_profile";
 
-export function isAdminAuthenticated() {
-  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-  if (!token) return false;
-
-  // Check JWT expiry without a library — same pattern as AuthContext
+function decodeJwtPayload(token) {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    if (payload.exp * 1000 < Date.now()) {
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+    return JSON.parse(atob(base64 + padding));
+  } catch {
+    return null;
+  }
+}
+
+export function isAdminAuthenticated() {
+  try {
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (!token) return false;
+
+    const payload = decodeJwtPayload(token);
+    if (!payload || (payload.exp && payload.exp * 1000 < Date.now())) {
       clearAdminSession();
       return false;
     }
@@ -37,12 +50,12 @@ export async function loginAdmin(email, password) {
   }
 
   // Decode profile from the JWT payload
-  const payload = JSON.parse(atob(accessToken.split(".")[1]));
+  const payload = decodeJwtPayload(accessToken) || {};
 
   const profile = {
-    userId: payload.userId,
-    email: payload.email,
-    role: payload.role,
+    userId: payload.userId || "",
+    email: payload.email || email,
+    role: payload.role || "admin",
   };
 
   setAdminSession(accessToken, refreshToken, profile);
