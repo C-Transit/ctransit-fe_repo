@@ -54,10 +54,26 @@ export default function DashboardWrapper() {
         { headers }
       );
      
-      const profile = userResponse.data.data.profile;
+      const userResData = userResponse.data;
+      const profile = userResData?.data?.profile 
+        || userResData?.data?.user 
+        || userResData?.profile 
+        || userResData?.user 
+        || userResData?.data 
+        || userResData 
+        || {};
+
+      const normalizedProfile = {
+        ...profile,
+        firstName: profile.firstName || profile.firstname || profile.first_name || '',
+        lastName: profile.lastName || profile.lastname || profile.last_name || '',
+        email: profile.email || '',
+        matricNumber: profile.matricNumber || profile.matric_number || '',
+        wallet: profile.wallet || { balance: profile.balance || 0 },
+      };
   
-      setUserData(profile);
-      setWalletBalance(profile?.wallet?.balance || 0);
+      setUserData(normalizedProfile);
+      setWalletBalance(Number(normalizedProfile?.wallet?.balance || profile?.balance || 0));
       setError(null);
 
       // 2. Fetch Trip History
@@ -67,15 +83,24 @@ export default function DashboardWrapper() {
           { headers }
         );
 
-        const tripsData = tripsResponse.data.data.transactions;
-        const normalized = tripsData.map(t => ({
-          ...t,
-          createdAt: t.synced_at,
-          terminal: t.terminal_id,
-          status: t.type === 'RIDE' ? 'success' : 'pending',
-        }));
+        const tripsResData = tripsResponse.data;
+        const tripsData = tripsResData?.data?.transactions 
+          || tripsResData?.transactions 
+          || (Array.isArray(tripsResData?.data) ? tripsResData.data : null)
+          || (Array.isArray(tripsResData) ? tripsResData : []);
 
-        setRecentTaps(normalized.slice(0, 5));
+        if (Array.isArray(tripsData)) {
+          const normalized = tripsData.map(t => ({
+            ...t,
+            createdAt: t.synced_at || t.createdAt || t.created_at || t.date || new Date().toISOString(),
+            terminal: t.terminal_id || t.terminal || 'Terminal',
+            status: t.type === 'RIDE' ? 'success' : 'pending',
+          }));
+
+          setRecentTaps(normalized.slice(0, 5));
+        } else {
+          setRecentTaps([]);
+        }
        
       } catch (tripErr) {
         console.warn('Trip history endpoint not found/available yet:', tripErr.message);

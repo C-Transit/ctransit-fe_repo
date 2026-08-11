@@ -10,8 +10,8 @@ export default function ProfilePage({ userData, onBack }) {
   
   // Real parameters only: No dummy placeholder parameters
   const [formData, setFormData] = useState({
-    firstName: userData?.firstName || '',
-    lastName: userData?.lastName || '',
+    firstName: userData?.firstName || userData?.firstname || '',
+    lastName: userData?.lastName || userData?.lastname || '',
     email: userData?.email || '',
     matricNumber: userData?.matricNumber || '',
   });
@@ -23,8 +23,8 @@ export default function ProfilePage({ userData, onBack }) {
   useEffect(() => {
     if (userData) {
       setFormData({
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
+        firstName: userData.firstName || userData.firstname || '',
+        lastName: userData.lastName || userData.lastname || '',
         email: userData.email || '',
         matricNumber: userData.matricNumber || '',
       });
@@ -98,11 +98,11 @@ export default function ProfilePage({ userData, onBack }) {
       {/* Profile Avatar Section */}
       <div className={styles.avatarSection}>
         <div className={styles.avatar}>
-          {formData.firstName?.charAt(0).toUpperCase()}
-          {formData.lastName?.charAt(0).toUpperCase()}
+          {(formData.firstName || '').trim().charAt(0).toUpperCase() || 'U'}
+          {(formData.lastName || '').trim().charAt(0).toUpperCase()}
         </div>
         <p className={styles.userInitials}>
-          {userData?.fullname || `${formData.firstName} ${formData.lastName}`}
+          {userData?.fullname || `${formData.firstName} ${formData.lastName}`.trim() || 'C-Transit User'}
         </p>
       </div>
 

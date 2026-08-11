@@ -26,20 +26,29 @@ export default function TapHistoryPage({ onBack }) {
         { headers, params: { page: pageNum, limit: 20 } }
       );
 
-      const tripsData = res.data.data.transactions;
+      const resData = res.data;
+      const tripsData = resData?.data?.transactions 
+        || resData?.transactions 
+        || (Array.isArray(resData?.data) ? resData.data : null)
+        || (Array.isArray(resData) ? resData : []);
     
-      const normalized = tripsData.map(t => ({
-        id: t.id,
-        terminal: t.terminal_id,
-        time: t.synced_at,
-        amount: t.amount,
-        status: t.type === 'RIDE' ? 'success' : 'pending',
-        date: t.synced_at,
-      }));
+      if (Array.isArray(tripsData)) {
+        const normalized = tripsData.map(t => ({
+          id: t.id || `${t.terminal_id || 'T'}-${t.synced_at || Date.now()}-${Math.random()}`,
+          terminal: t.terminal_id || t.terminal || 'Terminal',
+          time: t.synced_at || t.createdAt || new Date().toISOString(),
+          amount: Number(t.amount || 0),
+          status: t.type === 'RIDE' ? 'success' : 'pending',
+          date: t.synced_at || t.createdAt || new Date().toISOString(),
+        }));
 
-      setTaps(prev => append ? [...prev, ...normalized] : normalized);
-      setHasMore(normalized.length === 20);
-      setError(null);
+        setTaps(prev => append ? [...prev, ...normalized] : normalized);
+        setHasMore(normalized.length === 20);
+        setError(null);
+      } else {
+        setTaps([]);
+        setHasMore(false);
+      }
     } catch (err) {
       console.error('Failed to load tap history:', err);
       setError('Failed to load history');
@@ -60,7 +69,9 @@ export default function TapHistoryPage({ onBack }) {
 
   // ── Client-side date filter logic ──────────────────────────────
   const isInFilterRange = (dateStr) => {
+    if (!dateStr) return true;
     const tapDate = new Date(dateStr);
+    if (isNaN(tapDate.getTime())) return true;
     const now = new Date();
 
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -76,7 +87,6 @@ export default function TapHistoryPage({ onBack }) {
       case 'this month':
         return tapDate >= startOfMonth;
       case 'custom':
-        // placeholder — wire to a date picker later if needed
         return true;
       case 'all':
       default:
@@ -87,12 +97,14 @@ export default function TapHistoryPage({ onBack }) {
   // group by formatted date, applying both filter + search
   const groupedTaps = {};
   taps
-    .filter(tap => isInFilterRange(tap.date))
-    .filter(tap => tap.terminal?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(tap => tap && isInFilterRange(tap.date))
+    .filter(tap => (tap.terminal || '').toLowerCase().includes(searchTerm.toLowerCase()))
     .forEach(tap => {
-      const dateLabel = new Date(tap.date).toLocaleDateString('en-NG', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      });
+      const d = tap.date ? new Date(tap.date) : null;
+      const dateLabel = d && !isNaN(d.getTime())
+        ? d.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })
+        : 'Recent Activity';
+
       if (!groupedTaps[dateLabel]) groupedTaps[dateLabel] = [];
       groupedTaps[dateLabel].push(tap);
     });
@@ -148,7 +160,11 @@ export default function TapHistoryPage({ onBack }) {
                 <div className={styles.tapInfo}>
                   <p className={styles.tapTerminal}>{tap.terminal || 'Unknown Terminal'}</p>
                   <p className={styles.tapTime}>
-                    {new Date(tap.time).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}
+                    {(() => {
+                      if (!tap.time) return 'Recent';
+                      const d = new Date(tap.time);
+                      return isNaN(d.getTime()) ? 'Recent' : d.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+                    })()}
                   </p>
                 </div>
                 <div className={styles.tapRight}>

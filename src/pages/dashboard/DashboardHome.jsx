@@ -54,6 +54,8 @@ function StatsCard({ label, value, subValue, badge, badgeColor }) {
 // are wallet credits — display as +₦ in green.
 // RIDE transactions are fare deductions — display as -₦.
 function TapRow({ tap }) {
+  if (!tap) return null;
+
   const isCredit =
     tap.type === 'TOPUP' || tap.terminal_id === 'SYSTEM_TERMINAL';
 
@@ -65,6 +67,12 @@ function TapRow({ tap }) {
     ? 'Wallet Top-Up'
     : tap.terminal || tap.location || `Fare — ${tap.terminal_id || 'Terminal'}`;
 
+  const formattedDate = () => {
+    if (!tap.createdAt) return tap.time || 'Recent';
+    const d = new Date(tap.createdAt);
+    return isNaN(d.getTime()) ? (tap.time || 'Recent') : d.toLocaleDateString('en-NG');
+  };
+
   return (
     <div className={styles.tapRow}>
       <div className={styles.tapIcon}>
@@ -72,11 +80,7 @@ function TapRow({ tap }) {
       </div>
       <div className={styles.tapInfo}>
         <p className={styles.tapTerminal}>{displayLabel}</p>
-        <p className={styles.tapTime}>
-          {tap.createdAt
-            ? new Date(tap.createdAt).toLocaleDateString('en-NG')
-            : tap.time || 'Recent'}
-        </p>
+        <p className={styles.tapTime}>{formattedDate()}</p>
       </div>
       <div className={styles.tapRight}>
         <p
@@ -213,37 +217,41 @@ export default function DashboardHome({
   // Generate dynamic analytics points
   // Generate dynamic analytics points — exclude TOPUPs from fare chart
   useEffect(() => {
-    const safeTaps = Array.isArray(recentTaps) ? recentTaps : [];
+    const safeTaps = Array.isArray(recentTaps) ? recentTaps.filter(Boolean) : [];
 
     const dynamicPoints = safeTaps
       .filter(
-        (tap) => tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
+        (tap) => tap && tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
       )
-      .map((tap) => ({
-        date: tap.createdAt
-          ? new Date(tap.createdAt).toLocaleDateString("en-NG", {
-              day: "numeric",
-              month: "short",
-            })
-          : "Tap",
-        amount: Number(tap.amount || 0),
-      }))
+      .map((tap) => {
+        const d = tap.createdAt ? new Date(tap.createdAt) : null;
+        const isValid = d && !isNaN(d.getTime());
+        return {
+          date: isValid
+            ? d.toLocaleDateString("en-NG", {
+                day: "numeric",
+                month: "short",
+              })
+            : "Tap",
+          amount: Number(tap.amount || 0),
+        };
+      })
       .reverse();
 
     setActiveChartData(dynamicPoints);
   }, [recentTaps]);
 
-  const safeTaps = Array.isArray(recentTaps) ? recentTaps : [];
+  const safeTaps = Array.isArray(recentTaps) ? recentTaps.filter(Boolean) : [];
   // Only count RIDE transactions as spending
   const totalSpendingThisMonth = safeTaps
     .filter(
-      (tap) => tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
+      (tap) => tap && tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
     )
-    .reduce((sum, current) => sum + Number(current.amount || 0), 0);
+    .reduce((sum, current) => sum + Number(current?.amount || 0), 0);
 
   // Only count RIDE transactions as trips
   const totalTripsThisMonth = safeTaps.filter(
-    (tap) => tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
+    (tap) => tap && tap.type !== "TOPUP" && tap.terminal_id !== "SYSTEM_TERMINAL"
   ).length;
 
   return (
@@ -251,7 +259,7 @@ export default function DashboardHome({
       {/* ── Greeting ── */}
       <div className={styles.greeting}>
         <p className={styles.greetingTitle}>
-          Hello, {userData?.firstName || "User"}
+          Hello, {userData?.firstName || userData?.firstname || "User"}
         </p>
         <p className={styles.greetingSubtitle}>Welcome back to C-Transit</p>
       </div>

@@ -105,10 +105,22 @@ export function AuthProvider({ children }) {
           `${USER_API_URL}/users/myprofile`
         );
 
-        // ✅ Bug fix: backend returns { success, data: { profile: {...} } }
-        // Previously stored the entire response object, causing userData to be
-        // { success: true, data: {...} } instead of the actual profile shape.
-        const userData = profileResponse.data.data.profile;
+        const resData = profileResponse.data;
+        const rawUser = resData?.data?.profile 
+          || resData?.data?.user 
+          || resData?.profile 
+          || resData?.user 
+          || resData?.data 
+          || resData 
+          || {};
+
+        const userData = {
+          ...rawUser,
+          firstName: rawUser.firstName || rawUser.firstname || rawUser.first_name || '',
+          lastName: rawUser.lastName || rawUser.lastname || rawUser.last_name || '',
+          email: rawUser.email || email.trim().toLowerCase(),
+          matricNumber: rawUser.matricNumber || rawUser.matric_number || '',
+        };
 
         setSession(accessToken, userData);
 
