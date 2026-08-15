@@ -57,13 +57,13 @@ export default function NotificationCenter() {
     updateUnreadCount(updated);
 
     try {
-      const response = await fetch(`${NOT_API_URL}/mark-read`, {
-        method: 'POST',
+      // Backend uses PATCH /api/notifications/:id/mark-read
+      const response = await fetch(`${NOT_API_URL}/${id}/mark-read`, {
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notificationId: id }),
       });
 
       if (!response.ok) throw new Error('Failed to mark as read');
@@ -83,7 +83,7 @@ export default function NotificationCenter() {
 
     try {
       const response = await fetch(`${NOT_API_URL}/mark-all-read`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
@@ -98,28 +98,9 @@ export default function NotificationCenter() {
     }
   };
 
-  // Delete notification
+  // Mark notification as read (replacing delete action)
   const handleDeleteNotification = async (id) => {
-    // Optimistic update
-    const updated = notifications.filter((n) => n.id !== id);
-    setNotifications(updated);
-    updateUnreadCount(updated);
-
-    try {
-      const response = await fetch(`${NOT_API_URL}/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to delete notification');
-    } catch (err) {
-      console.error('Delete failed:', err.message);
-      // Revert on failure
-      fetchNotifications();
-    }
+    handleMarkAsRead(id);
   };
 
   const getNotificationColor = (type) => {
@@ -239,7 +220,7 @@ export default function NotificationCenter() {
                             />
                           )}
                         </div>
-                        <p>{notif.message}</p>
+                        <p>{notif.body || notif.message}</p>
                         <span className={styles.time}>
                           {formatTime(notif.timestamp)}
                         </span>

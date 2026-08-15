@@ -44,17 +44,19 @@ export default function ProfilePage({ userData, onBack }) {
       setSaveError(null);
       const token = localStorage.getItem('authToken');
       
-      // Submit specific parameters payload to backend router
-      await axios.put(`${USER_API_URL}/users/myprofile`, {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        matricNumber: formData.matricNumber.trim(),
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      // Backend uses PATCH /api/users/update-profile with { firstname, lastname } only
+      await axios.patch(
+        `${USER_API_URL}/users/update-profile`,
+        {
+          firstname: formData.firstName.trim(),
+          lastname: formData.lastName.trim(),
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setEditMode(false);
     } catch (err) {
       console.error('Error saving profile:', err);
@@ -133,24 +135,24 @@ export default function ProfilePage({ userData, onBack }) {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Email Address</label>
+          <label className={styles.label}>Email Address (Read-only)</label>
           <input
             type="email"
             className={styles.input}
             value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            disabled={!editMode}
+            disabled
+            title="Email cannot be modified"
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Matric Number</label>
+          <label className={styles.label}>Matric Number (Read-only)</label>
           <input
             type="text"
             className={styles.input}
             value={formData.matricNumber}
-            onChange={(e) => handleInputChange('matricNumber', e.target.value)}
-            disabled={!editMode}
+            disabled
+            title="Matric Number cannot be modified"
           />
         </div>
       </div>

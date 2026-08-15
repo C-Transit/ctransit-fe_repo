@@ -132,15 +132,18 @@ export default function DashboardHome({
     setWalletBalance(walletBalanceProp);
   }, [walletBalanceProp]);
 
-  // ─── Refresh fetches wallet balance only — not the full dashboard ───────────
-  // Calls GET /api/wallets/details directly so only the balance updates.
-  // The full dashboard re-fetch (fetchDashboardData in parent) is NOT triggered.
+  // ─── Auth Header Helper ───────────────────────────────────────────────────
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  // ─── Refresh fetches wallet balance only ───────────────────────────────────
   const refreshBalance = async () => {
     setRefreshing(true);
     try {
-      const token = localStorage.getItem("authToken");
       const res = await axios.get(`${USER_API_URL}/wallets/details`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       });
       // Response: { success: true, data: { balance, accountNumber, bank, bankName } }
       const fresh =
@@ -167,12 +170,10 @@ export default function DashboardHome({
     setTopUpSuccess(false);
 
     try {
-      // Read token inline — authHeaders helper was removed in a prior fix
-      const token = localStorage.getItem("authToken");
       const response = await axios.post(
         `${USER_API_URL}/payments/topup`,
         { amount },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: getAuthHeader() }
       );
 
       // Backend returns: { success, message, data: { reference, amount, newBalance } }

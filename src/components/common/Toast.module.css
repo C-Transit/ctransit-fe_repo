@@ -106,12 +106,12 @@
 }
 
 /* Dark mode */
-::global(html[data-theme="dark"]) .toast {
+:global(html[data-theme="dark"]) .toast {
   background: var(--color-dark-bg-secondary);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-::global(html[data-theme="dark"]) .toast.success {
+:global(html[data-theme="dark"]) .toast.success {
   background: linear-gradient(
     135deg,
     rgba(16, 185, 129, 0.1) 0%,
@@ -119,7 +119,7 @@
   );
 }
 
-::global(html[data-theme="dark"]) .toast.error {
+:global(html[data-theme="dark"]) .toast.error {
   background: linear-gradient(
     135deg,
     rgba(239, 68, 68, 0.1) 0%,
@@ -127,7 +127,7 @@
   );
 }
 
-::global(html[data-theme="dark"]) .toast.warning {
+:global(html[data-theme="dark"]) .toast.warning {
   background: linear-gradient(
     135deg,
     rgba(245, 158, 11, 0.1) 0%,
@@ -135,7 +135,7 @@
   );
 }
 
-::global(html[data-theme="dark"]) .toast.info {
+:global(html[data-theme="dark"]) .toast.info {
   background: linear-gradient(
     135deg,
     rgba(37, 99, 235, 0.1) 0%,
@@ -143,16 +143,16 @@
   );
 }
 
-::global(html[data-theme="dark"]) .toastTitle,
-::global(html[data-theme="dark"]) .toastMessage {
+:global(html[data-theme="dark"]) .toastTitle,
+:global(html[data-theme="dark"]) .toastMessage {
   color: var(--color-dark-text-primary);
 }
 
-::global(html[data-theme="dark"]) .closeBtn {
+:global(html[data-theme="dark"]) .closeBtn {
   color: var(--color-dark-text-secondary);
 }
 
-::global(html[data-theme="dark"]) .closeBtn:hover {
+:global(html[data-theme="dark"]) .closeBtn:hover {
   color: var(--color-dark-text-primary);
 }
 

@@ -134,34 +134,34 @@
   font-size: 1.1rem;
 }
 
-::global(html[data-theme="dark"]) .modal {
+:global(html[data-theme="dark"]) .modal {
   background: #0f1724;
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .header h2,
-::global(html[data-theme="dark"]) .form label {
+:global(html[data-theme="dark"]) .header h2,
+:global(html[data-theme="dark"]) .form label {
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .header p,
-::global(html[data-theme="dark"]) .noteBox,
-::global(html[data-theme="dark"]) .successBox {
+:global(html[data-theme="dark"]) .header p,
+:global(html[data-theme="dark"]) .noteBox,
+:global(html[data-theme="dark"]) .successBox {
   color: #cbd5e1;
 }
 
-::global(html[data-theme="dark"]) .form input,
-::global(html[data-theme="dark"]) .closeBtn,
-::global(html[data-theme="dark"]) .badge {
+:global(html[data-theme="dark"]) .form input,
+:global(html[data-theme="dark"]) .closeBtn,
+:global(html[data-theme="dark"]) .badge {
   background: #0b1220;
   border-color: rgba(148, 163, 184, 0.18);
 }
 
-::global(html[data-theme="dark"]) .noteBox {
+:global(html[data-theme="dark"]) .noteBox {
   background: rgba(37, 99, 235, 0.14);
 }
 
-::global(html[data-theme="dark"]) .successBox {
+:global(html[data-theme="dark"]) .successBox {
   background: rgba(16, 185, 129, 0.12);
   border-color: rgba(16, 185, 129, 0.25);
 }

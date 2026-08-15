@@ -320,7 +320,7 @@ export default function Home() {
             { icon: <FaChartLine />,  title: 'Real-time Analytics', sub: 'Track & save more' },
             { icon: <FaShieldAlt />,  title: 'Safe & Secure',      sub: 'Bank grade security' },
           ].map((f, i) => (
-            <div key={i} className={styles.featureItem} style={{ transitionDelay: `${i * 100}ms` }}>
+            <div key={`feat-${f.title || i}`} className={styles.featureItem} style={{ transitionDelay: `${i * 100}ms` }}>
               <div className={styles.featureIcon}>{f.icon}</div>
               <h4>{f.title}</h4>
               <p>{f.sub}</p>
@@ -347,7 +347,7 @@ export default function Home() {
               { icon: <FaChartBar />,  title: 'Track & Analyze',    desc: 'Get insights on your travel, spending, and destination patterns.' },
               { icon: <FaShieldAlt />, title: 'Reliable & Secure',  desc: 'Your data and payments are 100% secure with advanced encryption.' },
             ].map((c, i) => (
-              <div key={i} className={styles.card} style={{ transitionDelay: `${i * 120}ms` }}>
+              <div key={`why-${c.title || i}`} className={styles.card} style={{ transitionDelay: `${i * 120}ms` }}>
                 <div className={styles.cardIconBox}>{c.icon}</div>
                 <h3>{c.title}</h3>
                 <p>{c.desc}</p>
@@ -369,7 +369,7 @@ export default function Home() {
         { icon: <FaSignal />, pain: '"Network no de"', fix: 'C-Transit works even when internet is down.' },
         { icon: <FaBan />, pain: '"I no de collect transfer"', fix: 'No driver approval needed. Just tap and ride.' },
       ].map((item, i) => (
-        <div key={i} className={styles.cashlessCard}>
+        <div key={`cashless-${i}-${item.pain}`} className={styles.cashlessCard}>
           <div className={styles.cashlessIcon}>{item.icon}</div>
           <p className={styles.cashlessPain}>{item.pain}</p>
           <p className={styles.cashlessFix}>{item.fix}</p>
@@ -397,7 +397,7 @@ export default function Home() {
               { icon: <FaBus />,        title: 'Ride',      desc: 'Enjoy your ride seamlessly.' },
               { icon: <FaRedo />,       title: 'Go Again',  desc: 'Tap again at every boarding and destination stop.' },
             ].map((s, i) => (
-              <Fragment key={i}>
+              <Fragment key={`step-${s.title || i}`}>
                 <div className={styles.step} style={{ transitionDelay: `${i * 150}ms` }}>
                   <div className={styles.stepBadge}>{i + 1}</div>
                   <div className={styles.stepIcon}>{s.icon}</div>
@@ -420,7 +420,7 @@ export default function Home() {
             { value: ontime,   suffix: '%',  label: 'On-time Performance' },
             { value: vehicles, suffix: '+',  label: 'Active Vehicles' },
           ].map((s, i) => (
-            <Fragment key={i}>
+            <Fragment key={`stat-item-${s.label || i}`}>
               <div className={`${styles.stat} ${statsAnimated ? styles.fadeInUp : styles.hidden}`} style={{ transitionDelay: `${i * 150}ms` }}>
                 <div className={styles.statNumber}>
                   {s.value}<span>{s.suffix}</span>
@@ -448,13 +448,15 @@ export default function Home() {
               { initials: 'MM', name: 'Muhammed M.',  role: 'Lecturer',  text: 'Love the tap & ride experience. Fast, secure and reliable.' },
               { initials: 'AA', name: 'AbdulAzeez A.',   role: 'Student',        text: 'Best transit card system I\'ve used. Super convenient!' },
             ].map((t, i) => (
-              <div key={i} className={styles.testimonialCard} style={{ transitionDelay: `${i * 120}ms` }}>
+              <div key={`test-${t.name || i}`} className={styles.testimonialCard} style={{ transitionDelay: `${i * 120}ms` }}>
                 <div className={styles.avatar}>{t.initials}</div>
                 <h4>{t.name}</h4>
                 <span className={styles.role}>{t.role}</span>
                 <p>"{t.text}"</p>
                 <div className={styles.stars}>
-                  {[...Array(5)].map((_, j) => <FaStar key={j} className={styles.star} />)}
+                  {[...Array(5)].map((_, j) => (
+                    <FaStar key={`star-${t.name || i}-${j}`} className={styles.star} />
+                  ))}
                 </div>
               </div>
             ))}

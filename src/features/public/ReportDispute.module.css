@@ -4,28 +4,28 @@
   background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
 }
 
-::global(html[data-theme="dark"]) .page {
+:global(html[data-theme="dark"]) .page {
   background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
 }
 
-::global(html[data-theme="dark"]) .card {
+:global(html[data-theme="dark"]) .card {
   background: #0f1724;
   border-color: rgba(148, 163, 184, 0.18);
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .header h1,
-::global(html[data-theme="dark"]) .badge,
-::global(html[data-theme="dark"]) .form label,
-::global(html[data-theme="dark"]) .successBox h2 {
+:global(html[data-theme="dark"]) .header h1,
+:global(html[data-theme="dark"]) .badge,
+:global(html[data-theme="dark"]) .form label,
+:global(html[data-theme="dark"]) .successBox h2 {
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .header p,
-::global(html[data-theme="dark"]) .noteBox,
-::global(html[data-theme="dark"]) .successBox,
-::global(html[data-theme="dark"]) .form input,
-::global(html[data-theme="dark"]) .form textarea {
+:global(html[data-theme="dark"]) .header p,
+:global(html[data-theme="dark"]) .noteBox,
+:global(html[data-theme="dark"]) .successBox,
+:global(html[data-theme="dark"]) .form input,
+:global(html[data-theme="dark"]) .form textarea {
   color: #cbd5e1;
   background: #111827;
 }

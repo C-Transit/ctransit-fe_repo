@@ -1,52 +1,67 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaUser, FaEnvelope, FaCreditCard, FaCalendar, FaLock, FaLink } from 'react-icons/fa';
+import { FaSearch, FaUser, FaIdCard, FaKey, FaLink, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { linkAgentCard, fetchAgentUsers } from '../../api/agentApi';
 import styles from './LinkCard.module.css';
 
 export default function LinkCard() {
-  const [searchEmail, setSearchEmail] = useState('');
-  const [user, setUser] = useState(null);
-  const [cardData, setCardData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-  });
+  const [studentQuery, setStudentQuery] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const handleSearchUser = async () => {
-    if (!searchEmail) return;
+  const handleSearchStudent = async () => {
+    if (!studentQuery.trim()) return;
     setSearching(true);
     setError(null);
-    setUser(null);
+    setSelectedStudent(null);
+    setSearchResults([]);
 
     try {
-      // Placeholder - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const mockUser = {
-        id: 'USR-001',
-        name: 'John Doe',
-        email: searchEmail,
-        phone: '08012345678',
-        cardLinked: false,
-      };
-      setUser(mockUser);
-      if (mockUser.cardLinked) {
-        setError('This user already has a card linked.');
+      const data = await fetchAgentUsers({ page: 1, limit: 10 });
+      const students = data?.students || data?.data || (Array.isArray(data) ? data : []);
+      const q = studentQuery.trim().toLowerCase();
+      const matched = students.filter(s =>
+        (s.email && s.email.toLowerCase().includes(q)) ||
+        (s.matricNumber && s.matricNumber.toLowerCase().includes(q)) ||
+        (s.firstname && s.firstname.toLowerCase().includes(q)) ||
+        (s.lastname && s.lastname.toLowerCase().includes(q))
+      );
+
+      if (matched.length > 0) {
+        setSearchResults(matched);
+        setSelectedStudent(matched[0]);
+      } else {
+        // Allow direct student ID / matric linking even if not in first page of search
+        setSelectedStudent({
+          id: studentQuery.trim(),
+          matricNumber: studentQuery.trim(),
+          firstname: 'Student',
+          lastname: `(${studentQuery.trim()})`,
+        });
       }
     } catch (err) {
-      setError('User not found. Please check the email address.');
+      // Fallback to manual entry
+      setSelectedStudent({
+        id: studentQuery.trim(),
+        matricNumber: studentQuery.trim(),
+        firstname: 'Student',
+        lastname: `(${studentQuery.trim()})`,
+      });
     } finally {
       setSearching(false);
     }
   };
 
-  const handleLinkCard = async () => {
-    if (!user) return;
-    if (!cardData.cardNumber || !cardData.expiryDate || !cardData.cvv) {
-      setError('Please fill in all card details.');
+  const handleLinkCard = async (e) => {
+    e.preventDefault();
+    const targetStudentId = selectedStudent?.id || selectedStudent?._id || selectedStudent?.matricNumber || studentQuery.trim();
+    if (!targetStudentId || !otp.trim()) {
+      setError('Please provide the Student ID/Matric and the 6-digit card verification OTP.');
       return;
     }
 
@@ -55,14 +70,16 @@ export default function LinkCard() {
     setSuccess(false);
 
     try {
-      // Placeholder - replace with real endpoint
-      console.log('Linking card for user:', user.id, cardData);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await linkAgentCard({
+        studentId: targetStudentId,
+        otp: otp.trim(),
+      });
+
       setSuccess(true);
-      setCardData({ cardNumber: '', expiryDate: '', cvv: '' });
+      setOtp('');
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
-      setError('Failed to link card. Please try again.');
+      setError(err.response?.data?.message || 'Failed to link card. Please verify the OTP and Student ID.');
     } finally {
       setLoading(false);
     }
@@ -71,33 +88,55 @@ export default function LinkCard() {
   return (
     <div className={styles.linkCard}>
       <div className={styles.header}>
-        <h1 className={styles.pageTitle}>Link Card</h1>
-        <p className={styles.pageSubtitle}>Link a card to a user for seamless payments</p>
+        <h1 className={styles.pageTitle}>Link Student Transit Card</h1>
+        <p className={styles.pageSubtitle}>Authorize and bind physical RFID Transit Cards using student OTP</p>
       </div>
 
       <div className={styles.container}>
         <div className={styles.searchSection}>
-          <h2 className={styles.sectionTitle}>Find User</h2>
+          <h2 className={styles.sectionTitle}>1. Locate Student Account</h2>
           <div className={styles.searchBox}>
             <div className={styles.searchInput}>
-              <FaEnvelope className={styles.searchIcon} />
+              <FaSearch className={styles.searchIcon} />
               <input
-                type="email"
-                placeholder="Enter user email address"
-                value={searchEmail}
-                onChange={(e) => setSearchEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchUser()}
+                type="text"
+                placeholder="Enter student Matric No (e.g. 2021/1/12345) or Email"
+                value={studentQuery}
+                onChange={(e) => setStudentQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchStudent()}
                 className={styles.input}
               />
             </div>
-            <button className={styles.searchBtn} onClick={handleSearchUser} disabled={searching}>
-              <FaSearch /> {searching ? 'Searching...' : 'Search'}
+            <button className={styles.searchBtn} onClick={handleSearchStudent} disabled={searching}>
+              <FaSearch /> {searching ? 'Finding...' : 'Find'}
             </button>
           </div>
 
-          {error && !user && <div className={styles.errorBox}>{error}</div>}
+          {searchResults.length > 1 && (
+            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>Multiple matches found:</span>
+              {searchResults.map((s) => (
+                <button
+                  key={s.id || s._id || s.matricNumber}
+                  type="button"
+                  onClick={() => setSelectedStudent(s)}
+                  style={{
+                    padding: '8px 12px',
+                    textAlign: 'left',
+                    background: selectedStudent?.id === s.id ? '#e0f2fe' : '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <strong>{s.firstname} {s.lastname}</strong> — {s.matricNumber || s.email}
+                </button>
+              ))}
+            </div>
+          )}
 
-          {user && (
+          {selectedStudent && (
             <motion.div
               className={styles.userCard}
               initial={{ opacity: 0, y: 10 }}
@@ -105,108 +144,83 @@ export default function LinkCard() {
             >
               <div className={styles.userHeader}>
                 <div className={styles.userAvatar}>
-                  {user.name?.charAt(0) || 'U'}
+                  <FaUser />
                 </div>
                 <div className={styles.userInfo}>
-                  <h3>{user.name}</h3>
-                  <p>{user.email}</p>
-                  <p className={styles.userPhone}>{user.phone}</p>
+                  <h3>{selectedStudent.firstname} {selectedStudent.lastname}</h3>
+                  <p>Matric / ID: <strong>{selectedStudent.matricNumber || selectedStudent.id}</strong></p>
+                  {selectedStudent.email && <p className={styles.userPhone}>{selectedStudent.email}</p>}
                 </div>
                 <div className={styles.cardStatus}>
-                  {user.cardLinked ? (
-                    <span className={styles.cardLinked}>Card Linked</span>
-                  ) : (
-                    <span className={styles.cardNotLinked}>No Card</span>
-                  )}
+                  <span className={styles.cardNotLinked}>Ready to Link</span>
                 </div>
               </div>
             </motion.div>
           )}
         </div>
 
-        {user && !user.cardLinked && (
-          <motion.div
-            className={styles.cardSection}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h2 className={styles.sectionTitle}>Card Details</h2>
-            <div className={styles.cardForm}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  <FaCreditCard className={styles.labelIcon} /> Card Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  value={cardData.cardNumber}
-                  onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value.replace(/\s/g, '') })}
-                  maxLength="16"
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    <FaCalendar className={styles.labelIcon} /> Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    value={cardData.expiryDate}
-                    onChange={(e) => setCardData({ ...cardData, expiryDate: e.target.value })}
-                    className={styles.input}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    <FaLock className={styles.labelIcon} /> CVV
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="***"
-                    value={cardData.cvv}
-                    onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
-                    maxLength="4"
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-
-              {error && <div className={styles.errorBox}>{error}</div>}
-              {success && <div className={styles.successBox}>Card linked successfully!</div>}
-
-              <button className={styles.linkBtn} onClick={handleLinkCard} disabled={loading}>
-                <FaLink /> {loading ? 'Linking...' : 'Link Card'}
-              </button>
+        <div className={styles.cardSection}>
+          <h2 className={styles.sectionTitle}>2. Enter Link Authorization Code</h2>
+          <form onSubmit={handleLinkCard} className={styles.cardForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                <FaIdCard className={styles.labelIcon} /> Student ID / Matric Number
+              </label>
+              <input
+                type="text"
+                placeholder="Target Student Identifier"
+                value={selectedStudent?.matricNumber || selectedStudent?.id || studentQuery}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedStudent(prev => ({ ...(prev || {}), matricNumber: val, id: val }));
+                }}
+                className={styles.input}
+                required
+              />
             </div>
-          </motion.div>
-        )}
 
-        {user && user.cardLinked && (
-          <div className={styles.alreadyLinked}>
-            <span className={styles.alreadyIcon}>✓</span>
-            <div>
-              <h3>Card Already Linked</h3>
-              <p>This user already has a card linked to their account.</p>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                <FaKey className={styles.labelIcon} /> Student Card OTP (6 Digits)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 849201"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                className={styles.input}
+                required
+              />
+              <span style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                Student generates this OTP in their profile under "Settings → Card Linking".
+              </span>
             </div>
-          </div>
-        )}
+
+            {error && (
+              <div className={styles.errorBox}>
+                <FaExclamationTriangle style={{ marginRight: '6px' }} /> {error}
+              </div>
+            )}
+            {success && (
+              <div className={styles.successBox}>
+                <FaCheckCircle style={{ marginRight: '6px' }} /> Physical Transit Card linked successfully!
+              </div>
+            )}
+
+            <button type="submit" className={styles.linkBtn} disabled={loading || !otp}>
+              <FaLink /> {loading ? 'Binding Card...' : 'Confirm & Link Card'}
+            </button>
+          </form>
+        </div>
 
         <div className={styles.infoBox}>
-          <h3>Card Linking Guide</h3>
+          <h3><FaIdCard style={{ marginRight: '8px' }} /> Field Operations Guide</h3>
           <ul>
-            <li>Search for the user using their email address</li>
-            <li>Enter the card details accurately</li>
-            <li>Card number should be 16 digits</li>
-            <li>Expiry date format: MM/YY</li>
-            <li>CVV is required for verification</li>
+            <li>Ask the student to open their C-Transit app and click "Link New Card" in Settings.</li>
+            <li>Input their student matriculation ID and the 6-digit OTP they generated.</li>
+            <li>Tap the student card on the terminal to complete binding.</li>
           </ul>
-          <p className={styles.note}>
-            Note: This is a placeholder endpoint. Integration with backend will be added soon.
-          </p>
         </div>
       </div>
     </div>

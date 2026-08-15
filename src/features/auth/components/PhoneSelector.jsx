@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import { formatPhoneNumber, COUNTRY_CODES, getCountryByCode } from '../../utils/phoneUtils';
+import { formatPhoneNumber, COUNTRY_CODES, getCountryByCode } from '../../../utils/phoneUtils';
 import styles from './PhoneSelector.module.css';
 
 /**

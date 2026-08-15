@@ -6,3 +6,6 @@ dist/
 .DS_Store
 *.log
 package-lock.json
+.env.admin
+.env.web
+.env.agent

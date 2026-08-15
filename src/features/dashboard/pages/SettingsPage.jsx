@@ -362,7 +362,6 @@ function CardLinking({ onShowInfo, onToast }) {
       }
 
       try {
-        // ✅ Bug fix: was calling /card-status (404 not found)
         // Real endpoint: GET /api/auth/card-link-status
         const response = await fetch(`${AUTH_API_URL}/card-link-status`, {
           method: "GET",
@@ -372,27 +371,33 @@ function CardLinking({ onShowInfo, onToast }) {
           },
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          // ✅ Real response: { success, status: "LINKED"|"PENDING"|"NO_ACTIVE_OTP", cardUid? }
-          if (result.status === "LINKED") {
-            setCards([
-              {
-                id: Date.now(),
-                uid: result.cardUid || "Linked Card",
-                label: "My Transit Card",
-                linked: true,
-                linkedAt: new Date().toISOString().split("T")[0],
-              },
-            ]);
-            setIsLinked(true);
-            localStorage.setItem("cardLinked", "true");
-          }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Failed to fetch card status");
+
+        // Real response: { success, status: "LINKED"|"PENDING"|"NO_ACTIVE_OTP", cardUid?, expiresAt? }
+        if (result.status === "LINKED") {
+          setIsLinked(true);
+          localStorage.setItem("cardLinked", "true");
+          setCards([
+            {
+              id: Date.now(),
+              uid: result.cardUid || "Linked Card",
+              label: "My Transit Card",
+              linked: true,
+              linkedAt: new Date().toISOString().split("T")[0],
+            },
+          ]);
+        } else {
+          setIsLinked(false);
+          localStorage.removeItem("cardLinked");
         }
       } catch (err) {
-        // FIX: Check localStorage fallback
+        console.error("Card status fetch error:", err);
+        // Fallback to localStorage if error
         if (localStorage.getItem("cardLinked") === "true") {
           setIsLinked(true);
+        } else {
+          setIsLinked(false);
         }
       } finally {
         setLinkLoading(false);
@@ -645,21 +650,22 @@ function KYCSection({ onToast }) {
         });
 
         const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to fetch KYC status');
 
-        // ✅ Bug fix: backend returns PENDING | APPROVED | REJECTED (uppercase enum)
-        // UI was checking for 'unverified'|'pending'|'verified' — never matched.
-        // Normalise to the UI's expected lowercase values here.
-        const rawStatus =
-          result.data?.status || result.status || result.data?.kycStatus;
+        // Backend returns: { data: "PENDING"|"APPROVED"|"REJECTED", message }
+        const rawStatus = typeof result.data === 'string'
+          ? result.data
+          : result.data?.status || result.status || null;
+
         const statusMap = {
-          APPROVED: "verified",
-          PENDING: "pending",
-          REJECTED: "rejected",
+          APPROVED: 'verified',
+          PENDING:  'pending',
+          REJECTED: 'rejected',
         };
-        const status = statusMap[rawStatus] || "unverified";
+        const status = statusMap[rawStatus] || 'unverified';
 
-        if (status !== "unverified") {
-          localStorage.setItem("kycStatus", status);
+        if (status !== 'unverified') {
+          localStorage.setItem('kycStatus', status);
         }
 
         setKycStatus(status);

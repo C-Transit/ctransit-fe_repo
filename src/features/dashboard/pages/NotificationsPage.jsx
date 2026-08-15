@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaArrowLeft, FaEllipsisV } from 'react-icons/fa';
+import { useState, useEffect, useCallback } from 'react';
+import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import styles from './NotificationsPage.module.css';
 import { NOT_API_URL } from '../../../api/api';
 
@@ -11,7 +11,7 @@ export default function NotificationsPage({ onBack }) {
   const getToken = () => localStorage.getItem('authToken');
 
   // Fetch notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -27,34 +27,35 @@ export default function NotificationsPage({ onBack }) {
 
       if (!response.ok) throw new Error(result.message || 'Failed to fetch notifications');
 
-      const data = result.data || result.notifications || result || [];
+      // Backend returns: { success: true, notifications: [...], unreadCount: N }
+      const data = result.notifications || result.data || (Array.isArray(result) ? result : []);
       setNotifications(data);
     } catch (err) {
       setError(err.message || 'Failed to load notifications');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
-  // Mark as read
+  // Mark single notification as read
   const handleMarkAsRead = async (id) => {
-    // Optimistic update
+    // Optimistic update using isRead field
     setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
+      prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
     );
 
     try {
-      const response = await fetch(`${NOT_API_URL}/mark-read`, {
-        method: 'POST',
+      // Backend uses PATCH /api/notifications/:id/mark-read
+      const response = await fetch(`${NOT_API_URL}/${id}/mark-read`, {
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notificationId: id }),
       });
 
       if (!response.ok) throw new Error('Failed to mark as read');
@@ -64,21 +65,22 @@ export default function NotificationsPage({ onBack }) {
     }
   };
 
-  // Delete notification
-  const handleDeleteNotification = async (id) => {
+  // Mark all notifications as read
+  const handleMarkAllAsRead = async () => {
     // Optimistic update
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
 
     try {
-      const response = await fetch(`${NOT_API_URL}/${id}`, {
-        method: 'DELETE',
+      // Backend uses PATCH /api/notifications/mark-all-read
+      const response = await fetch(`${NOT_API_URL}/mark-all-read`, {
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) throw new Error('Failed to delete notification');
+      if (!response.ok) throw new Error('Failed to mark all as read');
     } catch (err) {
       console.error(err.message);
       fetchNotifications(); // revert on failure
@@ -87,6 +89,7 @@ export default function NotificationsPage({ onBack }) {
 
   // Split into Today vs Earlier based on createdAt timestamp
   const isToday = (timestamp) => {
+    if (!timestamp) return false;
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
@@ -98,6 +101,7 @@ export default function NotificationsPage({ onBack }) {
   const earlierNotifications = notifications.filter(n => !isToday(n.createdAt || n.timestamp));
 
   const formatTime = (timestamp) => {
+    if (!timestamp) return 'Recently';
     const now = new Date();
     const diffMs = now - new Date(timestamp);
     const diffMins = Math.floor(diffMs / 60000);
@@ -114,32 +118,37 @@ export default function NotificationsPage({ onBack }) {
   const renderNotification = (notif) => (
     <div
       key={notif.id}
-      className={`${styles.notificationRow} ${!notif.read ? styles.unread : ''} ${styles[`type-${notif.type}`]}`}
+      className={`${styles.notificationRow} ${!notif.isRead ? styles.unread : ''} ${styles[`type-${notif.type}`] || ''}`}
+      onClick={() => !notif.isRead && handleMarkAsRead(notif.id)}
     >
       <div className={styles.notificationIcon}>
         <span className={styles.iconBadge}></span>
       </div>
       <div className={styles.notificationContent}>
         <p className={styles.notificationTitle}>{notif.title}</p>
-        <p className={styles.notificationMessage}>{notif.message}</p>
+        <p className={styles.notificationMessage}>{notif.body || notif.message}</p>
         <p className={styles.notificationTime}>
           {formatTime(notif.createdAt || notif.timestamp)}
         </p>
       </div>
       <div className={styles.notificationActions}>
-        <button
-          className={styles.moreBtn}
-          onClick={() =>
-            !notif.read
-              ? handleMarkAsRead(notif.id)
-              : handleDeleteNotification(notif.id)
-          }
-        >
-          <FaEllipsisV size={16} />
-        </button>
+        {!notif.isRead && (
+          <button
+            className={styles.moreBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMarkAsRead(notif.id);
+            }}
+            title="Mark as read"
+          >
+            <FaCheck size={14} />
+          </button>
+        )}
       </div>
     </div>
   );
+
+  const hasUnread = notifications.some(n => !n.isRead);
 
   return (
     <div className={styles.notificationPage}>
@@ -149,6 +158,15 @@ export default function NotificationsPage({ onBack }) {
           <FaArrowLeft size={20} />
         </button>
         <h1 className={styles.pageTitle}>Notifications</h1>
+        {hasUnread && (
+          <button
+            className={styles.markAllBtn}
+            onClick={handleMarkAllAsRead}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#2563eb', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}
+          >
+            Mark all read
+          </button>
+        )}
       </div>
 
       {/* Loading */}

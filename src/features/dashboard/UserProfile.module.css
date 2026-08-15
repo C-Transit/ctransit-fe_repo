@@ -4,42 +4,42 @@
   padding: 2rem 1rem;
 }
 
-::global(html[data-theme="dark"]) .profilePage {
+:global(html[data-theme="dark"]) .profilePage {
   background: linear-gradient(135deg, #0b1220 0%, #111827 100%);
 }
 
-::global(html[data-theme="dark"]) .profileCard,
-::global(html[data-theme="dark"]) .statsCard,
-::global(html[data-theme="dark"]) .emergencyCard,
-::global(html[data-theme="dark"]) .modal {
+:global(html[data-theme="dark"]) .profileCard,
+:global(html[data-theme="dark"]) .statsCard,
+:global(html[data-theme="dark"]) .emergencyCard,
+:global(html[data-theme="dark"]) .modal {
   background: #0f1724;
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .header h1,
-::global(html[data-theme="dark"]) .infoSection h2,
-::global(html[data-theme="dark"]) .statsCard h3,
-::global(html[data-theme="dark"]) .emergencyCard h3,
-::global(html[data-theme="dark"]) .modal h2,
-::global(html[data-theme="dark"]) .infoItem p,
-::global(html[data-theme="dark"]) .statValue,
-::global(html[data-theme="dark"]) .placeholder {
+:global(html[data-theme="dark"]) .header h1,
+:global(html[data-theme="dark"]) .infoSection h2,
+:global(html[data-theme="dark"]) .statsCard h3,
+:global(html[data-theme="dark"]) .emergencyCard h3,
+:global(html[data-theme="dark"]) .modal h2,
+:global(html[data-theme="dark"]) .infoItem p,
+:global(html[data-theme="dark"]) .statValue,
+:global(html[data-theme="dark"]) .placeholder {
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .statItem,
-::global(html[data-theme="dark"]) .backBtn,
-::global(html[data-theme="dark"]) .secondaryBtn,
-::global(html[data-theme="dark"]) .cancelBtn,
-::global(html[data-theme="dark"]) .formGroup input {
+:global(html[data-theme="dark"]) .statItem,
+:global(html[data-theme="dark"]) .backBtn,
+:global(html[data-theme="dark"]) .secondaryBtn,
+:global(html[data-theme="dark"]) .cancelBtn,
+:global(html[data-theme="dark"]) .formGroup input {
   background: #111827;
   border-color: rgba(148, 163, 184, 0.18);
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .infoItem label,
-::global(html[data-theme="dark"]) .statLabel,
-::global(html[data-theme="dark"]) .formGroup label {
+:global(html[data-theme="dark"]) .infoItem label,
+:global(html[data-theme="dark"]) .statLabel,
+:global(html[data-theme="dark"]) .formGroup label {
   color: #7dd3fc;
 }
 
@@ -421,7 +421,7 @@
   font-size: 0.95rem;
 }
 
-::global(html[data-theme="dark"]) .successToast {
+:global(html[data-theme="dark"]) .successToast {
   box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
 }
 

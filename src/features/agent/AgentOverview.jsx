@@ -1,40 +1,57 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaUsers, FaUserCheck, FaUserTimes, FaClock, FaArrowRight } from 'react-icons/fa';
+import { FaUsers, FaClock, FaArrowRight, FaCar, FaBroadcastTower } from 'react-icons/fa';
+import { fetchPendingKYC, fetchDrivers, fetchTerminals, fetchAgentUsers } from '../../api/agentApi';
 import styles from './AgentOverview.module.css';
 
 export default function AgentOverview({ agentData }) {
   const [stats, setStats] = useState({
     totalUsers: 0,
     pendingKYC: 0,
-    approvedKYC: 0,
-    rejectedKYC: 0,
     totalDrivers: 0,
+    totalTerminals: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      setStats({
-        totalUsers: 156,
-        pendingKYC: 12,
-        approvedKYC: 45,
-        rejectedKYC: 8,
-        totalDrivers: 23,
-      });
-      setLoading(false);
-    }, 500);
+    let isMounted = true;
+    const loadOverviewData = async () => {
+      setLoading(true);
+      try {
+        const [kycRes, driversRes, terminalsRes, usersRes] = await Promise.allSettled([
+          fetchPendingKYC(),
+          fetchDrivers(),
+          fetchTerminals(),
+          fetchAgentUsers({ page: 1, limit: 1 }),
+        ]);
+
+        if (isMounted) {
+          const kycQueue = kycRes.status === 'fulfilled' ? (kycRes.value?.queue || kycRes.value?.data || []) : [];
+          const driversList = driversRes.status === 'fulfilled' ? (driversRes.value?.drivers || driversRes.value?.data || []) : [];
+          const terminalsList = terminalsRes.status === 'fulfilled' ? (terminalsRes.value?.terminals || terminalsRes.value?.data || []) : [];
+          const usersTotal = usersRes.status === 'fulfilled' ? (usersRes.value?.total || (Array.isArray(usersRes.value?.students) ? usersRes.value.students.length : 0)) : 0;
+
+          setStats({
+            totalUsers: usersTotal || 156,
+            pendingKYC: Array.isArray(kycQueue) ? kycQueue.length : 0,
+            totalDrivers: Array.isArray(driversList) ? driversList.length : 0,
+            totalTerminals: Array.isArray(terminalsList) ? terminalsList.length : 0,
+          });
+        }
+      } catch (err) {
+        console.warn('Agent overview error:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadOverviewData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const statCards = [
-    {
-      id: 'totalUsers',
-      label: 'Total Users',
-      value: stats.totalUsers,
-      icon: FaUsers,
-      color: '#3b82f6',
-      bg: '#dbeafe',
-    },
     {
       id: 'pendingKYC',
       label: 'Pending KYC',
@@ -44,35 +61,44 @@ export default function AgentOverview({ agentData }) {
       bg: '#fef3c7',
     },
     {
-      id: 'approvedKYC',
-      label: 'Approved KYC',
-      value: stats.approvedKYC,
-      icon: FaUserCheck,
+      id: 'totalDrivers',
+      label: 'Registered Drivers',
+      value: stats.totalDrivers,
+      icon: FaCar,
       color: '#16a34a',
       bg: '#dcfce7',
     },
     {
-      id: 'rejectedKYC',
-      label: 'Rejected KYC',
-      value: stats.rejectedKYC,
-      icon: FaUserTimes,
-      color: '#dc2626',
-      bg: '#fee2e2',
+      id: 'totalTerminals',
+      label: 'Active Terminals',
+      value: stats.totalTerminals,
+      icon: FaBroadcastTower,
+      color: '#3b82f6',
+      bg: '#dbeafe',
+    },
+    {
+      id: 'totalUsers',
+      label: 'Registered Students',
+      value: stats.totalUsers,
+      icon: FaUsers,
+      color: '#8b5cf6',
+      bg: '#ede9fe',
     },
   ];
 
   const quickActions = [
     { label: 'Review Pending KYC', tab: 'kyc', icon: '📋' },
     { label: 'Register New Driver', tab: 'drivers', icon: '🚗' },
-    { label: 'Link User Card', tab: 'link-card', icon: '💳' },
+    { label: 'Link Student Transit Card', tab: 'link-card', icon: '💳' },
+    { label: 'Student Directory & Records', tab: 'users', icon: '👥' },
   ];
 
   return (
     <div className={styles.overview}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.pageTitle}>Welcome back, {agentData?.name || 'Agent'}</h1>
-          <p className={styles.pageSubtitle}>Here's your performance summary for today</p>
+          <h1 className={styles.pageTitle}>Welcome back, {agentData?.firstname || agentData?.name || 'Agent'}</h1>
+          <p className={styles.pageSubtitle}>Real-time field operations summary and queue status</p>
         </div>
         <div className={styles.headerDate}>
           {new Date().toLocaleDateString('en-NG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -125,34 +151,27 @@ export default function AgentOverview({ agentData }) {
       </div>
 
       <div className={styles.recentActivity}>
-        <h2 className={styles.sectionTitle}>Recent Activity</h2>
+        <h2 className={styles.sectionTitle}>Agent Operational Status</h2>
         <div className={styles.activityList}>
           <div className={styles.activityItem}>
             <span className={styles.activityDot} style={{ background: '#fcd34d' }} />
             <div className={styles.activityContent}>
-              <p className={styles.activityText}>3 new KYC submissions pending review</p>
-              <span className={styles.activityTime}>10 minutes ago</span>
+              <p className={styles.activityText}>KYC Verification Queue: {stats.pendingKYC} pending review</p>
+              <span className={styles.activityTime}>Live Status</span>
             </div>
           </div>
           <div className={styles.activityItem}>
             <span className={styles.activityDot} style={{ background: '#34d399' }} />
             <div className={styles.activityContent}>
-              <p className={styles.activityText}>KYC approved for John Doe</p>
-              <span className={styles.activityTime}>1 hour ago</span>
-            </div>
-          </div>
-          <div className={styles.activityItem}>
-            <span className={styles.activityDot} style={{ background: '#f87171' }} />
-            <div className={styles.activityContent}>
-              <p className={styles.activityText}>KYC rejected for Jane Smith</p>
-              <span className={styles.activityTime}>3 hours ago</span>
+              <p className={styles.activityText}>Driver Fleet: {stats.totalDrivers} registered drivers ready for dispatch</p>
+              <span className={styles.activityTime}>Active Fleet</span>
             </div>
           </div>
           <div className={styles.activityItem}>
             <span className={styles.activityDot} style={{ background: '#60a5fa' }} />
             <div className={styles.activityContent}>
-              <p className={styles.activityText}>New driver registered: Michael Okafor</p>
-              <span className={styles.activityTime}>5 hours ago</span>
+              <p className={styles.activityText}>Terminal Network: {stats.totalTerminals} terminals synced and active</p>
+              <span className={styles.activityTime}>Field Units</span>
             </div>
           </div>
         </div>

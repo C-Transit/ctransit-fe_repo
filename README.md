@@ -1,94 +1,91 @@
-# Cashless Campus Platform
+# C-Transit Frontend — Multi-Subdomain Architecture
 
-> A full-stack, team-driven cashless campus platform integrating React frontend, backend services, and IoT hardware for seamless bus payments.
+> A campus bus transit Progressive Web App (PWA) for FUTMinna students, operations staff, agents, and drivers.
 
-## Overview
+## Architecture Overview
 
-This repository contains the **frontend code** for the Cashless Campus Platform. The project is a collaborative effort, connecting frontend, backend, and hardware components to enable students to pay for bus rides digitally.
+This repository uses a clean **multi-application architecture in a single codebase**, allowing independent deployment of the main passenger app, admin control portal, and agent/driver portal across dedicated subdomains:
 
-- **Frontend:** Built with **React** and **CSS Modules** for modular, maintainable styling. Additional packages are used to enhance functionality and UI.  
-- **Backend:** Developed with **Node.js**, **Express**, and **MongoDB** to handle API requests, data storage, and business logic.
-
-## Features
-
-- Browse available buses in real-time  
-- Digital payments for bus rides  
-- Transaction history for users  
-- Responsive design for desktop and mobile  
-- Modular architecture for easy maintenance  
-
-## Tech Stack
-
-**Frontend:**  
-- React  
-- CSS Modules  
-- Additional npm packages (e.g., `axios`, `react-router-dom`)  
-
-**Backend:**  
-- Node.js  
-- Express.js  
-- MongoDB  
-
-**Collaboration:**  
-- Git/GitHub for version control  
-- API integration between frontend and backend  
-
-## Installation & Setup
-
-1. **Clone the repo**  
-
-```bash
-git clone https://github.com/your-username/cashless-campus.git
-cd cashless-campus
+```text
+https://ctransit.me        → Main / Passenger Application (PWA)
+https://admin.ctransit.me  → Admin Control Portal
+https://agent.ctransit.me  → Field Agent & Driver Portal
 ```
 
-**Install frontend dependencies**
+---
 
-```bash
-cd frontend
-npm install
+## Applications & Structure
+
+```text
+src/
+├── apps/
+│   ├── web/               # Main Passenger Application (ctransit.me)
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── admin/             # Admin Control Portal (admin.ctransit.me)
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── agent/             # Agent & Driver Portal (agent.ctransit.me)
+│       ├── App.jsx
+│       └── main.jsx
+├── features/
+│   ├── public/            # Landing, About, Contact, Terms, Disputes
+│   ├── auth/              # Passenger Authentication
+│   ├── dashboard/         # Passenger Wallet, Transfers, History, Settings
+│   ├── admin/             # Admin Management, Role Control, Terminals, Analytics
+│   ├── agent/             # Field Operations, KYC, NFC Card Linking, Terminals
+│   └── driver/            # Driver Trips, Earnings, Vehicle Checks (Phase 2)
 ```
 
-**Set frontend API URL**
+---
 
-Create `frontend/.env` and set:
+## Build & Development Commands
 
-```bash
-VITE_API_URL=https://c-transit.onrender.com
-```
-
-**Start frontend server**
+### Development
 
 ```bash
+# Unified development (supports subdomains & path routing)
 npm run dev
+
+# Specific application development targets
+npm run dev:web      # Run Main Passenger Web App
+npm run dev:admin    # Run Admin Portal
+npm run dev:agent    # Run Agent & Driver Portal
 ```
 
-**Backend setup (done by backend dev)**
+### Production Builds
 
-- Navigate to the backend folder
-- Run `npm install` to install dependencies
-- Start server: `npm run dev`
+```bash
+# Build specific production bundles
+npm run build:web    # Output Main Passenger App (for ctransit.me)
+npm run build:admin  # Output Admin Portal (for admin.ctransit.me)
+npm run build:agent  # Output Agent & Driver Portal (for agent.ctransit.me)
 
-**Connect frontend to backend**
+# Default build (aliases build:web)
+npm run build
+```
 
-- Ensure `VITE_API_URL` points to the active backend instance
-  
-**Contributing**
+---
 
-This is a team project. Contributions include:
+## Vercel Multi-Project Deployment Setup
 
-- Frontend components and styling
+To deploy the three subdomains from this single GitHub repository, create three projects in Vercel:
 
-- API integration and testing
+| Vercel Project Name | Domain / Subdomain | Build Command | Output Directory | Environment Variables |
+| :--- | :--- | :--- | :--- | :--- |
+| **`ctransit-web`** | `ctransit.me` | `npm run build:web` | `dist` | `VITE_API_URL=https://c-transit-pink.vercel.app` |
+| **`ctransit-admin`** | `admin.ctransit.me` | `npm run build:admin` | `dist` | `VITE_API_URL=https://c-transit-pink.vercel.app` |
+| **`ctransit-agent`** | `agent.ctransit.me` | `npm run build:agent` | `dist` | `VITE_API_URL=https://c-transit-pink.vercel.app` |
 
-- Backend services and database schema
+---
 
-- Hardware integration modules (if applicable)
+## Future Driver Portal (Phase 2)
 
-Please follow GitFlow or your agreed team workflow for branches and commits.
+The driver portal architecture is prepared under `src/features/driver/` and mounted under `agent.ctransit.me`. It establishes clean application boundaries and navigation placeholders for trips, vehicle checks, and driver earnings without introducing unverified backend logic or fake data.
 
-**License**
+---
+
+## License
 
 This project is licensed under the MIT License.
 
-# ctransit-fe_repo

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaCheck, FaTimes, FaClock, FaUser, FaIdCard, FaCalendar, FaSearch, FaEye } from 'react-icons/fa';
-import agentApi from '../../api/agentApi';
+import { useState, useEffect, useCallback } from 'react';
+import { FaCheck, FaTimes, FaUser, FaIdCard, FaCalendar, FaSearch, FaEye } from 'react-icons/fa';
+import { fetchPendingKYC, approveAgentKYC, rejectAgentKYC } from '../../api/agentApi';
 import styles from './KYCManagement.module.css';
 
 export default function KYCManagement() {
@@ -14,52 +13,50 @@ export default function KYCManagement() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const fetchKYCRequests = async () => {
+  const fetchKYCRequests = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await agentApi.get('/agents/kyc/pending');
-      if (response.data && response.data.data) {
-        setKycRequests(response.data.data);
-      } else {
-        setKycRequests([]);
-      }
+      const data = await fetchPendingKYC();
+      const list = data?.queue || data?.data || (Array.isArray(data) ? data : []);
+      setKycRequests(list);
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Session expired. Please login again.');
       } else if (err.response?.status === 403) {
         setError('You do not have permission to view KYC requests.');
       } else {
-        setError('Failed to load KYC requests. Please try again.');
+        setError('Failed to load KYC requests. Please check your connection.');
       }
       setKycRequests([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleApprove = async (userId) => {
-    if (!window.confirm('Are you sure you want to approve this KYC?')) return;
+    if (!userId) return;
     setProcessingId(userId);
     try {
-      await agentApi.post(`/agents/kyc/${userId}/approve`);
+      await approveAgentKYC(userId);
       await fetchKYCRequests();
     } catch (err) {
-      alert('Failed to approve KYC. Please try again.');
+      alert(err.response?.data?.message || 'Failed to approve KYC. Please try again.');
     } finally {
       setProcessingId(null);
     }
   };
 
   const handleReject = async (userId) => {
+    if (!userId) return;
     const reason = window.prompt('Please provide a reason for rejection:');
     if (reason === null) return;
     setProcessingId(userId);
     try {
-      await agentApi.post(`/agents/kyc/${userId}/reject`, { reason });
+      await rejectAgentKYC(userId, reason || 'Incomplete or unreadable document');
       await fetchKYCRequests();
     } catch (err) {
-      alert('Failed to reject KYC. Please try again.');
+      alert(err.response?.data?.message || 'Failed to reject KYC. Please try again.');
     } finally {
       setProcessingId(null);
     }
@@ -72,7 +69,7 @@ export default function KYCManagement() {
 
   useEffect(() => {
     fetchKYCRequests();
-  }, []);
+  }, [fetchKYCRequests]);
 
   const getFilteredRequests = () => {
     let filtered = kycRequests;

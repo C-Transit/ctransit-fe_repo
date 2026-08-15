@@ -27,7 +27,7 @@
   overflow: auto;
 }
 
-::global(html[data-theme="dark"]) .modal {
+:global(html[data-theme="dark"]) .modal {
   background: #0f1724;
   border: 1px solid rgba(148, 163, 184, 0.16);
 }
@@ -41,7 +41,7 @@
   align-items: flex-start;
 }
 
-::global(html[data-theme="dark"]) .header {
+:global(html[data-theme="dark"]) .header {
   border-bottom-color: rgba(148, 163, 184, 0.16);
 }
 
@@ -71,7 +71,7 @@
   font-weight: 800;
 }
 
-::global(html[data-theme="dark"]) .header h2 {
+:global(html[data-theme="dark"]) .header h2 {
   color: #e2e8f0;
 }
 
@@ -81,7 +81,7 @@
   margin: 0;
 }
 
-::global(html[data-theme="dark"]) .header p {
+:global(html[data-theme="dark"]) .header p {
   color: #94a3b8;
 }
 
@@ -245,7 +245,7 @@
   color: #1e3a8a;
 }
 
-::global(html[data-theme="dark"]) .closeBtn:hover {
+:global(html[data-theme="dark"]) .closeBtn:hover {
   background: rgba(148, 163, 184, 0.1);
   color: #e2e8f0;
 }
@@ -261,7 +261,7 @@
   font-weight: 500;
 }
 
-::global(html[data-theme="dark"]) .errorBox {
+:global(html[data-theme="dark"]) .errorBox {
   background: rgba(220, 38, 38, 0.1);
   color: #fca5a5;
   border-left-color: #ef4444;
@@ -298,12 +298,12 @@
   background: #eff6ff;
 }
 
-::global(html[data-theme="dark"]) .uploadLabel {
+:global(html[data-theme="dark"]) .uploadLabel {
   border-color: rgba(37, 99, 235, 0.3);
   background: rgba(37, 99, 235, 0.05);
 }
 
-::global(html[data-theme="dark"]) .uploadLabel:hover {
+:global(html[data-theme="dark"]) .uploadLabel:hover {
   border-color: #3b82f6;
   background: rgba(37, 99, 235, 0.1);
 }
@@ -314,7 +314,7 @@
   font-size: 1rem;
 }
 
-::global(html[data-theme="dark"]) .uploadLabel span {
+:global(html[data-theme="dark"]) .uploadLabel span {
   color: #e2e8f0;
 }
 
@@ -323,7 +323,7 @@
   font-size: 0.85rem;
 }
 
-::global(html[data-theme="dark"]) .uploadLabel small {
+:global(html[data-theme="dark"]) .uploadLabel small {
   color: #94a3b8;
 }
 
@@ -332,7 +332,7 @@
   color: #2563eb;
 }
 
-::global(html[data-theme="dark"]) .uploadLabel svg {
+:global(html[data-theme="dark"]) .uploadLabel svg {
   color: #3b82f6;
 }
 
@@ -356,7 +356,7 @@
   background: #f8fbff;
 }
 
-::global(html[data-theme="dark"]) .previewImage {
+:global(html[data-theme="dark"]) .previewImage {
   border-color: rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.6);
 }
@@ -390,7 +390,7 @@
   margin-top: 1.2rem;
 }
 
-::global(html[data-theme="dark"]) .instructions {
+:global(html[data-theme="dark"]) .instructions {
   background: rgba(37, 99, 235, 0.05);
   border-color: rgba(37, 99, 235, 0.2);
 }
@@ -402,7 +402,7 @@
   font-weight: 600;
 }
 
-::global(html[data-theme="dark"]) .instructions h4 {
+:global(html[data-theme="dark"]) .instructions h4 {
   color: #93c5fd;
 }
 
@@ -415,7 +415,7 @@
   line-height: 1.6;
 }
 
-::global(html[data-theme="dark"]) .instructions ul {
+:global(html[data-theme="dark"]) .instructions ul {
   color: #cbd5e1;
 }
 
@@ -460,8 +460,8 @@
   letter-spacing: 0.05em;
 }
 
-::global(html[data-theme="dark"]) .imageSection h4,
-::global(html[data-theme="dark"]) .detailsSection h4 {
+:global(html[data-theme="dark"]) .imageSection h4,
+:global(html[data-theme="dark"]) .detailsSection h4 {
   color: #93c5fd;
 }
 
@@ -476,7 +476,7 @@
   justify-content: center;
 }
 
-::global(html[data-theme="dark"]) .reviewImage {
+:global(html[data-theme="dark"]) .reviewImage {
   background: rgba(15, 23, 42, 0.6);
   border-color: rgba(148, 163, 184, 0.16);
 }
@@ -499,7 +499,7 @@
   padding: 0.9rem;
 }
 
-::global(html[data-theme="dark"]) .detailItem {
+:global(html[data-theme="dark"]) .detailItem {
   background: rgba(37, 99, 235, 0.05);
   border-color: rgba(37, 99, 235, 0.2);
 }
@@ -514,7 +514,7 @@
   margin-bottom: 0.4rem;
 }
 
-::global(html[data-theme="dark"]) .detailItem label {
+:global(html[data-theme="dark"]) .detailItem label {
   color: #94a3b8;
 }
 
@@ -525,7 +525,7 @@
   font-size: 0.95rem;
 }
 
-::global(html[data-theme="dark"]) .detailItem p {
+:global(html[data-theme="dark"]) .detailItem p {
   color: #e2e8f0;
 }
 
@@ -541,7 +541,7 @@
   font-weight: 600;
 }
 
-::global(html[data-theme="dark"]) .photoBadge {
+:global(html[data-theme="dark"]) .photoBadge {
   background: rgba(16, 185, 129, 0.2);
   color: #6ee7b7;
 }
@@ -554,7 +554,7 @@
   margin-top: 1rem;
 }
 
-::global(html[data-theme="dark"]) .warningBox {
+:global(html[data-theme="dark"]) .warningBox {
   background: rgba(245, 158, 11, 0.1);
   border-color: rgba(245, 158, 11, 0.3);
 }
@@ -566,7 +566,7 @@
   line-height: 1.5;
 }
 
-::global(html[data-theme="dark"]) .warningBox p {
+:global(html[data-theme="dark"]) .warningBox p {
   color: #fcd34d;
 }
 
@@ -583,7 +583,7 @@
   background: #f8fbff;
 }
 
-::global(html[data-theme="dark"]) .footer {
+:global(html[data-theme="dark"]) .footer {
   border-top-color: rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.5);
 }
@@ -612,12 +612,12 @@
   background: #dbe7ff;
 }
 
-::global(html[data-theme="dark"]) .cancelBtn {
+:global(html[data-theme="dark"]) .cancelBtn {
   background: rgba(148, 163, 184, 0.15);
   color: #e2e8f0;
 }
 
-::global(html[data-theme="dark"]) .cancelBtn:hover:not(:disabled) {
+:global(html[data-theme="dark"]) .cancelBtn:hover:not(:disabled) {
   background: rgba(148, 163, 184, 0.25);
 }
 
