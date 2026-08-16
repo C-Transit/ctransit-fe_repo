@@ -68,7 +68,14 @@ export default defineConfig(({ mode }) => {
   const appTarget = ["admin", "agent", "web"].includes(rawTarget) ? rawTarget : "web";
   const targetConfig = TARGET_ENTRIES[appTarget];
 
+  const TARGET_PORTS = {
+    web: 3000,
+    admin: 3001,
+    agent: 3002,
+  };
+
   return {
+    cacheDir: path.resolve(__dirname, `node_modules/.vite_${appTarget}`),
     plugins: [appTargetPlugin(targetConfig), react()],
 
     resolve: {
@@ -87,7 +94,7 @@ export default defineConfig(({ mode }) => {
 
     server: {
       host: "0.0.0.0",
-      port: 3000,
+      port: TARGET_PORTS[appTarget] || 3000,
       allowedHosts: true,
     },
   };

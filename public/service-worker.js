@@ -52,11 +52,13 @@ self.addEventListener("fetch", (event) => {
   // 0. Skip non-GET requests entirely — SW must never intercept POST/PUT/DELETE
   if (request.method !== "GET") return;
 
-  // 1. Skip Vite internal dev URLs and WebSocket upgrades
+  // 1. Skip Vite internal dev URLs, source files, and WebSocket upgrades
   if (
-    url.pathname.includes("/node_modules/.vite/") ||
+    url.pathname.includes("/node_modules/") ||
+    url.pathname.startsWith("/src/") ||
     url.pathname.startsWith("/@vite/") ||
     url.pathname.startsWith("/@fs/") ||
+    url.pathname.startsWith("/@id/") ||
     request.headers.get("upgrade") === "websocket"
   ) {
     return;

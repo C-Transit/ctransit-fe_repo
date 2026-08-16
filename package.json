@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "cross-env VITE_APP_TARGET=web vite --host 0.0.0.0 --port 3000",
     "dev:web": "cross-env VITE_APP_TARGET=web vite --mode web --host 0.0.0.0 --port 3000",
-    "dev:admin": "cross-env VITE_APP_TARGET=admin vite --mode admin --host 0.0.0.0 --port 3000",
-    "dev:agent": "cross-env VITE_APP_TARGET=agent vite --mode agent --host 0.0.0.0 --port 3000",
+    "dev:admin": "cross-env VITE_APP_TARGET=admin vite --mode admin --host 0.0.0.0 --port 3001",
+    "dev:agent": "cross-env VITE_APP_TARGET=agent vite --mode agent --host 0.0.0.0 --port 3002",
     "build": "cross-env VITE_APP_TARGET=web vite build --mode web",
     "build:web": "cross-env VITE_APP_TARGET=web vite build --mode web",
     "build:admin": "cross-env VITE_APP_TARGET=admin vite build --mode admin",
