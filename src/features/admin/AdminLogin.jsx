@@ -38,6 +38,13 @@ export default function AdminLogin() {
     }
   };
 
+  const handleFillDevCredentials = () => {
+    const devEmail = import.meta.env.VITE_DEV_ADMIN_EMAIL || "admin@ctransit.ng";
+    const devPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || "Admin@12345";
+    setEmail(devEmail);
+    setPassword(devPass);
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
@@ -115,6 +122,26 @@ export default function AdminLogin() {
                 </>
               )}
             </PrimaryButton>
+
+            {import.meta.env.DEV && (
+              <div style={{ marginTop: "14px", textAlign: "center" }}>
+                <button
+                  type="button"
+                  onClick={handleFillDevCredentials}
+                  style={{
+                    background: "none",
+                    border: "1px dashed rgba(148, 163, 184, 0.5)",
+                    borderRadius: "6px",
+                    padding: "6px 12px",
+                    fontSize: "12px",
+                    color: "#64748b",
+                    cursor: "pointer",
+                  }}
+                >
+                  ⚡ Auto-fill Test Administrator
+                </button>
+              </div>
+            )}
           </form>
         </motion.section>
 

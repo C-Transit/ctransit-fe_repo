@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
-import agentApi from "../../api/agentApi";
+import { agentLogin } from "../../api/agentApi";
 import useAgentAuth from "../../hooks/useAgentAuth";
 import styles from "./AgentLogin.module.css";
 
@@ -24,20 +24,12 @@ export default function AgentLogin() {
     setLoading(true);
 
     try {
-      // ✅ Bug fix: was posting to /agents/login (wrong path).
-      // Real endpoint: POST /api/auth/agent/login
-      // agentApi baseURL = USER_API_URL = https://...vercel.app/api
-      // So the path here must be /auth/agent/login
-      const response = await agentApi.post("/auth/agent/login", {
-        email: email.trim().toLowerCase(),
-        password,
-      });
+      const data = await agentLogin(email, password);
+      const token = data.accessToken || data.token;
+      const agent = data.agent || data.user || data.data?.agent || data.data;
+      const refreshToken = data.refreshToken;
 
-      // ✅ Bug fix: was destructuring from response.data.data (undefined)
-      // Real response shape: { success, token, refreshToken, agent: {...} }
-      const { token, agent, refreshToken } = response.data;
-
-      if (!token || !agent) {
+      if (!token) {
         throw new Error("Invalid response from server");
       }
 
@@ -45,7 +37,7 @@ export default function AgentLogin() {
         localStorage.setItem("agentRefreshToken", refreshToken);
       }
 
-      login(token, agent);
+      login(token, agent || { email, firstname: "Field", lastname: "Agent" });
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Invalid email or password");
@@ -53,12 +45,19 @@ export default function AgentLogin() {
         setError("Agent account not found");
       } else {
         setError(
-          err.response?.data?.message || "Login failed. Please try again."
+          err.response?.data?.message || err.response?.data?.error || "Login failed. Please try again."
         );
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFillDevCredentials = () => {
+    const devEmail = import.meta.env.VITE_DEV_AGENT_EMAIL || "agent@ctransit.ng";
+    const devPass = import.meta.env.VITE_DEV_AGENT_PASSWORD || "Agent@12345";
+    setEmail(devEmail);
+    setPassword(devPass);
   };
 
   return (
@@ -135,6 +134,26 @@ export default function AgentLogin() {
                 </>
               )}
             </button>
+
+            {import.meta.env.DEV && (
+              <div style={{ marginTop: "12px", textAlign: "center" }}>
+                <button
+                  type="button"
+                  onClick={handleFillDevCredentials}
+                  style={{
+                    background: "none",
+                    border: "1px dashed #cbd5e1",
+                    borderRadius: "6px",
+                    padding: "6px 12px",
+                    fontSize: "12px",
+                    color: "#64748b",
+                    cursor: "pointer",
+                  }}
+                >
+                  ⚡ Auto-fill Test Agent Credentials
+                </button>
+              </div>
+            )}
           </form>
         </motion.section>
 

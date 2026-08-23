@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FaBroadcastTower,
   FaChartLine,
   FaHeadset,
   FaMoneyBillWave,
   FaSignOutAlt,
   FaUserCheck,
+  FaSyncAlt,
+  FaSpinner,
+  FaBell,
+  FaUserShield,
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Area,
-  AreaChart,
   Bar,
   Line,
   LineChart,
@@ -29,107 +30,24 @@ import Navbar from './components/Navbar';
 import StatCard from './components/StatCard';
 import PrimaryButton from './components/PrimaryButton';
 import Modal from './components/Modal';
-import { clearAdminSession, getAdminProfile } from '../../api/adminAuth';
-import { ADMIN_API_URL } from '../../api/api';
+import { getAdminProfile } from '../../api/adminAuth';
+import {
+  fetchAdminOverview,
+  fetchAdminIncome,
+  fetchAdminTerminals,
+  fetchAdminAgents,
+  fetchAdminAgentById,
+  createAdminAgent,
+  updateAdminAgentStatus,
+  fetchAdminDisputes,
+  fetchAdminDisputeById,
+  updateAdminDisputeStatus,
+  sendAdminStudentNotification,
+  syncAdminCardWhitelist,
+  logoutAdmin,
+} from '../../api/adminApi';
 
 import styles from './AdminDashboard.module.css';
-
-// Helper for authenticated Admin API calls
-const getAdminHeaders = () => {
-  const token = localStorage.getItem('admin_token') || localStorage.getItem('adminToken');
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-    : {
-        'Content-Type': 'application/json',
-      };
-};
-
-const statCards = [
-  {
-    id: 'revenue',
-    title: 'Total Revenue (This Month)',
-    value: '₦12,450,000',
-    trend: '+14.2% from last month',
-    icon: FaMoneyBillWave,
-  },
-  {
-    id: 'activeUsers',
-    title: 'Active Users',
-    value: '8,942',
-    trend: '+380 this week',
-    icon: FaUserCheck,
-  },
-  {
-    id: 'activeTerminals',
-    title: 'Active Terminals',
-    value: '450',
-    trend: '+25 this week',
-    icon: FaBroadcastTower,
-  },
-  {
-    id: 'paymentSuccess',
-    title: 'Payment Success Rate',
-    value: '98.4%',
-    trend: '+0.6% this week',
-    icon: FaChartLine,
-  },
-];
-
-const demandHeatData = [
-  { slot: '08:00', demand: 72 },
-  { slot: '09:00', demand: 55 },
-  { slot: '10:00', demand: 43 },
-  { slot: '11:00', demand: 86 },
-  { slot: '12:00', demand: 63 },
-  { slot: '13:00', demand: 40 },
-  { slot: '14:00', demand: 79 },
-  { slot: '15:00', demand: 61 },
-  { slot: '16:00', demand: 57 },
-  { slot: '17:00', demand: 75 },
-  { slot: '18:00', demand: 91 },
-  { slot: '19:00', demand: 68 },
-];
-
-const revenueTrendData = [
-  { hour: '08:00', revenue: 280000, commission: 56000 },
-  { hour: '09:00', revenue: 310000, commission: 62000 },
-  { hour: '10:00', revenue: 295000, commission: 59000 },
-  { hour: '11:00', revenue: 360000, commission: 72000 },
-  { hour: '12:00', revenue: 335000, commission: 67000 },
-  { hour: '13:00', revenue: 390000, commission: 78000 },
-  { hour: '14:00', revenue: 420000, commission: 84000 },
-  { hour: '15:00', revenue: 402000, commission: 80400 },
-];
-
-const recentActivityData = [
-  {
-    id: 1,
-    type: 'Terminal Online',
-    description: 'New terminal activated at Main Campus',
-    terminal: 'TRM-2026-145',
-    time: '2 mins ago',
-    icon: '🟢',
-  },
-  {
-    id: 2,
-    type: 'Dispute Resolved',
-    description: 'Payment dispute case #DIS-5421 resolved',
-    user: 'Amina Hassan',
-    time: '15 mins ago',
-    icon: '✓',
-  },
-  {
-    id: 3,
-    type: 'OTA Upgrade',
-    description: 'System firmware v2.3.1 ready for deployment',
-    version: 'v2.3.1',
-    time: '1 hour ago',
-    icon: '📦',
-  },
-];
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -150,354 +68,197 @@ function getHeatColor(demand, isDarkMode) {
   return '#60a5fa';
 }
 
-const OverviewSection = () => {
+// ─── 1. OVERVIEW CHARTS & STATS ────────────────────────────────────────────────
+function OverviewSection({ onSyncWhitelist, syncingWhitelist }) {
   return (
-    <section className={styles.overviewSection}>
-      <p>Overview section is displayed in the charts above.</p>
-    </section>
-  );
-};
-
-const UsersSection = () => {
-  const userOnboardingData = [
-    { month: 'January', users: 50 },
-    { month: 'February', users: 100 },
-    { month: 'March', users: 150 },
-    { month: 'April', users: 200 },
-    { month: 'May', users: 250 },
-    { month: 'June', users: 300 },
-  ];
-
-  return (
-    <section className={styles.usersSection}>
-      <h2>Users</h2>
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>Total Users / Active Users</h3>
-          <p>10,000 / 8,000</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Total Terminals Deployed / Active Terminals</h3>
-          <p>500 / 450</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Total Drivers / Active Drivers</h3>
-          <p>1,200 / 1,000</p>
-        </div>
+    <div style={{ marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '16px' }}>
+        <button
+          onClick={onSyncWhitelist}
+          disabled={syncingWhitelist}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: '#3b82f6',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: syncingWhitelist ? 'not-allowed' : 'pointer',
+            opacity: syncingWhitelist ? 0.7 : 1,
+          }}
+        >
+          {syncingWhitelist ? <FaSpinner className="animate-spin" /> : <FaSyncAlt />}
+          {syncingWhitelist ? 'Syncing Whitelist...' : 'Sync Card Whitelist (POS)'}
+        </button>
       </div>
-      <div className={styles.chartContainer}>
-        <h3>User Onboarding Trend</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={userOnboardingData}>
-            <defs>
-              <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="users" stroke="#8884d8" fillOpacity={1} fill="url(#colorUsers)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </section>
+    </div>
   );
-};
+}
 
-// ─── AGENTS SECTION ──────────────────────────────────────────────────────────
-const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, setShowForm }) => {
-  const [loading, setLoading] = useState(false);
+// ─── 2. AGENTS MANAGEMENT SECTION ──────────────────────────────────────────────
+function AgentsSection() {
+  const [agents, setAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('ACTIVE');
+  const [totalAgents, setTotalAgents] = useState(0);
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAgent, setSelectedAgent] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusAction, setStatusAction] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  // Mock agents data
-  const mockAgents = [
-    { 
-      id: 'AGT001', 
-      firstName: 'John', 
-      lastName: 'Doe',
-      email: 'john.doe@ctransit.ng',
-      phone: '08012345678', 
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString()
-    },
-    { 
-      id: 'AGT002', 
-      firstName: 'Jane', 
-      lastName: 'Smith',
-      email: 'jane.smith@ctransit.ng',
-      phone: '08098765432', 
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString()
-    },
-    { 
-      id: 'AGT003', 
-      firstName: 'Michael', 
-      lastName: 'Johnson',
-      email: 'michael.j@ctransit.ng',
-      phone: '08055555555', 
-      status: 'INACTIVE',
-      createdAt: new Date().toISOString()
-    },
-  ];
+  const [formData, setFormData] = useState({
+    firstname: '',
+    lastname: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
 
-  // Fetch agents with pagination and filters
-  const fetchAgents = async (pageNum = page, status = statusFilter) => {
+  const loadAgents = useCallback(async (pageNum = 1, status = statusFilter) => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(
-        `${ADMIN_API_URL}/agents?status=${status}&page=${pageNum}&limit=20`,
-        {
-          headers: getAdminHeaders(),
-        }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.data) {
-          onAddAgent(data.data.agents || []);
-          setTotalPages(data.data.totalPages || 1);
-        }
-      } else {
-        onAddAgent(mockAgents);
-        setTotalPages(1);
-      }
-    } catch (error) {
-      console.warn('API error, using mock data:', error);
-      onAddAgent(mockAgents);
-      setTotalPages(1);
+      const data = await fetchAdminAgents({
+        page: pageNum,
+        limit: 20,
+        status: status === 'ALL' ? undefined : status,
+      });
+
+      const list = data?.agents || data?.data?.agents || data?.data || (Array.isArray(data) ? data : []);
+      setAgents(list);
+      setPage(data?.page || pageNum);
+      setTotalPages(data?.totalPages || 1);
+      setTotalAgents(data?.total || list.length);
+    } catch (err) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load agents list.');
     } finally {
       setLoading(false);
     }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadAgents(page, statusFilter);
+  }, [loadAgents, page, statusFilter]);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 4000);
   };
 
-  // ─── Create New Agent ────────────────────────────────────────────────────
-  const handleCreateAgent = async () => {
-    // Validate required fields
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
+  const handleCreateAgentSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.firstname || !formData.lastname || !formData.email || !formData.password) {
       alert('Please fill in all required fields');
       return;
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    // Validate phone number (basic)
-    if (formData.phone.length < 10) {
-      alert('Please enter a valid phone number');
-      return;
-    }
-
-    // Validate password length
-    if (formData.password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
+    setCreating(true);
     try {
-      const response = await fetch(`${ADMIN_API_URL}/agents`, {
-        method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-        }),
-      });
-
-      if (response.ok) {
-        setSuccessMessage(`${formData.firstName} ${formData.lastName} created successfully!`);
-        setShowForm(false);
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          password: '',
-        });
-        fetchAgents(1, statusFilter);
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Failed to create agent');
-      }
-    } catch (error) {
-      // Fallback - add to mock list
-      const newAgent = {
-        id: `AGT${String(agents.length + 1).padStart(3, '0')}`,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString()
-      };
-      onAddAgent([...agents, newAgent]);
-      setSuccessMessage(`${formData.firstName} ${formData.lastName} created successfully!`);
-      setShowForm(false);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-      });
-      setTimeout(() => setSuccessMessage(''), 3000);
+      await createAdminAgent(formData);
+      showToast(`Agent ${formData.firstname} ${formData.lastname} created successfully!`);
+      setShowCreateModal(false);
+      setFormData({ firstname: '', lastname: '', email: '', phone: '', password: '' });
+      loadAgents(1, statusFilter);
+    } catch (err) {
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to create agent');
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   };
 
-  // ─── Update Agent Status ──────────────────────────────────────────────────
-  const handleStatusChange = async (agentId, newStatus, agentName) => {
-    setConfirmAction({ agentId, newStatus, agentName });
-    setShowConfirmModal(true);
+  const handleOpenStatusModal = (agent, newStatus) => {
+    setStatusAction({ agent, newStatus });
+    setShowStatusModal(true);
   };
 
-  const executeStatusChange = async () => {
-    if (!confirmAction) return;
-    
-    const { agentId, newStatus, agentName } = confirmAction;
-    setLoading(true);
-    setShowConfirmModal(false);
-
+  const handleConfirmStatusChange = async () => {
+    if (!statusAction) return;
+    const { agent, newStatus } = statusAction;
+    setUpdatingStatus(true);
     try {
-      const response = await fetch(`${ADMIN_API_URL}/agents/${agentId}/status`, {
-        method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (response.ok) {
-        setSuccessMessage(`${agentName} ${newStatus.toLowerCase()}d successfully!`);
-        fetchAgents(page, statusFilter);
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const updatedAgents = agents.map(agent => 
-          agent.id === agentId ? { ...agent, status: newStatus } : agent
-        );
-        onAddAgent(updatedAgents);
-        setSuccessMessage(`${agentName} ${newStatus.toLowerCase()}d successfully!`);
-        setTimeout(() => setSuccessMessage(''), 3000);
-      }
-    } catch (error) {
-      const updatedAgents = agents.map(agent => 
-        agent.id === agentId ? { ...agent, status: newStatus } : agent
-      );
-      onAddAgent(updatedAgents);
-      setSuccessMessage(`${agentName} ${newStatus.toLowerCase()}d successfully!`);
-      setTimeout(() => setSuccessMessage(''), 3000);
+      await updateAdminAgentStatus(agent.id || agent._id, newStatus);
+      showToast(`Agent status updated to ${newStatus}`);
+      setShowStatusModal(false);
+      setStatusAction(null);
+      loadAgents(page, statusFilter);
+    } catch (err) {
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update agent status');
     } finally {
-      setLoading(false);
-      setConfirmAction(null);
+      setUpdatingStatus(false);
     }
   };
 
-  // ─── View Agent Details ──────────────────────────────────────────────────
   const handleViewAgent = async (agentId) => {
+    setShowViewModal(true);
+    setLoadingDetails(true);
     try {
-      const response = await fetch(`${ADMIN_API_URL}/agents/${agentId}`, {
-        headers: getAdminHeaders(),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedAgent(data.data);
-        setShowViewModal(true);
-      } else {
-        const agent = agents.find(a => a.id === agentId);
-        if (agent) {
-          setSelectedAgent(agent);
-          setShowViewModal(true);
-        }
-      }
-    } catch (error) {
-      const agent = agents.find(a => a.id === agentId);
-      if (agent) {
-        setSelectedAgent(agent);
-        setShowViewModal(true);
-      }
+      const data = await fetchAdminAgentById(agentId);
+      setSelectedAgent(data?.agent || data?.data || data);
+    } catch (err) {
+      const local = agents.find((a) => (a.id || a._id) === agentId);
+      setSelectedAgent(local || null);
+    } finally {
+      setLoadingDetails(false);
     }
   };
 
-  useEffect(() => {
-    onAddAgent(mockAgents);
-    fetchAgents();
-  }, []);
-
-  // ─── Helper Functions ────────────────────────────────────────────────────
-  const getStatusDisplay = (status) => {
-    const statusMap = {
-      'ACTIVE': 'Active',
-      'INACTIVE': 'Inactive',
-      'SUSPENDED': 'Suspended'
-    };
-    return statusMap[status] || status || 'Active';
-  };
-
-  const getStatusClass = (status) => {
-    const statusMap = {
-      'ACTIVE': 'active',
-      'INACTIVE': 'inactive',
-      'SUSPENDED': 'suspended'
-    };
-    return statusMap[status] || 'active';
-  };
-
-  const getFullName = (agent) => {
-    if (agent.firstName && agent.lastName) {
-      return `${agent.firstName} ${agent.lastName}`;
-    }
-    return agent.name || agent.firstName || 'Unknown';
-  };
+  const filteredAgents = agents.filter((a) => {
+    const q = searchTerm.toLowerCase().trim();
+    const name = `${a.firstname || a.firstName || ''} ${a.lastname || a.lastName || ''}`.toLowerCase();
+    const email = (a.email || '').toLowerCase();
+    const phone = (a.phone || '').toLowerCase();
+    return name.includes(q) || email.includes(q) || phone.includes(q);
+  });
 
   return (
     <section className={styles.agentsSection}>
-      {/* ─── Success Toast ──────────────────────────────────────────────────── */}
-      {successMessage && (
+      {toastMessage && (
         <motion.div
           className={styles.successToast}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
         >
-          ✓ {successMessage}
+          ✓ {toastMessage}
         </motion.div>
       )}
 
       <div className={styles.sectionHeader}>
-        <h2>Agent Management</h2>
+        <div>
+          <h2>Authorized Field Agents</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0 0' }}>
+            Manage campus registration agents, POS station operators, and access credentials
+          </p>
+        </div>
+
         <div className={styles.filterContainer}>
-          <select 
-            value={statusFilter} 
+          <select
+            value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
-              fetchAgents(1, e.target.value);
+              setPage(1);
             }}
             className={styles.filterSelect}
           >
+            <option value="ALL">All Statuses</option>
             <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
             <option value="SUSPENDED">Suspended</option>
-            <option value="ALL">All</option>
+            <option value="DEACTIVATED">Deactivated</option>
           </select>
+
           <input
             type="text"
             placeholder="Search agents..."
@@ -505,117 +266,37 @@ const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, se
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
-          <button 
-            className={styles.refreshBtn}
-            onClick={() => fetchAgents(page, statusFilter)}
+
+          <button className={styles.refreshBtn} onClick={() => loadAgents(page, statusFilter)}>
+            <FaSyncAlt /> Refresh
+          </button>
+
+          <button
+            className={styles.submitBtn}
+            style={{ width: 'auto', padding: '0 16px', height: '40px', fontSize: '13px' }}
+            onClick={() => setShowCreateModal(true)}
           >
-            Refresh
+            + Register New Agent
           </button>
         </div>
       </div>
 
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>Total Agents</h3>
-          <p>{agents.length}</p>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '16px' }}>
+          {error}
         </div>
-        <div className={styles.statCard}>
-          <h3>Active Agents</h3>
-          <p>{agents.filter(a => a.status === 'ACTIVE').length}</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Inactive Agents</h3>
-          <p>{agents.filter(a => a.status === 'INACTIVE').length}</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Suspended Agents</h3>
-          <p>{agents.filter(a => a.status === 'SUSPENDED').length}</p>
-        </div>
-      </div>
+      )}
 
-      {/* ─── Register New Agent Form ──────────────────────────────────────── */}
-      <div className={styles.agentFormContainer}>
-        <button className={styles.toggleFormBtn} onClick={() => setShowForm(!showForm)}>
-          {showForm ? '✕ Hide Form' : '+ Register New Agent'}
-        </button>
-
-        {showForm && (
-          <form className={styles.agentForm} onSubmit={(e) => { e.preventDefault(); handleCreateAgent(); }}>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>First Name *</label>
-                <input
-                  type="text"
-                  placeholder="Enter first name"
-                  value={formData.firstName || ''}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Last Name *</label>
-                <input
-                  type="text"
-                  placeholder="Enter last name"
-                  value={formData.lastName || ''}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Email Address *</label>
-                <input
-                  type="email"
-                  placeholder="agent@email.com"
-                  value={formData.email || ''}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Phone Number *</label>
-                <input
-                  type="tel"
-                  placeholder="08012345678"
-                  value={formData.phone || ''}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Password *</label>
-                <input
-                  type="password"
-                  placeholder="Min 6 characters"
-                  value={formData.password || ''}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  minLength="6"
-                />
-                <small className={styles.helperText}>Minimum 6 characters</small>
-              </div>
-            </div>
-
-            <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Registering...' : 'Register Agent'}
-            </button>
-          </form>
-        )}
-      </div>
-
-      {/* ─── Agents List ───────────────────────────────────────────────────── */}
       <div className={styles.tableContainer}>
-        <h3>Agents List</h3>
         {loading ? (
-          <div className={styles.loadingState}>Loading agents...</div>
-        ) : agents.length === 0 ? (
-          <p className={styles.noAgents}>No agents found.</p>
+          <div className={styles.loadingState}>
+            <FaSpinner className="animate-spin" style={{ marginRight: '8px' }} /> Loading agents from server...
+          </div>
+        ) : filteredAgents.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+            <FaUserShield style={{ fontSize: '36px', color: '#cbd5e1', marginBottom: '12px' }} />
+            <p>No agents found matching your query or filter.</p>
+          </div>
         ) : (
           <>
             <div className={styles.agentsListWrapper}>
@@ -626,78 +307,92 @@ const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, se
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
+                    <th>Registered</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {agents.map((agent) => (
-                    <tr key={agent.id}>
-                      <td><strong>{getFullName(agent)}</strong></td>
-                      <td>{agent.email}</td>
-                      <td>{agent.phone}</td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${styles[getStatusClass(agent.status)]}`}>
-                          {getStatusDisplay(agent.status)}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={styles.actionButtons}>
-                          <button
-                            className={`${styles.actionBtn} ${styles.viewBtn}`}
-                            onClick={() => handleViewAgent(agent.id)}
-                            title="View details"
+                  {filteredAgents.map((agent) => {
+                    const agentId = agent.id || agent._id;
+                    const fullName = `${agent.firstname || agent.firstName || ''} ${agent.lastname || agent.lastName || ''}`.trim() || 'Agent';
+                    const status = (agent.status || 'ACTIVE').toUpperCase();
+
+                    return (
+                      <tr key={agentId}>
+                        <td><strong>{fullName}</strong></td>
+                        <td>{agent.email}</td>
+                        <td>{agent.phone || 'N/A'}</td>
+                        <td>
+                          <span
+                            className={`${styles.statusBadge}`}
+                            style={{
+                              background: status === 'ACTIVE' ? '#dcfce7' : status === 'SUSPENDED' ? '#fef3c7' : '#fee2e2',
+                              color: status === 'ACTIVE' ? '#166534' : status === 'SUSPENDED' ? '#92400e' : '#991b1b',
+                            }}
                           >
-                            View
-                          </button>
-                          {agent.status === 'ACTIVE' && (
+                            {status}
+                          </span>
+                        </td>
+                        <td>{agent.createdAt ? new Date(agent.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                          <div className={styles.actionButtons}>
                             <button
-                              className={`${styles.actionBtn} ${styles.suspendBtn}`}
-                              onClick={() => handleStatusChange(agent.id, 'SUSPENDED', getFullName(agent))}
-                              title="Suspend agent"
+                              className={`${styles.actionBtn} ${styles.viewBtn}`}
+                              onClick={() => handleViewAgent(agentId)}
+                              title="View details"
                             >
-                              Suspend
+                              View
                             </button>
-                          )}
-                          {agent.status === 'SUSPENDED' && (
-                            <button
-                              className={`${styles.actionBtn} ${styles.activateBtn}`}
-                              onClick={() => handleStatusChange(agent.id, 'ACTIVE', getFullName(agent))}
-                              title="Activate agent"
-                            >
-                              Activate
-                            </button>
-                          )}
-                          {agent.status !== 'INACTIVE' && (
-                            <button
-                              className={`${styles.actionBtn} ${styles.deactivateBtn}`}
-                              onClick={() => handleStatusChange(agent.id, 'INACTIVE', getFullName(agent))}
-                              title="Deactivate agent"
-                            >
-                              Deactivate
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {status !== 'ACTIVE' && (
+                              <button
+                                className={`${styles.actionBtn} ${styles.activateBtn}`}
+                                onClick={() => handleOpenStatusModal(agent, 'ACTIVE')}
+                                title="Activate agent"
+                              >
+                                Activate
+                              </button>
+                            )}
+                            {status === 'ACTIVE' && (
+                              <button
+                                className={`${styles.actionBtn} ${styles.suspendBtn}`}
+                                onClick={() => handleOpenStatusModal(agent, 'SUSPENDED')}
+                                title="Suspend agent"
+                              >
+                                Suspend
+                              </button>
+                            )}
+                            {status !== 'DEACTIVATED' && (
+                              <button
+                                className={`${styles.actionBtn} ${styles.deactivateBtn}`}
+                                onClick={() => handleOpenStatusModal(agent, 'DEACTIVATED')}
+                                title="Deactivate agent"
+                              >
+                                Deactivate
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             {totalPages > 1 && (
               <div className={styles.pagination}>
-                <button 
-                  onClick={() => fetchAgents(page - 1, statusFilter)}
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   className={styles.pageBtn}
                 >
                   Previous
                 </button>
                 <span className={styles.pageInfo}>
-                  Page {page} of {totalPages}
+                  Page {page} of {totalPages} ({totalAgents} agents)
                 </span>
-                <button 
-                  onClick={() => fetchAgents(page + 1, statusFilter)}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
                   className={styles.pageBtn}
                 >
@@ -709,34 +404,128 @@ const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, se
         )}
       </div>
 
-      {/* ─── View Agent Modal ─────────────────────────────────────────────── */}
-      {showViewModal && selectedAgent && (
-        <Modal open={showViewModal} title="Agent Details" onClose={() => { setShowViewModal(false); setSelectedAgent(null); }}>
-          <div className={styles.modalContent}>
-            <div className={styles.agentDetailRow}>
-              <span className={styles.detailLabel}>Full Name:</span>
-              <span><strong>{getFullName(selectedAgent)}</strong></span>
+      {/* ─── Create Agent Modal ───────────────────────────────────────────── */}
+      {showCreateModal && (
+        <Modal open={showCreateModal} title="Register New Field Agent" onClose={() => setShowCreateModal(false)}>
+          <form onSubmit={handleCreateAgentSubmit} className={styles.modalContent}>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>First Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Ibrahim"
+                  value={formData.firstname}
+                  onChange={(e) => setFormData({ ...formData, firstname: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Last Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Bello"
+                  value={formData.lastname}
+                  onChange={(e) => setFormData({ ...formData, lastname: e.target.value })}
+                  required
+                />
+              </div>
             </div>
-            <div className={styles.agentDetailRow}>
-              <span className={styles.detailLabel}>Email:</span>
-              <span>{selectedAgent.email}</span>
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Agent Email *</label>
+                <input
+                  type="email"
+                  placeholder="agent@ctransit.ng"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  placeholder="08012345678"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
+                />
+              </div>
             </div>
-            <div className={styles.agentDetailRow}>
-              <span className={styles.detailLabel}>Phone:</span>
-              <span>{selectedAgent.phone}</span>
+
+            <div className={styles.formGroup}>
+              <label>Initial Login Password *</label>
+              <input
+                type="password"
+                placeholder="Min 6 characters"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength="6"
+              />
             </div>
-            <div className={styles.agentDetailRow}>
-              <span className={styles.detailLabel}>Status:</span>
-              <span className={`${styles.statusBadge} ${styles[getStatusClass(selectedAgent.status)]}`}>
-                {getStatusDisplay(selectedAgent.status)}
-              </span>
-            </div>
-            <div className={styles.agentDetailRow}>
-              <span className={styles.detailLabel}>Created:</span>
-              <span>{selectedAgent.createdAt ? new Date(selectedAgent.createdAt).toLocaleString() : 'N/A'}</span>
-            </div>
+
             <div className={styles.modalActions}>
-              <PrimaryButton variant="ghost" onClick={() => { setShowViewModal(false); setSelectedAgent(null); }}>
+              <PrimaryButton variant="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </PrimaryButton>
+              <PrimaryButton type="submit" disabled={creating}>
+                {creating ? 'Registering Agent...' : 'Create Agent Account'}
+              </PrimaryButton>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ─── View Agent Details Modal ─────────────────────────────────────── */}
+      {showViewModal && (
+        <Modal open={showViewModal} title="Agent Profile & Details" onClose={() => setShowViewModal(false)}>
+          <div className={styles.modalContent}>
+            {loadingDetails ? (
+              <div style={{ textAlign: 'center', padding: '24px' }}>
+                <FaSpinner className="animate-spin" /> Loading agent details...
+              </div>
+            ) : selectedAgent ? (
+              <div>
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Agent ID:</span>
+                  <span><strong>{selectedAgent.id || selectedAgent._id}</strong></span>
+                </div>
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Full Name:</span>
+                  <span>{selectedAgent.firstname || selectedAgent.firstName} {selectedAgent.lastname || selectedAgent.lastName}</span>
+                </div>
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Email:</span>
+                  <span>{selectedAgent.email}</span>
+                </div>
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Phone:</span>
+                  <span>{selectedAgent.phone || 'N/A'}</span>
+                </div>
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Status:</span>
+                  <span style={{ fontWeight: 700, color: selectedAgent.status === 'ACTIVE' ? '#16a34a' : '#dc2626' }}>
+                    {selectedAgent.status || 'ACTIVE'}
+                  </span>
+                </div>
+                {selectedAgent.resolvedDisputeCount !== undefined && (
+                  <div className={styles.agentDetailRow}>
+                    <span className={styles.detailLabel}>Resolved Disputes:</span>
+                    <span>{selectedAgent.resolvedDisputeCount}</span>
+                  </div>
+                )}
+                <div className={styles.agentDetailRow}>
+                  <span className={styles.detailLabel}>Created At:</span>
+                  <span>{selectedAgent.createdAt ? new Date(selectedAgent.createdAt).toLocaleString() : 'N/A'}</span>
+                </div>
+              </div>
+            ) : (
+              <p>No agent information available.</p>
+            )}
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" onClick={() => setShowViewModal(false)}>
                 Close
               </PrimaryButton>
             </div>
@@ -744,47 +533,21 @@ const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, se
         </Modal>
       )}
 
-      {/* ─── Confirmation Modal ───────────────────────────────────────────── */}
-      {showConfirmModal && confirmAction && (
-        <Modal 
-          open={showConfirmModal} 
-          title="Confirm Action" 
-          onClose={() => { setShowConfirmModal(false); setConfirmAction(null); }}
-        >
+      {/* ─── Status Confirmation Modal ────────────────────────────────────── */}
+      {showStatusModal && statusAction && (
+        <Modal open={showStatusModal} title="Confirm Status Change" onClose={() => setShowStatusModal(false)}>
           <div className={styles.modalContent}>
-            <div style={{ textAlign: 'center', padding: '8px 0' }}>
-              <div style={{ fontSize: '48px', marginBottom: '12px' }}>
-                {confirmAction.newStatus === 'SUSPENDED' && '⛔'}
-                {confirmAction.newStatus === 'ACTIVE' && '✅'}
-                {confirmAction.newStatus === 'INACTIVE' && '⚠️'}
-              </div>
-              <p style={{ fontSize: '16px', margin: '0 0 4px 0', fontWeight: '600' }}>
-                Are you sure you want to <strong style={{ 
-                  color: confirmAction.newStatus === 'SUSPENDED' ? '#dc2626' : 
-                         confirmAction.newStatus === 'ACTIVE' ? '#16a34a' : '#d97706'
-                }}>
-                  {confirmAction.newStatus.toLowerCase()}
-                </strong> agent <strong>{confirmAction.agentName}</strong>?
-              </p>
-              <p style={{ color: '#6b7280', fontSize: '14px', margin: '8px 0 0 0' }}>
-                This action will change the agent's status to <strong>{confirmAction.newStatus.toLowerCase()}</strong>.
-              </p>
-            </div>
-            <div className={styles.modalActions} style={{ marginTop: '20px', justifyContent: 'center' }}>
-              <PrimaryButton 
-                variant="ghost" 
-                onClick={() => { setShowConfirmModal(false); setConfirmAction(null); }}
-              >
+            <p style={{ fontSize: '15px' }}>
+              Are you sure you want to change status of agent{' '}
+              <strong>{statusAction.agent.firstname} {statusAction.agent.lastname}</strong> to{' '}
+              <strong>{statusAction.newStatus}</strong>?
+            </p>
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" onClick={() => setShowStatusModal(false)}>
                 Cancel
               </PrimaryButton>
-              <PrimaryButton 
-                onClick={executeStatusChange}
-                style={{
-                  background: confirmAction.newStatus === 'SUSPENDED' ? '#dc2626' : 
-                             confirmAction.newStatus === 'ACTIVE' ? '#16a34a' : '#d97706'
-                }}
-              >
-                Confirm {confirmAction.newStatus.toLowerCase()}
+              <PrimaryButton onClick={handleConfirmStatusChange} disabled={updatingStatus}>
+                {updatingStatus ? 'Updating...' : `Confirm ${statusAction.newStatus}`}
               </PrimaryButton>
             </div>
           </div>
@@ -792,201 +555,611 @@ const AgentsSection = ({ agents, onAddAgent, formData, setFormData, showForm, se
       )}
     </section>
   );
-};
-const NotificationsSection = () => {
-  const notifications = [
-    {
-      id: 1,
-      type: 'Unresolved Disputes',
-      severity: 'high',
-      count: 12,
-      description: 'There are 12 pending disputes awaiting resolution',
-      action: 'Review & Resolve',
-      icon: '⚠️',
-    },
-    {
-      id: 2,
-      type: 'Monnify Issues',
-      severity: 'critical',
-      count: 5,
-      description: 'Payment gateway experiencing intermittent failures',
-      action: 'Check Status',
-      icon: '🔴',
-    },
-    {
-      id: 3,
-      type: 'Damaged Terminals',
-      severity: 'medium',
-      count: 8,
-      description: '8 terminals reported as damaged and need maintenance',
-      action: 'Schedule Repair',
-      icon: '🛠️',
-    },
-    {
-      id: 4,
-      type: 'Non-Active Users',
-      severity: 'low',
-      count: 245,
-      description: '245 users have been inactive for more than 30 days',
-      action: 'Send Reminder',
-      icon: '👤',
-    },
-    {
-      id: 5,
-      type: 'Monnify Deposits',
-      severity: 'medium',
-      count: 3,
-      description: '3 pending deposit verifications from Monnify',
-      action: 'Verify Deposits',
-      icon: '💳',
-    },
-    {
-      id: 6,
-      type: 'Agent Disputes',
-      severity: 'high',
-      count: 7,
-      description: '7 agents have filed complaints requiring review',
-      action: 'Investigate',
-      icon: '🔍',
-    },
-    {
-      id: 7,
-      type: 'Bulk User Disputes',
-      severity: 'high',
-      count: 18,
-      description: 'Bulk dispute filed by 18 users regarding charges',
-      action: 'Review Case',
-      icon: '📋',
-    },
-    {
-      id: 8,
-      type: 'Backend Crash Alert',
-      severity: 'critical',
-      count: 2,
-      description: 'Backend service crashed 2 times in the last 24 hours',
-      action: 'View Logs',
-      icon: '💥',
-    },
-  ];
+}
 
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'critical':
-        return styles.criticalNotif;
-      case 'high':
-        return styles.highNotif;
-      case 'medium':
-        return styles.mediumNotif;
-      case 'low':
-        return styles.lowNotif;
-      default:
-        return styles.lowNotif;
+// ─── 3. DISPUTES & SUPPORT MANAGEMENT SECTION ──────────────────────────────────
+function DisputesSection() {
+  const [disputes, setDisputes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [selectedDispute, setSelectedDispute] = useState(null);
+  const [showInspectModal, setShowInspectModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [resolutionText, setResolutionText] = useState('');
+  const [newStatus, setNewStatus] = useState('RESOLVED');
+  const [updating, setUpdating] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const loadDisputes = useCallback(async (pageNum = 1, status = statusFilter) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchAdminDisputes({
+        page: pageNum,
+        limit: 20,
+        status: status === 'ALL' ? undefined : status,
+      });
+
+      const list = data?.disputes || data?.data?.disputes || data?.data || (Array.isArray(data) ? data : []);
+      setDisputes(list);
+      setPage(data?.page || pageNum);
+      setTotalPages(data?.totalPages || 1);
+    } catch (err) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load disputes list.');
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadDisputes(page, statusFilter);
+  }, [loadDisputes, page, statusFilter]);
+
+  const handleInspect = async (disputeId) => {
+    setShowInspectModal(true);
+    try {
+      const data = await fetchAdminDisputeById(disputeId);
+      setSelectedDispute(data?.dispute || data?.data || data);
+    } catch {
+      const local = disputes.find((d) => (d.id || d._id) === disputeId);
+      setSelectedDispute(local || null);
+    }
+  };
+
+  const handleOpenStatusModal = (dispute) => {
+    setSelectedDispute(dispute);
+    setNewStatus(dispute.status === 'OPEN' ? 'UNDER_REVIEW' : 'RESOLVED');
+    setResolutionText(dispute.resolution || '');
+    setShowStatusModal(true);
+  };
+
+  const handleUpdateStatusSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedDispute) return;
+
+    setUpdating(true);
+    try {
+      await updateAdminDisputeStatus(selectedDispute.id || selectedDispute._id, {
+        status: newStatus,
+        resolution: resolutionText,
+      });
+
+      setToastMessage(`Dispute status updated to ${newStatus}`);
+      setShowStatusModal(false);
+      loadDisputes(page, statusFilter);
+      setTimeout(() => setToastMessage(''), 4000);
+    } catch (err) {
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update dispute status');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <section className={styles.supportSection}>
+      {toastMessage && (
+        <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
+          ✓ {toastMessage}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, margin: '0 0 4px' }}>Dispute Resolution Desk</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Review, investigate, and resolve transit fare complaints</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className={styles.filterSelect}
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="OPEN">Open Disputes</option>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+
+          <button className={styles.refreshBtn} onClick={() => loadDisputes(page, statusFilter)}>
+            <FaSyncAlt /> Refresh
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '16px' }}>
+          {error}
+        </div>
+      )}
+
+      <div className={styles.tableContainer}>
+        {loading ? (
+          <div className={styles.loadingState}>
+            <FaSpinner className="animate-spin" style={{ marginRight: '8px' }} /> Loading disputes...
+          </div>
+        ) : disputes.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+            <FaHeadset style={{ fontSize: '36px', color: '#cbd5e1', marginBottom: '12px' }} />
+            <p>No disputes found in this category.</p>
+          </div>
+        ) : (
+          <div className={styles.agentsListWrapper}>
+            <table className={styles.agentsTable}>
+              <thead>
+                <tr>
+                  <th>Case ID</th>
+                  <th>Student / Matric</th>
+                  <th>Description</th>
+                  <th>Transaction ID</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {disputes.map((disp) => {
+                  const id = disp.id || disp._id;
+                  const status = (disp.status || 'OPEN').toUpperCase();
+                  const student = disp.user?.matricNumber || disp.student_uid || disp.studentMatric || disp.user_email || 'Student';
+
+                  return (
+                    <tr key={id}>
+                      <td><strong>#{id.substring ? id.substring(0, 8) : id}</strong></td>
+                      <td>{student}</td>
+                      <td style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {disp.description || disp.reason || 'Transit fare discrepancy'}
+                      </td>
+                      <td>{disp.transaction_id || disp.transactionId || 'N/A'}</td>
+                      <td>
+                        <span
+                          className={styles.statusBadge}
+                          style={{
+                            background:
+                              status === 'RESOLVED' ? '#dcfce7' : status === 'OPEN' ? '#fee2e2' : status === 'UNDER_REVIEW' ? '#fef3c7' : '#f1f5f9',
+                            color:
+                              status === 'RESOLVED' ? '#166534' : status === 'OPEN' ? '#991b1b' : status === 'UNDER_REVIEW' ? '#92400e' : '#475569',
+                          }}
+                        >
+                          {status}
+                        </span>
+                      </td>
+                      <td>{disp.createdAt ? new Date(disp.createdAt).toLocaleDateString() : 'N/A'}</td>
+                      <td>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={`${styles.actionBtn} ${styles.viewBtn}`}
+                            onClick={() => handleInspect(id)}
+                          >
+                            Inspect
+                          </button>
+                          <button
+                            className={`${styles.actionBtn} ${styles.activateBtn}`}
+                            onClick={() => handleOpenStatusModal(disp)}
+                          >
+                            Update
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ─── Inspect Dispute Modal ────────────────────────────────────────── */}
+      {showInspectModal && selectedDispute && (
+        <Modal open={showInspectModal} title="Dispute Case Investigation" onClose={() => setShowInspectModal(false)}>
+          <div className={styles.modalContent}>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Dispute ID:</span>
+              <span><strong>{selectedDispute.id || selectedDispute._id}</strong></span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Student:</span>
+              <span>{selectedDispute.user?.name || selectedDispute.student_uid || selectedDispute.studentMatric || 'Campus Student'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Status:</span>
+              <span style={{ fontWeight: 700 }}>{selectedDispute.status || 'OPEN'}</span>
+            </div>
+            <div className={styles.agentDetailRow}>
+              <span className={styles.detailLabel}>Transaction ID:</span>
+              <span>{selectedDispute.transaction_id || selectedDispute.transactionId || 'None referenced'}</span>
+            </div>
+            <div style={{ marginTop: '12px' }}>
+              <strong style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: '#475569' }}>Dispute Details:</strong>
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }}>
+                {selectedDispute.description || selectedDispute.reason || 'No description provided.'}
+              </div>
+            </div>
+            {selectedDispute.resolution && (
+              <div style={{ marginTop: '12px' }}>
+                <strong style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: '#166534' }}>Official Resolution Note:</strong>
+                <div style={{ background: '#f0fdf4', padding: '12px', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '14px', color: '#166534' }}>
+                  {selectedDispute.resolution}
+                </div>
+              </div>
+            )}
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" onClick={() => setShowInspectModal(false)}>
+                Close
+              </PrimaryButton>
+              <PrimaryButton onClick={() => { setShowInspectModal(false); handleOpenStatusModal(selectedDispute); }}>
+                Update Status
+              </PrimaryButton>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* ─── Update Dispute Status Modal ──────────────────────────────────── */}
+      {showStatusModal && selectedDispute && (
+        <Modal open={showStatusModal} title="Update Dispute Status & Resolution" onClose={() => setShowStatusModal(false)}>
+          <form onSubmit={handleUpdateStatusSubmit} className={styles.modalContent}>
+            <div className={styles.formGroup}>
+              <label>Set Dispute Status *</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className={styles.filterSelect}
+                style={{ width: '100%' }}
+                required
+              >
+                <option value="OPEN">OPEN</option>
+                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                <option value="RESOLVED">RESOLVED</option>
+                <option value="REJECTED">REJECTED</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Resolution / Investigation Notes</label>
+              <textarea
+                rows="4"
+                placeholder="e.g. Card charge reversed to student wallet following POS log audit."
+                value={resolutionText}
+                onChange={(e) => setResolutionText(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+              />
+            </div>
+
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" type="button" onClick={() => setShowStatusModal(false)}>
+                Cancel
+              </PrimaryButton>
+              <PrimaryButton type="submit" disabled={updating}>
+                {updating ? 'Saving Status...' : 'Apply Status Update'}
+              </PrimaryButton>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </section>
+  );
+}
+
+// ─── 4. PAYMENTS, INCOME & TERMINALS SECTION ──────────────────────────────────
+function PaymentsAndIncomeSection() {
+  const [incomeData, setIncomeData] = useState(null);
+  const [terminals, setTerminals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    from: '',
+    to: '',
+    terminalId: '',
+    driverUid: '',
+  });
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [incRes, termRes] = await Promise.allSettled([
+        fetchAdminIncome(filters),
+        fetchAdminTerminals(),
+      ]);
+
+      if (incRes.status === 'fulfilled') {
+        setIncomeData(incRes.value?.stats || incRes.value?.data || incRes.value);
+      }
+      if (termRes.status === 'fulfilled') {
+        const list = termRes.value?.terminals || termRes.value?.data || (Array.isArray(termRes.value) ? termRes.value : []);
+        setTerminals(list);
+      }
+    } catch (err) {
+      console.warn('Income report error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const totalRevenue = incomeData?.total?.revenue || incomeData?.total || 0;
+  const totalTx = incomeData?.total?.count || 0;
+
+  return (
+    <section className={styles.paymentsSection}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2>Campus Revenue & Terminal Income</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Realtime revenue auditing by date, terminal ID, and driver UID</p>
+        </div>
+
+        <button className={styles.refreshBtn} onClick={loadData}>
+          <FaSyncAlt /> Refresh Report
+        </button>
+      </div>
+
+      {/* Filter Bar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', background: '#fff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>From Date</label>
+          <input
+            type="date"
+            value={filters.from}
+            onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>To Date</label>
+          <input
+            type="date"
+            value={filters.to}
+            onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Filter Terminal ID</label>
+          <input
+            type="text"
+            placeholder="e.g. TRM-001"
+            value={filters.terminalId}
+            onChange={(e) => setFilters({ ...filters, terminalId: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>Filter Driver UID</label>
+          <input
+            type="text"
+            placeholder="e.g. DRV-102"
+            value={filters.driverUid}
+            onChange={(e) => setFilters({ ...filters, driverUid: e.target.value })}
+            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+          />
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+          <FaSpinner className="animate-spin" style={{ fontSize: '24px', marginBottom: '8px', color: '#3b82f6' }} />
+          <p>Auditing revenue figures...</p>
+        </div>
+      ) : (
+        <>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <h3>Filtered Period Revenue</h3>
+              <p>{nairaFormatter.format(Number(totalRevenue) || 0)}</p>
+              <small>{totalTx} successful fare taps</small>
+            </div>
+            <div className={styles.statCard}>
+              <h3>Active POS Terminals</h3>
+              <p>{terminals.length}</p>
+              <small>Synced across campus</small>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px' }}>Registered POS Terminals</h3>
+            <div className={styles.agentsListWrapper}>
+              <table className={styles.agentsTable}>
+                <thead>
+                  <tr>
+                    <th>Terminal ID</th>
+                    <th>Status</th>
+                    <th>Active Driver UID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {terminals.map((term, idx) => (
+                    <tr key={term.terminal_id || term.id || idx}>
+                      <td><strong>{term.terminal_id || term.id || `POS-${idx + 1}`}</strong></td>
+                      <td>
+                        <span
+                          className={styles.statusBadge}
+                          style={{
+                            background: term.status === 'INACTIVE' ? '#fee2e2' : '#dcfce7',
+                            color: term.status === 'INACTIVE' ? '#991b1b' : '#166534',
+                          }}
+                        >
+                          {term.status || 'ACTIVE'}
+                        </span>
+                      </td>
+                      <td>{term.active_driver_uid || 'None (Stationary / Idle)'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+// ─── 5. NOTIFICATIONS & TARGETED STUDENT BROADCAST SECTION ─────────────────────
+function NotificationsSection({ onSyncWhitelist, syncingWhitelist }) {
+  const [studentMatric, setStudentMatric] = useState('');
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSendNotification = async (e) => {
+    e.preventDefault();
+    if (!studentMatric.trim() || !title.trim() || !body.trim()) {
+      alert('Please fill out all fields');
+      return;
+    }
+
+    setSending(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      await sendAdminStudentNotification({
+        studentMatric: studentMatric.trim(),
+        title: title.trim(),
+        body: body.trim(),
+      });
+      setSuccess(true);
+      setStudentMatric('');
+      setTitle('');
+      setBody('');
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to dispatch notification to student.');
+    } finally {
+      setSending(false);
     }
   };
 
   return (
     <section className={styles.notificationsSection}>
-      <h2>System Notifications</h2>
-      <p className={styles.notifDescription}>Critical alerts and issues requiring immediate attention</p>
-      <div className={styles.notificationsGrid}>
-        {notifications.map((notification) => (
-          <div key={notification.id} className={`${styles.notificationCard} ${getSeverityColor(notification.severity)}`}>
-            <div className={styles.notifHeader}>
-              <span className={styles.notifIcon}>{notification.icon}</span>
-              <div className={styles.notifTitleGroup}>
-                <h3>{notification.type}</h3>
-                <span className={styles.notifSeverity}>{notification.severity.toUpperCase()}</span>
-              </div>
-              <span className={styles.notifCount}>{notification.count}</span>
-            </div>
-            <p className={styles.notifDescription}>{notification.description}</p>
-            <button className={styles.notifActionBtn}>{notification.action} →</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2>Student Push Notifications & Broadcasts</h2>
+          <p className={styles.notifDescription}>Dispatch urgent transit announcements and card status updates</p>
+        </div>
+
+        <button
+          onClick={onSyncWhitelist}
+          disabled={syncingWhitelist}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: '#3b82f6',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: syncingWhitelist ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {syncingWhitelist ? <FaSpinner className="animate-spin" /> : <FaSyncAlt />}
+          {syncingWhitelist ? 'Syncing...' : 'Sync Card Whitelist'}
+        </button>
+      </div>
+
+      <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0', maxWidth: '700px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: '#1e293b' }}>
+          Send Notification to Student
+        </h3>
+
+        {success && (
+          <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
+            ✓ Notification dispatched successfully to student device!
           </div>
-        ))}
+        )}
+
+        {error && (
+          <div style={{ padding: '12px', background: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '16px' }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSendNotification} style={{ display: 'grid', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>
+              Student Matriculation Number *
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. 2021/1/12345CT"
+              value={studentMatric}
+              onChange={(e) => setStudentMatric(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>
+              Notification Title *
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Transit Card Bound & Active"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>
+              Message Body *
+            </label>
+            <textarea
+              rows="4"
+              placeholder="e.g. Your physical RFID Transit Card has been linked and validated for campus shuttles."
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={sending}
+            style={{
+              padding: '12px 24px',
+              background: '#2563eb',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: sending ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            {sending && <FaSpinner className="animate-spin" />}
+            {sending ? 'Sending...' : 'Send Push Notification'}
+          </button>
+        </form>
       </div>
     </section>
   );
-};
+}
 
-const PaymentsSection = () => {
-  const [monnifyQuery, setMonnifyQuery] = useState('');
-
-  return (
-    <section className={styles.paymentsSection}>
-      <h2>Payments & Monnify</h2>
-      
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>Total Funds in Account</h3>
-          <p>₦5,000,000</p>
-          <small>Monnify Wallet</small>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Account Details</h3>
-          <p>Monnify Business</p>
-          <small>Account ID: MNF-2026-001</small>
-        </div>
-      </div>
-
-      <div className={styles.monnifyStatsContainer}>
-        <h3>Monnify Pool Stats</h3>
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <h3>Total Revenue</h3>
-            <p>₦1,000,000</p>
-            <small>This Month</small>
-          </div>
-          <div className={styles.statCard}>
-            <h3>Total Transactions</h3>
-            <p>1,245</p>
-            <small>Successful Transfers</small>
-          </div>
-          <div className={styles.statCard}>
-            <h3>Success Rate</h3>
-            <p>98.7%</p>
-            <small>Payment Success</small>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.queryContainer}>
-        <h3>Monnify Query</h3>
-        <div className={styles.queryBox}>
-          <input
-            type="text"
-            placeholder="Search transaction ID, account number, or reference..."
-            value={monnifyQuery}
-            onChange={(e) => setMonnifyQuery(e.target.value)}
-            className={styles.queryInput}
-          />
-          <button className={styles.queryBtn}>Search Transaction</button>
-        </div>
-        <div className={styles.queryResults}>
-          <p className={styles.queryPlaceholder}>Enter a query to view transaction details</p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const SupportSection = () => {
-  return (
-    <section className={styles.supportSection}>
-      <h2>Support</h2>
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>Reports</h3>
-          <p>View and manage system reports.</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Role Permissions</h3>
-          <p>Manage user roles and permissions.</p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
+// ─── MAIN ADMIN DASHBOARD COMPONENT ──────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const adminProfile = useMemo(() => getAdminProfile(), []);
@@ -1003,47 +1176,36 @@ export default function AdminDashboard() {
   const [disputesList, setDisputesList] = useState([]);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
-  const [showOtaUploadModal, setShowOtaUploadModal] = useState(false);
-  
-  // Agents state - simplified
-  const [agents, setAgents] = useState([]);
-  const [showAgentForm, setShowAgentForm] = useState(false);
-  const [agentFormData, setAgentFormData] = useState({
-    name: '',
-    phone: '',
-    accountNumber: '',
-    dob: '',
-  });
+  const [syncingWhitelist, setSyncingWhitelist] = useState(false);
+  const [syncToast, setSyncToast] = useState('');
 
-  // ─── Fetch Real Overview, Income & Disputes Data ──────────────────────────
   const fetchDashboardMetrics = async () => {
     setLoadingOverview(true);
     setOverviewError(null);
     try {
-      const headers = getAdminHeaders();
       const [overviewRes, incomeRes, disputesRes] = await Promise.allSettled([
-        fetch(`${ADMIN_API_URL}/overview`, { headers }),
-        fetch(`${ADMIN_API_URL}/income`, { headers }),
-        fetch(`${ADMIN_API_URL}/disputes?status=OPEN`, { headers }),
+        fetchAdminOverview(),
+        fetchAdminIncome(),
+        fetchAdminDisputes({ page: 1, limit: 10, status: 'OPEN' }),
       ]);
 
-      if (overviewRes.status === 'fulfilled' && overviewRes.value.ok) {
-        const data = await overviewRes.value.json();
-        setOverview(data.overview || data.data || data);
+      if (overviewRes.status === 'fulfilled') {
+        const data = overviewRes.value;
+        setOverview(data?.overview || data?.data || data);
       }
 
-      if (incomeRes.status === 'fulfilled' && incomeRes.value.ok) {
-        const data = await incomeRes.value.json();
-        setIncomeOverview(data.data || data.income || data);
+      if (incomeRes.status === 'fulfilled') {
+        const data = incomeRes.value;
+        setIncomeOverview(data?.stats || data?.data || data);
       }
 
-      if (disputesRes.status === 'fulfilled' && disputesRes.value.ok) {
-        const data = await disputesRes.value.json();
-        setDisputesList(data.disputes || data.data || []);
+      if (disputesRes.status === 'fulfilled') {
+        const data = disputesRes.value;
+        setDisputesList(data?.disputes || data?.data || []);
       }
     } catch (err) {
       console.error('Failed to load admin metrics:', err);
-      setOverviewError('Failed to load operational metrics. Please check network or re-authenticate.');
+      setOverviewError('Failed to load live metrics. Please verify backend connection.');
     } finally {
       setLoadingOverview(false);
     }
@@ -1053,28 +1215,26 @@ export default function AdminDashboard() {
     fetchDashboardMetrics();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('admin_dark_mode', darkMode ? 'true' : 'false');
-  }, [darkMode]);
-
-  const handleLogout = () => {
-    clearAdminSession();
-    navigate('/admin/login', { replace: true });
-  };
-
-  const handleToggleDarkMode = () => {
-    setDarkMode((previousValue) => !previousValue);
-  };
-
-  const handleAddAgent = (newAgents) => {
-    if (Array.isArray(newAgents)) {
-      setAgents(newAgents);
+  const handleSyncWhitelist = async () => {
+    setSyncingWhitelist(true);
+    try {
+      const res = await syncAdminCardWhitelist();
+      setSyncToast(res?.message || 'Card whitelist synced across all campus POS terminals successfully!');
+      setTimeout(() => setSyncToast(''), 4000);
+    } catch (err) {
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to sync whitelist');
+    } finally {
+      setSyncingWhitelist(false);
     }
   };
 
-  // ─── Dynamically Built Stat Cards ─────────────────────────────────────────
+  const handleLogout = async () => {
+    await logoutAdmin();
+    navigate('/admin/login', { replace: true });
+  };
+
   const dynamicStatCards = useMemo(() => {
-    const monthlyIncome = overview?.income?.thisMonth ?? incomeOverview?.thisMonth ?? 0;
+    const monthlyIncome = overview?.income?.thisMonth ?? incomeOverview?.thisMonth ?? incomeOverview?.total?.revenue ?? 0;
     const todayIncome = overview?.income?.today ?? incomeOverview?.today ?? 0;
     const studentsCount = overview?.counts?.students ?? 0;
     const activeAgentsCount = overview?.counts?.activeAgents ?? 0;
@@ -1091,29 +1251,28 @@ export default function AdminDashboard() {
       },
       {
         id: 'activeUsers',
-        title: 'Registered Students',
+        title: 'Enrolled Students',
         value: studentsCount.toLocaleString('en-NG'),
-        trend: 'Enrolled on C-Transit',
+        trend: 'Active transit accounts',
         icon: FaUserCheck,
       },
       {
         id: 'activeAgents',
         title: 'Active Agents',
         value: activeAgentsCount.toLocaleString('en-NG'),
-        trend: 'Operational POS agents',
-        icon: FaBroadcastTower,
+        trend: 'Operational field agents',
+        icon: FaUserShield,
       },
       {
         id: 'disputes',
         title: 'Drivers & Open Disputes',
         value: `${driversCount} Drivers / ${openDisputesCount} Disputes`,
-        trend: `${openDisputesCount} disputes pending resolution`,
+        trend: `${openDisputesCount} disputes open`,
         icon: FaChartLine,
       },
     ];
   }, [overview, incomeOverview, disputesList]);
 
-  // ─── Dynamic Top Terminals Chart Data ─────────────────────────────────────
   const dynamicTerminalData = useMemo(() => {
     if (overview?.topTerminals && Array.isArray(overview.topTerminals) && overview.topTerminals.length > 0) {
       return overview.topTerminals.map((t, idx) => ({
@@ -1121,10 +1280,15 @@ export default function AdminDashboard() {
         demand: Math.min(100, Math.max(20, Math.round(Number(t.revenue || 0) / 1000))),
       }));
     }
-    return demandHeatData;
+    return [
+      { slot: 'TRM-01', demand: 75 },
+      { slot: 'TRM-02', demand: 88 },
+      { slot: 'TRM-03', demand: 62 },
+      { slot: 'TRM-04', demand: 91 },
+      { slot: 'TRM-05', demand: 45 },
+    ];
   }, [overview]);
 
-  // ─── Dynamic Revenue / Income Chart Data ───────────────────────────────────
   const dynamicRevenueData = useMemo(() => {
     if (incomeOverview?.hourly && Array.isArray(incomeOverview.hourly) && incomeOverview.hourly.length > 0) {
       return incomeOverview.hourly;
@@ -1137,62 +1301,14 @@ export default function AdminDashboard() {
         { hour: 'All Time', revenue: Number(overview.income.allTime || 0), commission: Number(overview.income.allTime || 0) * 0.1 },
       ];
     }
-    return revenueTrendData;
+    return [
+      { hour: '08:00', revenue: 280000, commission: 56000 },
+      { hour: '10:00', revenue: 360000, commission: 72000 },
+      { hour: '12:00', revenue: 335000, commission: 67000 },
+      { hour: '14:00', revenue: 420000, commission: 84000 },
+      { hour: '16:00', revenue: 402000, commission: 80400 },
+    ];
   }, [incomeOverview, overview]);
-
-  // ─── Dynamic Recent Activity Data (Real Disputes + Top Drivers) ───────────
-  const dynamicRecentActivity = useMemo(() => {
-    const activities = [];
-
-    if (disputesList && Array.isArray(disputesList) && disputesList.length > 0) {
-      disputesList.slice(0, 4).forEach((d, idx) => {
-        activities.push({
-          id: `disp-${d.id || idx}`,
-          type: `Dispute (${d.status || 'OPEN'})`,
-          description: d.reason || d.description || `Dispute on transaction ${d.transaction_id || d.id}`,
-          terminal: d.terminal_id || 'Campus Bus',
-          user: d.student_name || d.user_email || 'Student',
-          time: d.createdAt ? new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
-          icon: '⚠️',
-        });
-      });
-    }
-
-    if (overview?.topDrivers && Array.isArray(overview.topDrivers) && overview.topDrivers.length > 0) {
-      overview.topDrivers.slice(0, 2).forEach((dr, idx) => {
-        activities.push({
-          id: `drv-${idx}`,
-          type: 'Top Driver',
-          description: `Driver ${dr.driver_uid} generated ${nairaFormatter.format(dr.revenue || 0)}`,
-          terminal: 'Campus Route',
-          time: 'Today',
-          icon: '🚌',
-        });
-      });
-    }
-
-    return activities.length > 0 ? activities : recentActivityData;
-  }, [disputesList, overview]);
-
-  const chartColors = darkMode
-    ? {
-        grid: 'rgba(148, 163, 184, 0.24)',
-        tick: '#cbd5e1',
-        tooltipBg: '#17213d',
-        tooltipBorder: '#334155',
-        tooltipText: '#e2e8f0',
-        revenueStroke: '#38bdf8',
-        revenueFillStart: '#38bdf8',
-      }
-    : {
-        grid: 'rgba(148, 163, 184, 0.25)',
-        tick: '#64748b',
-        tooltipBg: '#ffffff',
-        tooltipBorder: '#dbe7ff',
-        tooltipText: '#0f172a',
-        revenueStroke: '#2563eb',
-        revenueFillStart: '#2563eb',
-      };
 
   return (
     <div className={`${styles.wrapper} ${darkMode ? styles.dark : ''}`.trim()}>
@@ -1213,9 +1329,9 @@ export default function AdminDashboard() {
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           darkMode={darkMode}
-          onToggleDarkMode={handleToggleDarkMode}
-          notificationCount={disputesList.length || 5}
-          adminName={adminProfile?.name || 'Admin'}
+          onToggleDarkMode={() => setDarkMode((d) => !d)}
+          notificationCount={disputesList.length || 0}
+          adminName={adminProfile?.name || 'Administrator'}
           onToggleProfileMenu={() => setShowProfileMenu((prev) => !prev)}
           onToggleMobileSidebar={() => setMobileSidebarOpen(true)}
         />
@@ -1239,15 +1355,13 @@ export default function AdminDashboard() {
 
         <section className={styles.welcomeSection}>
           <div>
-            <h1>Welcome back, {adminProfile?.name || 'Operations Admin'}</h1>
-            <p>
-              You are viewing the operational command center for C-Transit with live real-time metrics.
-            </p>
+            <h1>C-Transit Command Center</h1>
+            <p>Live operational oversight, fare validation audit, and agent management</p>
           </div>
           {activeNav === 'overview' && (
             <div className={styles.actionGroup}>
               <PrimaryButton onClick={() => setShowBroadcastModal(true)}>
-                <FaBroadcastTower /> Broadcast Notice
+                <FaBell /> Send Notification
               </PrimaryButton>
               <PrimaryButton variant="ghost" onClick={fetchDashboardMetrics} disabled={loadingOverview}>
                 {loadingOverview ? 'Refreshing...' : 'Refresh Metrics'}
@@ -1256,16 +1370,26 @@ export default function AdminDashboard() {
           )}
         </section>
 
+        {syncToast && (
+          <div style={{ margin: '16px 0', padding: '12px 16px', background: '#dcfce7', color: '#166534', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+            ✓ {syncToast}
+          </div>
+        )}
+
         {overviewError && (
-          <div style={{ margin: '0 24px 16px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{overviewError}</span>
             <button onClick={fetchDashboardMetrics} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>Retry</button>
           </div>
         )}
 
+        {/* TAB ROUTING */}
         {activeNav === 'overview' && (
           <>
-            <OverviewSection />
+            <OverviewSection
+              onSyncWhitelist={handleSyncWhitelist}
+              syncingWhitelist={syncingWhitelist}
+            />
 
             <section className={styles.cardGrid}>
               {dynamicStatCards.map((card) => (
@@ -1276,24 +1400,18 @@ export default function AdminDashboard() {
             <section className={styles.chartGrid}>
               <article className={styles.panel}>
                 <div className={styles.panelHead}>
-                  <h2>Realtime Demand & Terminal Activity</h2>
-                  <span>Live terminal utilization</span>
+                  <h2>Live Terminal Activity</h2>
+                  <span>POS terminal demand & validation</span>
                 </div>
                 <div className={styles.chartCanvas}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={dynamicTerminalData} barCategoryGap={8}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                      <XAxis dataKey="slot" tick={{ fill: chartColors.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: chartColors.tick, fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="slot" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
                       <Tooltip
-                        formatter={(value) => [`${value}`, 'Activity Index']}
-                        contentStyle={{
-                          borderRadius: '12px',
-                          border: `1px solid ${chartColors.tooltipBorder}`,
-                          background: chartColors.tooltipBg,
-                          color: chartColors.tooltipText,
-                        }}
-                        labelStyle={{ color: chartColors.tooltipText }}
+                        formatter={(value) => [`${value}`, 'Utilization Index']}
+                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
                       />
                       <Bar dataKey="demand" radius={[7, 7, 0, 0]}>
                         {dynamicTerminalData.map((entry, idx) => (
@@ -1307,16 +1425,16 @@ export default function AdminDashboard() {
 
               <article className={styles.panel}>
                 <div className={styles.panelHead}>
-                  <h2>Revenue / Commission Stats</h2>
-                  <span>NGN revenue distribution</span>
+                  <h2>Campus Revenue & Commission</h2>
+                  <span>Live NGN collections</span>
                 </div>
                 <div className={styles.chartCanvas}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={dynamicRevenueData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                      <XAxis dataKey="hour" tick={{ fill: chartColors.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="hour" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
                       <YAxis
-                        tick={{ fill: chartColors.tick, fontSize: 11 }}
+                        tick={{ fill: '#64748b', fontSize: 11 }}
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={(value) => `${Math.round(value / 1000)}k`}
@@ -1324,13 +1442,7 @@ export default function AdminDashboard() {
                       />
                       <Tooltip
                         formatter={(value) => [nairaFormatter.format(value), '']}
-                        contentStyle={{
-                          borderRadius: '12px',
-                          border: `1px solid ${chartColors.tooltipBorder}`,
-                          background: chartColors.tooltipBg,
-                          color: chartColors.tooltipText,
-                        }}
-                        labelStyle={{ color: chartColors.tooltipText }}
+                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
                       />
                       <Line
                         type="monotone"
@@ -1338,7 +1450,6 @@ export default function AdminDashboard() {
                         stroke="#2563eb"
                         strokeWidth={2.5}
                         dot={{ fill: '#2563eb', r: 4 }}
-                        activeDot={{ r: 6 }}
                         name="Revenue"
                       />
                       <Line
@@ -1347,7 +1458,6 @@ export default function AdminDashboard() {
                         stroke="#f59e0b"
                         strokeWidth={2.5}
                         dot={{ fill: '#f59e0b', r: 4 }}
-                        activeDot={{ r: 6 }}
                         name="Commission"
                       />
                     </LineChart>
@@ -1355,93 +1465,62 @@ export default function AdminDashboard() {
                 </div>
               </article>
             </section>
-
-            <section className={styles.tableSection}>
-              <div className={styles.tableHead}>
-                <h2>Recent Operational Activity & Disputes</h2>
-                <p>Live open disputes, terminal events, and system updates.</p>
-              </div>
-              <div className={styles.recentActivityGrid}>
-                {dynamicRecentActivity.map((activity) => (
-                  <div key={activity.id} className={styles.activityCard}>
-                    <div className={styles.activityIcon}>{activity.icon}</div>
-                    <div className={styles.activityContent}>
-                      <h4>{activity.type}</h4>
-                      <p>{activity.description}</p>
-                      {activity.terminal && <small>Location / Terminal: {activity.terminal}</small>}
-                      {activity.user && <small>User: {activity.user}</small>}
-                    </div>
-                    <span className={styles.activityTime}>{activity.time}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
           </>
         )}
 
-        {activeNav === 'users' && <UsersSection />}{activeNav === 'agents' && (
-          <AgentsSection
-            agents={agents}
-            onAddAgent={handleAddAgent}
-            formData={agentFormData}
-            setFormData={setAgentFormData}
-            showForm={showAgentForm}
-            setShowForm={setShowAgentForm}
+        {activeNav === 'agents' && <AgentsSection />}
+        {activeNav === 'support' && <DisputesSection />}
+        {activeNav === 'payments' && <PaymentsAndIncomeSection />}
+        {activeNav === 'reports' && <PaymentsAndIncomeSection />}
+        {activeNav === 'notifications' && (
+          <NotificationsSection
+            onSyncWhitelist={handleSyncWhitelist}
+            syncingWhitelist={syncingWhitelist}
           />
         )}
-        {activeNav === 'notifications' && <NotificationsSection />}
-        {activeNav === 'support' && <SupportSection />}
-        {activeNav === 'payments' && <PaymentsSection />}
-        {activeNav === 'reports' && (
-          <section className={styles.reportsSection}>
-            <h2>Reports</h2>
-            <p>System reports and analytics coming soon.</p>
+        {activeNav === 'users' && (
+          <section className={styles.usersSection}>
+            <h2>Enrolled Students & Commuters</h2>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <h3>Total Students</h3>
+                <p>{overview?.counts?.students || 156}</p>
+                <small>Campus registered</small>
+              </div>
+              <div className={styles.statCard}>
+                <h3>Active Cards Bound</h3>
+                <p>{overview?.wallets?.active || 142}</p>
+                <small>RFID contactless cards</small>
+              </div>
+            </div>
           </section>
         )}
         {activeNav === 'roles' && (
           <section className={styles.rolesSection}>
-            <h2>Roles & Permissions</h2>
-            <p>User roles and permissions management coming soon.</p>
+            <h2>Administrative Roles & System Boundaries</h2>
+            <p>Access control boundaries enforced via authenticated Bearer JWT tokens.</p>
           </section>
         )}
       </div>
 
-      <Modal open={showBroadcastModal} title="Broadcast Notification" onClose={() => setShowBroadcastModal(false)}>
-        <div className={styles.modalContent}>
-          <label htmlFor="broadcastMessage">Message</label>
-          <textarea
-            id="broadcastMessage"
-            rows="4"
-            placeholder="Service update: Route A buses delayed by 10 minutes due to campus gate checks."
-          />
-          <div className={styles.modalActions}>
-            <PrimaryButton variant="ghost" onClick={() => setShowBroadcastModal(false)}>
-              Cancel
-            </PrimaryButton>
-            <PrimaryButton>
-              Send Broadcast
-            </PrimaryButton>
+      {/* Broadcast / Send Notification Quick Modal */}
+      {showBroadcastModal && (
+        <Modal open={showBroadcastModal} title="Send Student Notification" onClose={() => setShowBroadcastModal(false)}>
+          <div className={styles.modalContent}>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
+              Switch to the <strong>Notifications</strong> tab in the sidebar to send targeted student push notices and sync terminal whitelists.
+            </p>
+            <div className={styles.modalActions}>
+              <PrimaryButton variant="ghost" onClick={() => setShowBroadcastModal(false)}>
+                Close
+              </PrimaryButton>
+              <PrimaryButton onClick={() => { setShowBroadcastModal(false); setActiveNav('notifications'); }}>
+                Go to Notifications
+              </PrimaryButton>
+            </div>
           </div>
-          <small>
-            Backend integration: connect this modal to POST /api/admin/notifications/broadcast with audience filters.
-          </small>
-        </div>
-      </Modal>
-
-      <Modal open={showOtaUploadModal} title="Upload OTA Firmware Upgrade" onClose={() => setShowOtaUploadModal(false)}>
-        <div className={styles.modalContent}>
-          <label htmlFor="firmwareFile">Select Firmware File (.bin)</label>
-          <input type="file" id="firmwareFile" accept=".bin,.zip" />
-          <div className={styles.modalActions}>
-            <PrimaryButton variant="ghost" onClick={() => setShowOtaUploadModal(false)}>
-              Cancel
-            </PrimaryButton>
-            <PrimaryButton onClick={() => setShowOtaUploadModal(false)}>
-              Upload & Deploy
-            </PrimaryButton>
-          </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </div>
   );
 }
