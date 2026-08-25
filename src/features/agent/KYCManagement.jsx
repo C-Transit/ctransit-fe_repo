@@ -11,6 +11,7 @@ import {
   FaClipboardList,
   FaEnvelope,
   FaSyncAlt,
+  FaCheckCircle,
 } from 'react-icons/fa';
 import { fetchPendingKYC, approveAgentKYC, rejectAgentKYC, fetchAgentUsers } from '../../api/agentApi';
 import { generateStudentDisplayId } from '../../utils/identifierUtils';
@@ -29,6 +30,21 @@ export default function KYCManagement() {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [imageLoadingState, setImageLoadingState] = useState({});
   const [imageErrorState, setImageErrorState] = useState({});
+  
+  // Rejection modal state
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectSubmitting, setRejectSubmitting] = useState(false);
+  const [rejectError, setRejectError] = useState(null);
+
+  // In-app Toast notifications
+  const [toast, setToast] = useState(null);
+
+  const showInAppToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchKYCRequests = useCallback(async () => {
     try {
@@ -44,43 +60,66 @@ export default function KYCManagement() {
       let rawQueue = [];
       if (kycRes.status === 'fulfilled') {
         const d = kycRes.value;
-        rawQueue = d?.queue || d?.data || (Array.isArray(d) ? d : []);
+        rawQueue = d?.queue || d?.data || d?.kyc || d?.requests || d?.pending || d?.items || (Array.isArray(d) ? d : []);
       } else {
         throw kycRes.reason;
       }
 
-      let studentsMap = new Map();
+      const studentsMap = new Map();
       if (usersRes.status === 'fulfilled') {
         const uData = usersRes.value;
         const studentsList = uData?.students || uData?.data || uData?.users || (Array.isArray(uData) ? uData : []);
         studentsList.forEach((s) => {
           if (s.id) studentsMap.set(String(s.id), s);
           if (s._id) studentsMap.set(String(s._id), s);
+          if (s.userId) studentsMap.set(String(s.userId), s);
+          if (s.user_id) studentsMap.set(String(s.user_id), s);
+          if (s.studentId) studentsMap.set(String(s.studentId), s);
+          if (s.student_id) studentsMap.set(String(s.student_id), s);
           if (s.matricNumber) studentsMap.set(String(s.matricNumber).toLowerCase(), s);
+          if (s.matric_number) studentsMap.set(String(s.matric_number).toLowerCase(), s);
+          if (s.email) studentsMap.set(String(s.email).toLowerCase(), s);
         });
       }
 
-      // Merge and resolve user details for each pending KYC record
+      // Merge and resolve complete user details for each KYC record
       const enrichedQueue = rawQueue.map((item) => {
-        const userId = item.userId || item.studentId || item.student_id || item.user?._id || item.user?.id || item.id;
-        const matchedStudent = studentsMap.get(String(userId)) ||
-          (item.matricNumber ? studentsMap.get(String(item.matricNumber).toLowerCase()) : null);
+        const userId = item.userId || item.user_id || item.studentId || item.student_id || item.studentUid || item.student_uid || item.user?.id || item.user?._id || item.student?.id || item.student?._id || item.id || item._id;
+        
+        // Multi-strategy student lookup
+        const matchedStudent =
+          (userId ? studentsMap.get(String(userId)) : null) ||
+          (item.matricNumber ? studentsMap.get(String(item.matricNumber).toLowerCase()) : null) ||
+          (item.user?.matricNumber ? studentsMap.get(String(item.user.matricNumber).toLowerCase()) : null) ||
+          (item.matric_number ? studentsMap.get(String(item.matric_number).toLowerCase()) : null) ||
+          (item.email ? studentsMap.get(String(item.email).toLowerCase()) : null) ||
+          (item.user?.email ? studentsMap.get(String(item.user.email).toLowerCase()) : null) ||
+          null;
 
-        const firstname = item.firstname || item.user?.firstname || matchedStudent?.firstname || '';
-        const lastname = item.lastname || item.user?.lastname || matchedStudent?.lastname || '';
-        const resolvedName = (firstname || lastname)
-          ? `${firstname} ${lastname}`.trim()
-          : (item.user?.name || item.name || matchedStudent?.name || 'Student');
+        // Resolve Name
+        const rawFirstname = item.user?.firstname || item.user?.firstName || item.student?.firstname || item.student?.firstName || item.firstname || item.firstName || matchedStudent?.firstname || matchedStudent?.firstName || '';
+        const rawLastname = item.user?.lastname || item.user?.lastName || item.student?.lastname || item.student?.lastName || item.lastname || item.lastName || matchedStudent?.lastname || matchedStudent?.lastName || '';
+        const combinedName = (rawFirstname || rawLastname) ? `${rawFirstname} ${rawLastname}`.trim() : '';
+        const resolvedName = combinedName || item.user?.name || item.student?.name || item.name || item.studentName || item.student_name || item.userName || item.user_name || matchedStudent?.name || 'N/A';
 
-        const resolvedEmail = item.email || item.user?.email || matchedStudent?.email || 'N/A';
-        const matricNumber = item.matricNumber || item.user?.matricNumber || matchedStudent?.matricNumber || '';
-        const submittedAt = item.submittedAt || item.createdAt || item.updatedAt || matchedStudent?.kyc?.submittedAt;
-        const idCardImageUrl = item.idCardImageUrl || item.id_card_image_url || item.documentUrl || item.imageUrl || item.idCardUrl || '';
+        // Resolve Email
+        const resolvedEmail = item.user?.email || item.student?.email || item.email || item.userEmail || item.user_email || item.studentEmail || item.student_email || matchedStudent?.email || 'N/A';
+
+        // Resolve Matriculation Number
+        const matricNumber = item.user?.matricNumber || item.user?.matric_number || item.student?.matricNumber || item.student?.matric_number || item.matricNumber || item.matric_number || item.matric || item.studentMatric || item.student_matric || matchedStudent?.matricNumber || matchedStudent?.matric_number || '';
+
+        // Resolve Submission Timestamp
+        const submittedAt = item.submittedAt || item.submitted_at || item.createdAt || item.created_at || item.updatedAt || item.updated_at || item.date || item.timestamp || matchedStudent?.kyc?.submittedAt || matchedStudent?.kyc?.submitted_at || matchedStudent?.kyc?.createdAt || matchedStudent?.createdAt || matchedStudent?.created_at || null;
+
+        // Resolve Cloudinary Document Image URL
+        const idCardImageUrl = item.idCardImageUrl || item.id_card_image_url || item.idCardUrl || item.id_card_url || item.documentUrl || item.document_url || item.imageUrl || item.image_url || item.url || item.cloudinaryUrl || item.cloudinary_url || item.idCard || item.id_card || item.document || item.image || item.user?.idCardImageUrl || item.user?.id_card_image_url || item.user?.documentUrl || item.student?.idCardImageUrl || item.student?.documentUrl || item.user?.kyc?.idCardImageUrl || matchedStudent?.kyc?.idCardImageUrl || matchedStudent?.kyc?.id_card_image_url || matchedStudent?.idCardImageUrl || '';
+
+        const resolvedStatus = (item.status || item.kycStatus || item.kyc_status || 'pending').toLowerCase();
 
         return {
           ...item,
           userId: String(userId),
-          rawRecordId: item.id || item._id,
+          rawRecordId: item.id || item._id || String(userId),
           user: {
             name: resolvedName,
             email: resolvedEmail,
@@ -89,7 +128,7 @@ export default function KYCManagement() {
           matricNumber,
           submittedAt,
           idCardImageUrl,
-          status: item.status || 'pending',
+          status: resolvedStatus,
         };
       });
 
@@ -126,41 +165,62 @@ export default function KYCManagement() {
         }));
       }
 
+      showInAppToast('success', `KYC for ${requestRecord?.user?.name || 'student'} approved successfully!`);
+
       // Re-fetch backend queue to synchronize pending counts
       await fetchKYCRequests();
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to approve KYC. Please try again.');
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to approve KYC. Please try again.';
+      showInAppToast('error', errorMsg);
     } finally {
       setProcessingId(null);
     }
   };
 
-  const handleReject = async (userId, requestRecord) => {
-    if (!userId) return;
-    const reason = window.prompt('Please provide a reason for rejection:');
-    if (reason === null) return;
-    setProcessingId(userId);
+  const handleOpenRejectModal = (requestRecord) => {
+    setRejectTarget(requestRecord);
+    setRejectReason('');
+    setRejectError(null);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (!reason) {
+      setRejectError('Please provide a reason for rejecting this KYC submission.');
+      return;
+    }
+
+    const userId = rejectTarget.userId || rejectTarget.user_id || rejectTarget.studentId || rejectTarget.id;
+    setRejectSubmitting(true);
+    setRejectError(null);
+
     try {
-      await rejectAgentKYC(userId, reason || 'Incomplete or unreadable document');
+      await rejectAgentKYC(userId, reason);
 
       // Update session history
-      if (requestRecord) {
-        setSessionHistory((prev) => ({
-          ...prev,
-          rejected: [
-            { ...requestRecord, status: 'rejected', rejectionReason: reason, processedAt: new Date().toISOString() },
-            ...prev.rejected.filter((r) => (r.userId || r.id) !== userId),
-          ],
-          approved: prev.approved.filter((r) => (r.userId || r.id) !== userId),
-        }));
-      }
+      setSessionHistory((prev) => ({
+        ...prev,
+        rejected: [
+          { ...rejectTarget, status: 'rejected', rejectionReason: reason, processedAt: new Date().toISOString() },
+          ...prev.rejected.filter((r) => (r.userId || r.id) !== userId),
+        ],
+        approved: prev.approved.filter((r) => (r.userId || r.id) !== userId),
+      }));
+
+      showInAppToast('success', `KYC for ${rejectTarget.user?.name || 'student'} rejected.`);
+      setRejectModalOpen(false);
+      setRejectTarget(null);
+      setRejectReason('');
 
       // Re-fetch backend queue to synchronize pending counts
       await fetchKYCRequests();
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to reject KYC. Please try again.');
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to reject KYC. Please try again.';
+      setRejectError(errorMsg);
     } finally {
-      setProcessingId(null);
+      setRejectSubmitting(false);
     }
   };
 
@@ -210,6 +270,14 @@ export default function KYCManagement() {
 
   return (
     <div className={styles.kycManagement}>
+      {/* In-app Toast Banner */}
+      {toast && (
+        <div className={`${styles.toastBanner} ${toast.type === 'success' ? styles.toastSuccess : styles.toastError}`}>
+          {toast.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       <div className={styles.header}>
         <div>
           <h1 className={styles.pageTitle}>KYC Verification Management</h1>
@@ -334,14 +402,14 @@ export default function KYCManagement() {
                       <div className={styles.detailItem}>
                         <FaCalendar />
                         <span>
-                          Submitted: {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                          Submitted: {request.submittedAt ? new Date(request.submittedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
                         </span>
                       </div>
                     </div>
 
                     <div className={styles.kycActions}>
                       <button className={styles.viewBtn} onClick={() => handleViewDetails(request)}>
-                        <FaEye /> View Document
+                        <FaEye /> View Details
                       </button>
                       {(!request.status || request.status === 'pending') && (
                         <>
@@ -354,10 +422,10 @@ export default function KYCManagement() {
                           </button>
                           <button
                             className={styles.rejectBtn}
-                            onClick={() => handleReject(request.userId, request)}
+                            onClick={() => handleOpenRejectModal(request)}
                             disabled={processingId === request.userId}
                           >
-                            <FaTimes /> {processingId === request.userId ? 'Processing...' : 'Reject'}
+                            <FaTimes /> Reject
                           </button>
                         </>
                       )}
@@ -456,11 +524,11 @@ export default function KYCManagement() {
                   </div>
                 )}
                 <div className={styles.modalDetailRow}>
-                  <span className={styles.modalLabel}>Date Submitted:</span>
-                  <span>{selectedRequest.submittedAt ? new Date(selectedRequest.submittedAt).toLocaleString('en-NG') : 'Recent'}</span>
+                  <span className={styles.modalLabel}>Submitted Time:</span>
+                  <span>{selectedRequest.submittedAt ? new Date(selectedRequest.submittedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</span>
                 </div>
                 <div className={styles.modalDetailRow}>
-                  <span className={styles.modalLabel}>Verification Status:</span>
+                  <span className={styles.modalLabel}>Status:</span>
                   <span className={`${styles.statusBadge} ${styles[selectedRequest.status || 'pending']}`}>
                     {(selectedRequest.status || 'pending').toUpperCase()}
                   </span>
@@ -510,8 +578,8 @@ export default function KYCManagement() {
                   <button
                     className={styles.rejectBtn}
                     onClick={() => {
-                      handleReject(selectedRequest.userId, selectedRequest);
                       setShowDetailsModal(false);
+                      handleOpenRejectModal(selectedRequest);
                     }}
                     disabled={processingId === selectedRequest.userId}
                   >
@@ -519,6 +587,86 @@ export default function KYCManagement() {
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KYC Rejection In-App Modal (Issue 4) */}
+      {rejectModalOpen && rejectTarget && (
+        <div className={styles.rejectModalOverlay} onClick={() => !rejectSubmitting && setRejectModalOpen(false)}>
+          <div className={styles.rejectModalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.rejectModalHeader}>
+              <h3>
+                <FaExclamationTriangle style={{ color: '#dc2626' }} /> Reject KYC Submission
+              </h3>
+              <button
+                className={styles.modalClose}
+                onClick={() => !rejectSubmitting && setRejectModalOpen(false)}
+                disabled={rejectSubmitting}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className={styles.rejectModalBody}>
+              <div className={styles.rejectStudentInfo}>
+                <div>
+                  <strong style={{ display: 'block', color: '#0f172a' }}>{rejectTarget.user?.name}</strong>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>{rejectTarget.user?.email}</span>
+                </div>
+                <code className={styles.studentCode}>
+                  {generateStudentDisplayId(rejectTarget.userId, rejectTarget.matricNumber)}
+                </code>
+              </div>
+
+              <label className={styles.rejectLabel} htmlFor="rejectReasonInput">
+                Reason for Rejection <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <textarea
+                id="rejectReasonInput"
+                className={styles.rejectTextarea}
+                placeholder="Enter rejection reason (e.g. ID card image is blurred, expiration date unreadable, or invalid student credentials)..."
+                value={rejectReason}
+                onChange={(e) => {
+                  setRejectReason(e.target.value);
+                  setRejectError(null);
+                }}
+                disabled={rejectSubmitting}
+                autoFocus
+              />
+
+              {rejectError && (
+                <div className={styles.rejectErrorBanner}>
+                  <FaExclamationTriangle />
+                  <span>{rejectError}</span>
+                </div>
+              )}
+            </div>
+            <div className={styles.rejectModalFooter}>
+              <button
+                type="button"
+                className={styles.rejectCancelBtn}
+                onClick={() => setRejectModalOpen(false)}
+                disabled={rejectSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.rejectConfirmBtn}
+                onClick={handleConfirmReject}
+                disabled={rejectSubmitting || !rejectReason.trim()}
+              >
+                {rejectSubmitting ? (
+                  <>
+                    <FaSpinner className="animate-spin" /> Rejecting...
+                  </>
+                ) : (
+                  <>
+                    <FaTimes /> Reject KYC
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

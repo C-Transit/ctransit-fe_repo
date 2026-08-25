@@ -11,6 +11,7 @@ import {
   FaBell,
   FaUserShield,
   FaCheckCircle,
+  FaExclamationTriangle,
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -120,6 +121,8 @@ function AgentsSection() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusAction, setStatusAction] = useState(null);
+  const [statusModalError, setStatusModalError] = useState('');
+  const [formError, setFormError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [creating, setCreating] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -165,8 +168,9 @@ function AgentsSection() {
 
   const handleCreateAgentSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.firstname || !formData.lastname || !formData.email || !formData.password) {
-      alert('Please fill in all required fields');
+      setFormError('Please fill in all required fields');
       return;
     }
 
@@ -178,7 +182,7 @@ function AgentsSection() {
       setFormData({ firstname: '', lastname: '', email: '', phone: '', password: '' });
       loadAgents(1, statusFilter);
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to create agent');
+      setFormError(err.response?.data?.message || err.response?.data?.error || 'Failed to create agent');
     } finally {
       setCreating(false);
     }
@@ -186,6 +190,7 @@ function AgentsSection() {
 
   const handleOpenStatusModal = (agent, newStatus) => {
     setStatusAction({ agent, newStatus });
+    setStatusModalError('');
     setShowStatusModal(true);
   };
 
@@ -193,14 +198,16 @@ function AgentsSection() {
     if (!statusAction) return;
     const { agent, newStatus } = statusAction;
     setUpdatingStatus(true);
+    setStatusModalError('');
     try {
-      await updateAdminAgentStatus(agent.id || agent._id, newStatus);
-      showToast(`Agent status updated to ${newStatus}`);
+      const res = await updateAdminAgentStatus(agent.id || agent._id, newStatus);
+      showToast(res?.message || `Agent status updated to ${newStatus}`);
       setShowStatusModal(false);
       setStatusAction(null);
       loadAgents(page, statusFilter);
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update agent status');
+      const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to update agent status';
+      setStatusModalError(msg);
     } finally {
       setUpdatingStatus(false);
     }
@@ -472,6 +479,12 @@ function AgentsSection() {
               />
             </div>
 
+            {formError && (
+              <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaExclamationTriangle /> {formError}
+              </div>
+            )}
+
             <div className={styles.modalActions}>
               <PrimaryButton variant="ghost" type="button" onClick={() => setShowCreateModal(false)}>
                 Cancel
@@ -548,6 +561,11 @@ function AgentsSection() {
               <strong>{statusAction.agent.firstname} {statusAction.agent.lastname}</strong> to{' '}
               <strong>{statusAction.newStatus}</strong>?
             </p>
+            {statusModalError && (
+              <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', margin: '14px 0', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaExclamationTriangle /> {statusModalError}
+              </div>
+            )}
             <div className={styles.modalActions}>
               <PrimaryButton variant="ghost" onClick={() => setShowStatusModal(false)}>
                 Cancel
@@ -577,6 +595,7 @@ function DisputesSection() {
   const [resolutionText, setResolutionText] = useState('');
   const [newStatus, setNewStatus] = useState('RESOLVED');
   const [updating, setUpdating] = useState(false);
+  const [statusModalError, setStatusModalError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
 
   const loadDisputes = useCallback(async (pageNum = 1, status = statusFilter) => {
@@ -619,6 +638,7 @@ function DisputesSection() {
     setSelectedDispute(dispute);
     setNewStatus(dispute.status === 'OPEN' ? 'UNDER_REVIEW' : 'RESOLVED');
     setResolutionText(dispute.resolution || '');
+    setStatusModalError('');
     setShowStatusModal(true);
   };
 
@@ -627,6 +647,7 @@ function DisputesSection() {
     if (!selectedDispute) return;
 
     setUpdating(true);
+    setStatusModalError('');
     try {
       await updateAdminDisputeStatus(selectedDispute.id || selectedDispute._id, {
         status: newStatus,
@@ -638,7 +659,7 @@ function DisputesSection() {
       loadDisputes(page, statusFilter);
       setTimeout(() => setToastMessage(''), 4000);
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update dispute status');
+      setStatusModalError(err.response?.data?.message || err.response?.data?.error || 'Failed to update dispute status');
     } finally {
       setUpdating(false);
     }
@@ -840,6 +861,12 @@ function DisputesSection() {
               />
             </div>
 
+            {statusModalError && (
+              <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaExclamationTriangle /> {statusModalError}
+              </div>
+            )}
+
             <div className={styles.modalActions}>
               <PrimaryButton variant="ghost" type="button" onClick={() => setShowStatusModal(false)}>
                 Cancel
@@ -1022,7 +1049,7 @@ function NotificationsSection({ onSyncWhitelist, syncingWhitelist }) {
   const handleSendNotification = async (e) => {
     e.preventDefault();
     if (!studentMatric.trim() || !title.trim() || !body.trim()) {
-      alert('Please fill out all fields');
+      setError('Please fill out all fields');
       return;
     }
 
@@ -1228,7 +1255,8 @@ export default function AdminDashboard() {
       setSyncToast(res?.message || 'Card whitelist synced across all campus POS terminals successfully!');
       setTimeout(() => setSyncToast(''), 4000);
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to sync whitelist');
+      setSyncToast(err.response?.data?.message || err.response?.data?.error || 'Failed to sync whitelist across terminals.');
+      setTimeout(() => setSyncToast(''), 5000);
     } finally {
       setSyncingWhitelist(false);
     }
