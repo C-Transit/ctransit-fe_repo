@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaUsers, FaClock, FaArrowRight, FaCar, FaBroadcastTower } from 'react-icons/fa';
+import { FaUsers, FaClock, FaArrowRight, FaCar, FaBroadcastTower, FaClipboardList, FaIdCard } from 'react-icons/fa';
 import { fetchPendingKYC, fetchDrivers, fetchTerminals, fetchAgentUsers } from '../../api/agentApi';
 import styles from './AgentOverview.module.css';
 
@@ -32,7 +32,7 @@ export default function AgentOverview({ agentData }) {
           const usersTotal = usersRes.status === 'fulfilled' ? (usersRes.value?.total || (Array.isArray(usersRes.value?.students) ? usersRes.value.students.length : 0)) : 0;
 
           setStats({
-            totalUsers: usersTotal || 156,
+            totalUsers: Number(usersTotal || 0),
             pendingKYC: Array.isArray(kycQueue) ? kycQueue.length : 0,
             totalDrivers: Array.isArray(driversList) ? driversList.length : 0,
             totalTerminals: Array.isArray(terminalsList) ? terminalsList.length : 0,
@@ -87,10 +87,10 @@ export default function AgentOverview({ agentData }) {
   ];
 
   const quickActions = [
-    { label: 'Review Pending KYC', tab: 'kyc', icon: '📋' },
-    { label: 'Register New Driver', tab: 'drivers', icon: '🚗' },
-    { label: 'Link Student Transit Card', tab: 'link-card', icon: '💳' },
-    { label: 'Student Directory & Records', tab: 'users', icon: '👥' },
+    { label: 'Review Pending KYC', tab: 'kyc', icon: FaClipboardList },
+    { label: 'Register New Driver', tab: 'drivers', icon: FaCar },
+    { label: 'Link Student Transit Card', tab: 'link-card', icon: FaIdCard },
+    { label: 'Student Directory & Records', tab: 'users', icon: FaUsers },
   ];
 
   return (
@@ -133,20 +133,23 @@ export default function AgentOverview({ agentData }) {
       <div className={styles.quickActionsSection}>
         <h2 className={styles.sectionTitle}>Quick Actions</h2>
         <div className={styles.actionGrid}>
-          {quickActions.map((action) => (
-            <button
-              key={action.tab}
-              className={styles.actionCard}
-              onClick={() => {
-                const tabChangeEvent = new CustomEvent('tabChange', { detail: { tab: action.tab } });
-                document.dispatchEvent(tabChangeEvent);
-              }}
-            >
-              <span className={styles.actionIcon}>{action.icon}</span>
-              <span className={styles.actionLabel}>{action.label}</span>
-              <FaArrowRight className={styles.actionArrow} />
-            </button>
-          ))}
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.tab}
+                className={styles.actionCard}
+                onClick={() => {
+                  const tabChangeEvent = new CustomEvent('tabChange', { detail: { tab: action.tab } });
+                  document.dispatchEvent(tabChangeEvent);
+                }}
+              >
+                <span className={styles.actionIcon}><Icon /></span>
+                <span className={styles.actionLabel}>{action.label}</span>
+                <FaArrowRight className={styles.actionArrow} />
+              </button>
+            );
+          })}
         </div>
       </div>
 

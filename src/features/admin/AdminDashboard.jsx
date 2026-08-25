@@ -1276,17 +1276,11 @@ export default function AdminDashboard() {
   const dynamicTerminalData = useMemo(() => {
     if (overview?.topTerminals && Array.isArray(overview.topTerminals) && overview.topTerminals.length > 0) {
       return overview.topTerminals.map((t, idx) => ({
-        slot: t.terminal_id || `TRM-${idx + 1}`,
-        demand: Math.min(100, Math.max(20, Math.round(Number(t.revenue || 0) / 1000))),
+        slot: t.terminal_id || t.id || `TRM-${idx + 1}`,
+        demand: Math.min(100, Math.max(0, Math.round(Number(t.revenue || t.taps || 0) / 1000))),
       }));
     }
-    return [
-      { slot: 'TRM-01', demand: 75 },
-      { slot: 'TRM-02', demand: 88 },
-      { slot: 'TRM-03', demand: 62 },
-      { slot: 'TRM-04', demand: 91 },
-      { slot: 'TRM-05', demand: 45 },
-    ];
+    return [];
   }, [overview]);
 
   const dynamicRevenueData = useMemo(() => {
@@ -1301,13 +1295,7 @@ export default function AdminDashboard() {
         { hour: 'All Time', revenue: Number(overview.income.allTime || 0), commission: Number(overview.income.allTime || 0) * 0.1 },
       ];
     }
-    return [
-      { hour: '08:00', revenue: 280000, commission: 56000 },
-      { hour: '10:00', revenue: 360000, commission: 72000 },
-      { hour: '12:00', revenue: 335000, commission: 67000 },
-      { hour: '14:00', revenue: 420000, commission: 84000 },
-      { hour: '16:00', revenue: 402000, commission: 80400 },
-    ];
+    return [];
   }, [incomeOverview, overview]);
 
   return (
@@ -1404,22 +1392,28 @@ export default function AdminDashboard() {
                   <span>POS terminal demand & validation</span>
                 </div>
                 <div className={styles.chartCanvas}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={dynamicTerminalData} barCategoryGap={8}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="slot" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
-                      <Tooltip
-                        formatter={(value) => [`${value}`, 'Utilization Index']}
-                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
-                      />
-                      <Bar dataKey="demand" radius={[7, 7, 0, 0]}>
-                        {dynamicTerminalData.map((entry, idx) => (
-                          <Cell key={`cell-${idx}`} fill={getHeatColor(entry.demand, darkMode)} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {dynamicTerminalData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dynamicTerminalData} barCategoryGap={8}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="slot" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
+                        <Tooltip
+                          formatter={(value) => [`${value}`, 'Utilization Index']}
+                          contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
+                        />
+                        <Bar dataKey="demand" radius={[7, 7, 0, 0]}>
+                          {dynamicTerminalData.map((entry, idx) => (
+                            <Cell key={`cell-${idx}`} fill={getHeatColor(entry.demand, darkMode)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '13px' }}>
+                      No terminal activity data available for this period.
+                    </div>
+                  )}
                 </div>
               </article>
 
@@ -1429,39 +1423,45 @@ export default function AdminDashboard() {
                   <span>Live NGN collections</span>
                 </div>
                 <div className={styles.chartCanvas}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={dynamicRevenueData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="hour" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis
-                        tick={{ fill: '#64748b', fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(value) => `${Math.round(value / 1000)}k`}
-                        width={36}
-                      />
-                      <Tooltip
-                        formatter={(value) => [nairaFormatter.format(value), '']}
-                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="revenue"
-                        stroke="#2563eb"
-                        strokeWidth={2.5}
-                        dot={{ fill: '#2563eb', r: 4 }}
-                        name="Revenue"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="commission"
-                        stroke="#f59e0b"
-                        strokeWidth={2.5}
-                        dot={{ fill: '#f59e0b', r: 4 }}
-                        name="Commission"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {dynamicRevenueData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={dynamicRevenueData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="hour" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis
+                          tick={{ fill: '#64748b', fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(value) => `${Math.round(value / 1000)}k`}
+                          width={36}
+                        />
+                        <Tooltip
+                          formatter={(value) => [nairaFormatter.format(value), '']}
+                          contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff' }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#2563eb"
+                          strokeWidth={2.5}
+                          dot={{ fill: '#2563eb', r: 4 }}
+                          name="Revenue"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="commission"
+                          stroke="#f59e0b"
+                          strokeWidth={2.5}
+                          dot={{ fill: '#f59e0b', r: 4 }}
+                          name="Commission"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '13px' }}>
+                      No revenue trend data available for this period.
+                    </div>
+                  )}
                 </div>
               </article>
             </section>
@@ -1484,12 +1484,12 @@ export default function AdminDashboard() {
             <div className={styles.statsGrid}>
               <div className={styles.statCard}>
                 <h3>Total Students</h3>
-                <p>{overview?.counts?.students || 156}</p>
+                <p>{Number(overview?.counts?.students || 0).toLocaleString('en-NG')}</p>
                 <small>Campus registered</small>
               </div>
               <div className={styles.statCard}>
                 <h3>Active Cards Bound</h3>
-                <p>{overview?.wallets?.active || 142}</p>
+                <p>{Number(overview?.wallets?.active || 0).toLocaleString('en-NG')}</p>
                 <small>RFID contactless cards</small>
               </div>
             </div>

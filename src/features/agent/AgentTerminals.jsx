@@ -73,47 +73,53 @@ export default function AgentTerminals() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-          {terminals.map((term, idx) => (
-            <div
-              key={term.id || term.terminalId || idx}
-              style={{
-                background: '#fff',
-                padding: '20px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '16px' }}>
-                  {term.terminalId || `POS-${idx + 1}`}
-                </span>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: term.status === 'INACTIVE' ? '#dc2626' : '#16a34a',
-                    background: term.status === 'INACTIVE' ? '#fee2e2' : '#dcfce7',
-                    padding: '3px 8px',
-                    borderRadius: '12px',
-                  }}
-                >
-                  {term.status === 'INACTIVE' ? <FaExclamationCircle /> : <FaCheckCircle />}
-                  {term.status || 'ONLINE'}
-                </span>
+          {terminals.map((term, idx) => {
+            const terminalId = term.terminal_id || term.terminalId || term.id || `POS-${idx + 1}`;
+            const driver = term.active_driver_uid || term.driverUid || term.driverName || 'Unassigned (Idle)';
+            const status = (term.status || 'ONLINE').toUpperCase();
+
+            return (
+              <div
+                key={term.id || term.terminal_id || term.terminalId || idx}
+                style={{
+                  background: '#fff',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '16px' }}>
+                    {terminalId}
+                  </span>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: status === 'INACTIVE' ? '#dc2626' : '#16a34a',
+                      background: status === 'INACTIVE' ? '#fee2e2' : '#dcfce7',
+                      padding: '3px 8px',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    {status === 'INACTIVE' ? <FaExclamationCircle /> : <FaCheckCircle />}
+                    {status}
+                  </span>
+                </div>
+                <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div>Active Driver UID: <strong>{driver}</strong></div>
+                  <div>Bus Line: <strong>{term.route || term.vehiclePlate || 'Campus Loop Transit'}</strong></div>
+                  <div>Last Sync: <strong>{term.lastSync ? new Date(term.lastSync).toLocaleTimeString() : 'Synced'}</strong></div>
+                </div>
               </div>
-              <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div>Bus / Route: <strong>{term.route || term.vehiclePlate || 'Main Campus Line'}</strong></div>
-                <div>Driver: <strong>{term.driverName || term.driverUid || 'Unassigned'}</strong></div>
-                <div>Last Sync: <strong>{term.lastSync ? new Date(term.lastSync).toLocaleTimeString() : 'Active'}</strong></div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

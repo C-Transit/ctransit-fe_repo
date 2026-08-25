@@ -192,10 +192,14 @@ export const fetchAdminAgentById = async (agentId) => {
  * 6. Create Agent
  * POST /api/admin/agents
  */
-export const createAdminAgent = async ({ firstname, lastname, email, phone, password }) => {
+export const createAdminAgent = async ({ firstname, lastname, firstName, lastName, email, phone, password }) => {
+  const fName = (firstname || firstName || '').trim();
+  const lName = (lastname || lastName || '').trim();
   const payload = {
-    firstname: firstname?.trim(),
-    lastname: lastname?.trim(),
+    firstname: fName,
+    lastname: lName,
+    firstName: fName,
+    lastName: lName,
     email: email?.trim()?.toLowerCase(),
     phone: phone?.trim(),
     password,
