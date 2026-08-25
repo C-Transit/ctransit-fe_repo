@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FaUsers, FaSearch, FaCheckCircle, FaTimesCircle, FaReceipt, FaSpinner, FaFilter } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaCheckCircle, FaTimesCircle, FaReceipt, FaSpinner, FaFilter, FaTimes } from 'react-icons/fa';
 import { fetchAgentUsers, fetchAgentUserTransactions } from '../../api/agentApi';
+import { generateStudentDisplayId, generateTerminalDisplayId } from '../../utils/identifierUtils';
 
 export default function AgentUsers() {
 
@@ -138,7 +139,7 @@ export default function AgentUsers() {
                       </td>
                       <td style={{ padding: '14px 16px', color: '#475569' }}>
                         <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>
-                          {u.matricNumber || '—'}
+                          {u.matricNumber || generateStudentDisplayId(u.id || u._id)}
                         </code>
                       </td>
                       <td style={{ padding: '14px 16px', color: '#64748b' }}>{u.email}</td>
@@ -196,9 +197,9 @@ export default function AgentUsers() {
               </div>
               <button
                 onClick={() => setTxModalOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b' }}
+                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center' }}
               >
-                ✕
+                <FaTimes />
               </button>
             </div>
 
@@ -219,7 +220,7 @@ export default function AgentUsers() {
                       <div>
                         <div style={{ fontWeight: 600, color: '#1e293b' }}>{tx.type || tx.description || 'Transit Tap'}</div>
                         <div style={{ fontSize: '12px', color: '#64748b' }}>
-                          {tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Recent'} • Terminal: {tx.terminalId || 'Bus POS'}
+                          {tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Recent'} • Terminal: {tx.terminalId ? generateTerminalDisplayId(tx.terminalId) : 'Bus POS'}
                         </div>
                       </div>
                       <div style={{ fontWeight: 700, color: tx.type === 'TOPUP' || tx.type === 'CREDIT' ? '#16a34a' : '#dc2626' }}>

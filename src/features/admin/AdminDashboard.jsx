@@ -10,6 +10,7 @@ import {
   FaSpinner,
   FaBell,
   FaUserShield,
+  FaCheckCircle,
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -46,6 +47,10 @@ import {
   syncAdminCardWhitelist,
   logoutAdmin,
 } from '../../api/adminApi';
+import {
+  generateAgentDisplayId,
+  generateDisputeDisplayId,
+} from '../../utils/identifierUtils';
 
 import styles from './AdminDashboard.module.css';
 
@@ -231,8 +236,9 @@ function AgentsSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
-          ✓ {toastMessage}
+          <FaCheckCircle /> {toastMessage}
         </motion.div>
       )}
 
@@ -490,7 +496,7 @@ function AgentsSection() {
               <div>
                 <div className={styles.agentDetailRow}>
                   <span className={styles.detailLabel}>Agent ID:</span>
-                  <span><strong>{selectedAgent.id || selectedAgent._id}</strong></span>
+                  <span><strong>{generateAgentDisplayId(selectedAgent.id || selectedAgent._id)}</strong></span>
                 </div>
                 <div className={styles.agentDetailRow}>
                   <span className={styles.detailLabel}>Full Name:</span>
@@ -641,8 +647,8 @@ function DisputesSection() {
   return (
     <section className={styles.supportSection}>
       {toastMessage && (
-        <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
-          ✓ {toastMessage}
+        <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FaCheckCircle /> {toastMessage}
         </div>
       )}
 
@@ -712,7 +718,7 @@ function DisputesSection() {
 
                   return (
                     <tr key={id}>
-                      <td><strong>#{id.substring ? id.substring(0, 8) : id}</strong></td>
+                      <td><strong>#{generateDisputeDisplayId(id)}</strong></td>
                       <td>{student}</td>
                       <td style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {disp.description || disp.reason || 'Transit fare discrepancy'}
@@ -763,7 +769,7 @@ function DisputesSection() {
           <div className={styles.modalContent}>
             <div className={styles.agentDetailRow}>
               <span className={styles.detailLabel}>Dispute ID:</span>
-              <span><strong>{selectedDispute.id || selectedDispute._id}</strong></span>
+              <span><strong>{generateDisputeDisplayId(selectedDispute.id || selectedDispute._id)}</strong></span>
             </div>
             <div className={styles.agentDetailRow}>
               <span className={styles.detailLabel}>Student:</span>
@@ -1078,8 +1084,8 @@ function NotificationsSection({ onSyncWhitelist, syncingWhitelist }) {
         </h3>
 
         {success && (
-          <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
-            ✓ Notification dispatched successfully to student device!
+          <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaCheckCircle /> Notification dispatched successfully to student device!
           </div>
         )}
 
@@ -1359,8 +1365,8 @@ export default function AdminDashboard() {
         </section>
 
         {syncToast && (
-          <div style={{ margin: '16px 0', padding: '12px 16px', background: '#dcfce7', color: '#166534', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-            ✓ {syncToast}
+          <div style={{ margin: '16px 0', padding: '12px 16px', background: '#dcfce7', color: '#166534', borderRadius: '8px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaCheckCircle /> {syncToast}
           </div>
         )}
 

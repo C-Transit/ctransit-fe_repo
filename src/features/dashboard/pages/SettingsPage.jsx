@@ -17,6 +17,7 @@ import {
 import styles from "./SettingsPage.module.css";
 import KYCModal from "../../../components/common/KYCModal";
 import { AUTH_API_URL, KYC_API_URL } from "../../../api/api";
+import { generateCardDisplayId } from "../../../utils/identifierUtils";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -557,7 +558,7 @@ function CardLinking({ onShowInfo, onToast }) {
           {cards.map((card) => (
             <div key={card.id} className={styles.linkedCard}>
               <p>
-                <strong>Card UID:</strong> {card.uid}
+                <strong>Card ID:</strong> <code style={{ background: 'var(--bg-secondary, #f1f5f9)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>{generateCardDisplayId(card.uid)}</code>
               </p>
               <p>
                 <strong>Label:</strong> {card.label}
