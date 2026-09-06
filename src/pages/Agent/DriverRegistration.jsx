@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaPhone, FaIdCard, FaCar, FaSave, FaTimes } from 'react-icons/fa';
-import agentApi from '../../config/agentApi';
+import agentApi from '../../config/AgentApi';
 import styles from './DriverRegistration.module.css';
 
 export default function DriverRegistration() {

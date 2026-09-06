@@ -1,0 +1,274 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.errorBanner {
+  background: #fef2f2;
+  border-left: 4px solid #e02424;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #991b1b;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* ── Name Row ── */
+.nameRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.nameRow > * {
+  flex: 1;
+  min-width: 0; /* prevents overflow on small screens */
+}
+
+/* ── Toast ── */
+.toastContainer {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: auto;
+  max-width: 90vw;
+}
+
+.toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast.success {
+  background: #ecfdf5;
+  border-left: 4px solid #0e9f6e;
+  color: #065f46;
+}
+
+.toast.error {
+  background: #fef2f2;
+  border-left: 4px solid #e02424;
+  color: #991b1b;
+}
+
+.toast.info {
+  background: #eff6ff;
+  border-left: 4px solid #1a56db;
+  color: #1e40af;
+}
+
+/* ─────────────────────────────────────────
+   LARGE SCREENS — 1280px and above
+   Desktops, wide monitors
+───────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .form {
+    gap: 20px;
+  }
+
+  .nameRow {
+    gap: 16px;
+  }
+
+  .errorBanner {
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+
+  .toast {
+    font-size: 14px;
+    padding: 14px 20px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   MEDIUM-LARGE — 1024px to 1279px
+   Small desktops, large laptops
+───────────────────────────────────────── */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .form {
+    gap: 18px;
+  }
+
+  .nameRow {
+    gap: 14px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   TABLETS LANDSCAPE — 768px to 1023px
+   iPads landscape, small laptops
+───────────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .form {
+    gap: 16px;
+  }
+
+  .nameRow {
+    gap: 12px;
+  }
+
+  .toastContainer {
+    top: 12px;
+    max-width: 80vw;
+  }
+}
+
+/* ─────────────────────────────────────────
+   TABLETS PORTRAIT — 600px to 767px
+   iPads portrait, large phones landscape
+───────────────────────────────────────── */
+@media (min-width: 600px) and (max-width: 767px) {
+  .form {
+    gap: 15px;
+  }
+
+  .nameRow {
+    gap: 10px;
+  }
+
+  .errorBanner {
+    font-size: 13px;
+    padding: 11px 13px;
+  }
+
+  .toastContainer {
+    top: 12px;
+    max-width: 85vw;
+  }
+
+  .toast {
+    font-size: 13px;
+    padding: 11px 15px;
+    white-space: normal;
+  }
+}
+
+/* ─────────────────────────────────────────
+   LARGE PHONES — 480px to 599px
+   iPhone Plus, large Android phones
+───────────────────────────────────────── */
+@media (min-width: 480px) and (max-width: 599px) {
+  .form {
+    gap: 14px;
+  }
+
+  .nameRow {
+    gap: 8px;
+  }
+
+  .errorBanner {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+
+  .toastContainer {
+    top: 10px;
+    max-width: 90vw;
+  }
+
+  .toast {
+    font-size: 12px;
+    padding: 10px 14px;
+    white-space: normal;
+  }
+}
+
+/* ─────────────────────────────────────────
+   SMALL PHONES — 360px to 479px
+   Standard Android phones, iPhone SE
+───────────────────────────────────────── */
+@media (min-width: 360px) and (max-width: 479px) {
+  .form {
+    gap: 13px;
+  }
+
+  /* Stack name fields vertically on small phones */
+  .nameRow {
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .errorBanner {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+
+  .toastContainer {
+    top: 8px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: 100%;
+  }
+
+  .toast {
+    font-size: 12px;
+    padding: 10px 12px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* ─────────────────────────────────────────
+   VERY SMALL PHONES — below 360px
+   iPhone SE 1st gen, budget phones
+───────────────────────────────────────── */
+@media (max-width: 359px) {
+  .form {
+    gap: 12px;
+  }
+
+  /* Always stack name fields */
+  .nameRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .errorBanner {
+    font-size: 11px;
+    padding: 9px 10px;
+    border-left-width: 3px;
+  }
+
+  .toastContainer {
+    top: 6px;
+    left: 8px;
+    right: 8px;
+    transform: none;
+    max-width: 100%;
+  }
+
+  .toast {
+    font-size: 11px;
+    padding: 9px 10px;
+    white-space: normal;
+    text-align: center;
+    border-left-width: 3px;
+  }
+}

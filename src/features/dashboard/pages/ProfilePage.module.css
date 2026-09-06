@@ -1,0 +1,288 @@
+@import "../../../styles/tokens.css";
+
+
+.pageHeader {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px 0;
+margin-bottom: 24px;
+flex-wrap: wrap;
+gap: 10px;
+}
+.profilePages{
+    padding: clamp(25px, 22rem, 25px);
+}
+.backBtn{
+    display:none;
+}
+.editBtn {
+background: none;
+border: none;
+cursor: pointer;
+padding: 8px;
+color: var(--text-primary);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.pageTitle {
+font-size: 20px;
+font-weight: 700;
+color: var(--text-primary);
+margin: 0;
+}
+
+/* Avatar Section */
+.avatarSection {
+text-align: center;
+margin-bottom: 28px;
+padding: 20px;
+background-color: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: var(--radius-md);
+}
+
+.avatar {
+width: 80px;
+height: 80px;
+border-radius: 50%;
+background-color: var(--primary);
+color: white;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 32px;
+font-weight: 700;
+margin: 0 auto 12px;
+}
+
+.userInitials {
+font-size: 18px;
+font-weight: 700;
+color: var(--text-primary);
+margin: 0 0 4px 0;
+}
+
+.userRole {
+font-size: 12px;
+color: var(--text-secondary);
+margin: 0;
+}
+
+/* Sections */
+.infoSection {
+margin-bottom: 28px;
+}
+
+.sectionTitle {
+font-size: 14px;
+font-weight: 700;
+color: var(--text-primary);
+margin: 0 0 16px 0;
+padding-bottom: 8px;
+border-bottom: 1px solid var(--border-light);
+}
+
+/* Form */
+.formGroup {
+margin-bottom: 14px;
+}
+
+.label {
+display: block;
+font-size: 12px;
+color: var(--text-muted);
+margin-bottom: 6px;
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 0.04em;
+}
+
+.input {
+width: 100%;
+padding: 12px 14px;
+font-size: 13px;
+border: 1px solid var(--border);
+border-radius: var(--radius-sm);
+background-color: var(--bg-card);
+color: var(--text-primary);
+font-family: inherit;
+}
+
+.input:disabled {
+background-color: var(--bg-page);
+color: var(--text-secondary);
+}
+
+.input:not(:disabled) {
+border-color: var(--primary);
+}
+
+.input::placeholder {
+color: var(--text-muted);
+}
+
+/* Buttons */
+.editActions {
+display: flex;
+gap: 10px;
+margin-bottom: 28px;
+flex-wrap: wrap;
+}
+
+.saveBtn,
+.cancelBtn {
+flex: 1;
+min-width: 140px;
+padding: 12px 16px;
+border-radius: var(--radius-md);
+font-size: 13px;
+font-weight: 600;
+border: none;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+transition: all 0.15s ease;
+}
+
+.saveBtn {
+background-color: var(--primary);
+color: white;
+}
+
+.saveBtn:hover {
+background-color: var(--primary-dark);
+}
+
+.cancelBtn {
+background-color: var(--bg-page);
+color: var(--text-secondary);
+border: 1px solid var(--border);
+}
+
+.cancelBtn:hover {
+background-color: var(--danger-light);
+color: var(--danger);
+}
+
+/* Danger Zone */
+.dangerZone {
+background-color: var(--danger-light);
+border: 1px solid var(--danger);
+border-radius: var(--radius-md);
+padding: 16px;
+margin-bottom: 20px;
+}
+
+.dangerTitle {
+font-size: 13px;
+font-weight: 700;
+color: var(--danger);
+margin: 0 0 12px 0;
+}
+
+.deleteAccountBtn {
+width: 100%;
+padding: 12px 16px;
+background-color: var(--danger);
+color: white;
+border: none;
+border-radius: var(--radius-sm);
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+transition: all 0.15s ease;
+}
+
+.deleteAccountBtn:hover {
+background-color: #b91e1e;
+}
+
+/* -------------------- */
+/*  MOBILE (≤ 480px) */
+/* -------------------- */
+
+@media (max-width: 480px) {
+.pageHeader {
+flex-direction: row;
+align-items: center;
+}
+
+.pageTitle {
+font-size: 16px;
+}
+
+.avatar {
+width: 64px;
+height: 64px;
+font-size: 24px;
+}
+
+.userInitials {
+font-size: 16px;
+}
+
+.editActions {
+flex-direction: column;
+}
+
+.saveBtn,
+.cancelBtn {
+width: 100%;
+}
+
+.dangerZone {
+padding: 14px;
+}
+}
+
+/* -------------------- */
+/*  TABLET (≤ 768px) */
+/* -------------------- */
+
+@media (max-width: 768px) {
+.pageTitle {
+font-size: 18px;
+}
+
+.avatar {
+width: 72px;
+height: 72px;
+}
+}
+
+/* -------------------- */
+/*  LARGE SCREENS (≥ 1024px) */
+/* -------------------- */
+
+@media (min-width: 1024px) {
+.pageHeader {
+padding: 20px 0;
+}
+
+.pageTitle {
+font-size: 22px;
+}
+
+.avatarSection {
+padding: 24px;
+}
+
+.avatar {
+width: 90px;
+height: 90px;
+font-size: 36px;
+}
+
+.editActions {
+max-width: 400px;
+}
+}

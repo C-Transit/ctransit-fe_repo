@@ -1,6 +1,12 @@
-import React, { createContext, useState, useCallback, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { AUTH_API_URL, USER_API_URL } from '../config/api';
+import React, {
+  createContext,
+  useState,
+  useCallback,
+  useEffect,
+  useContext,
+} from "react";
+import axios from "axios";
+import { AUTH_API_URL, USER_API_URL } from "../api/api";
 
 export const AuthContext = createContext();
 
@@ -12,9 +18,9 @@ export function AuthProvider({ children }) {
 
   // Helper function to centralize session initialization/saving
   const setSession = useCallback((token, userData) => {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('authUser', JSON.stringify(userData));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("authUser", JSON.stringify(userData));
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(userData);
     setIsAuthenticated(true);
   }, []);
@@ -24,22 +30,29 @@ export function AuthProvider({ children }) {
     setUser(null);
     setIsAuthenticated(false);
     setError(null);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('refreshToken');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authUser");
+    localStorage.removeItem("refreshToken");
+    delete axios.defaults.headers.common["Authorization"];
   }, []);
 
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem('authToken');
-        const storedUser = localStorage.getItem('authUser');
+        const storedToken = localStorage.getItem("authToken");
+        const storedUser = localStorage.getItem("authUser");
 
         if (storedToken && storedUser) {
           try {
-            // Check JWT expiration safely
-            const payload = JSON.parse(atob(storedToken.split('.')[1]));
+            // ✅ Bug fix: atob() requires standard base64, but JWTs use base64url
+            // (- instead of +, _ instead of /) with no padding. Emails with
+            // apostrophes or other characters produce base64url strings that
+            // atob() silently fails on, triggering clearSession() and a blank
+            // dashboard. Convert to standard base64 before decoding.
+            const base64Url = storedToken.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+            const payload = JSON.parse(atob(base64 + padding));
             const isExpired = payload.exp * 1000 < Date.now();
 
             if (isExpired) {
@@ -61,46 +74,70 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, [setSession, clearSession]);
 
-  const login = useCallback(async (email, password) => {
-    setIsLoading(true);
-    setError(null);
+  const login = useCallback(
+    async (email, password) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const response = await axios.post(`${AUTH_API_URL}/login`, {
-        email: email.trim().toLowerCase(),
-        password,
-      });
+      try {
+        const response = await axios.post(`${AUTH_API_URL}/login`, {
+          email: email.trim().toLowerCase(),
+          password,
+        });
 
-      // Backend only returns accessToken / refreshToken / message — NOT a user object.
-      const { accessToken, refreshToken } = response.data;
+        // Backend only returns accessToken / refreshToken / message — NOT a user object.
+        const { accessToken, refreshToken } = response.data;
 
-      if (!accessToken) {
-        throw new Error('No access token returned from server');
+        if (!accessToken) {
+          throw new Error("No access token returned from server");
+        }
+
+        // Set the auth header immediately so the profile call below is authenticated
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${accessToken}`;
+        if (refreshToken) {
+          localStorage.setItem("refreshToken", refreshToken);
+        }
+
+        // Fetch the actual user profile now that we have a valid token
+        const profileResponse = await axios.get(
+          `${USER_API_URL}/users/myprofile`
+        );
+
+        const resData = profileResponse.data;
+        const rawUser = resData?.data?.profile 
+          || resData?.data?.user 
+          || resData?.profile 
+          || resData?.user 
+          || resData?.data 
+          || resData 
+          || {};
+
+        const userData = {
+          ...rawUser,
+          firstName: rawUser.firstName || rawUser.firstname || rawUser.first_name || '',
+          lastName: rawUser.lastName || rawUser.lastname || rawUser.last_name || '',
+          email: rawUser.email || email.trim().toLowerCase(),
+          matricNumber: rawUser.matricNumber || rawUser.matric_number || '',
+        };
+
+        setSession(accessToken, userData);
+
+        return { success: true, user: userData };
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || "Login failed. Please try again.";
+        setError(errorMessage);
+        // Clean up any partial auth state set before the failure
+        delete axios.defaults.headers.common["Authorization"];
+        return { success: false, error: errorMessage };
+      } finally {
+        setIsLoading(false);
       }
-
-      // Set the auth header immediately so the profile call below is authenticated
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
-      }
-
-      // Fetch the actual user profile now that we have a valid token
-      const profileResponse = await axios.get(`${USER_API_URL}/users/myprofile`);
-      const userData = profileResponse.data;
-
-      setSession(accessToken, userData);
-
-      return { success: true, user: userData };
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
-      setError(errorMessage);
-      // Clean up any partial auth state set before the failure
-      delete axios.defaults.headers.common['Authorization'];
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setSession]);
+    },
+    [setSession]
+  );
 
   const register = useCallback(async (data) => {
     setIsLoading(true);
@@ -118,10 +155,11 @@ export function AuthProvider({ children }) {
       const response = await axios.post(`${AUTH_API_URL}/register`, payload);
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message
-        || err.response?.data?.error
-        || err.response?.data?.msg
-        || 'Registration failed. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data?.msg ||
+        "Registration failed. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -142,7 +180,9 @@ export function AuthProvider({ children }) {
 
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'OTP verification failed. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        "OTP verification failed. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -156,11 +196,13 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await axios.post(`${AUTH_API_URL}/resend-otp`, {
-        email: email.trim().toLowerCase()
+        email: email.trim().toLowerCase(),
       });
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to resend OTP. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        "Failed to resend OTP. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -174,12 +216,17 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await axios.post(`${USER_API_URL}/users/forgot-password`, {
-        email: email.trim().toLowerCase()
-      });
+      const response = await axios.post(
+        `${USER_API_URL}/users/forgot-password`,
+        {
+          email: email.trim().toLowerCase(),
+        }
+      );
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to process request. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        "Failed to process request. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -192,15 +239,20 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await axios.post(`${USER_API_URL}/users/reset-password`, {
-        email: email.trim().toLowerCase(),
-        otp: otp.trim(),
-        newPassword,
-      });
+      const response = await axios.post(
+        `${USER_API_URL}/users/reset-password`,
+        {
+          email: email.trim().toLowerCase(),
+          otp: otp.trim(),
+          newPassword,
+        }
+      );
 
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Password reset failed. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        "Password reset failed. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -233,7 +285,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 }

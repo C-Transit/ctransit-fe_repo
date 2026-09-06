@@ -1,58 +1,41 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaLock, FaShieldAlt, FaUserTie, FaArrowRight } from 'react-icons/fa';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FaLock, FaShieldAlt, FaUserTie, FaArrowRight } from "react-icons/fa";
 
-import PrimaryButton from '../../components/Admin/PrimaryButton';
-import { ADMIN_PLACEHOLDER_CREDENTIALS, setAdminSession } from '../../config/adminAuth';
+import PrimaryButton from "../../components/Admin/PrimaryButton";
+import { loginAdmin } from "../../config/adminAuth";
 
-import styles from './AdminLogin.module.css';
+import styles from "./AdminLogin.module.css";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const helperText = useMemo(
-    () => `Demo: ${ADMIN_PLACEHOLDER_CREDENTIALS.email} / ${ADMIN_PLACEHOLDER_CREDENTIALS.password}`,
-    [],
-  );
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
 
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      setError("Please enter both email and password.");
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
-      if (
-        email.toLowerCase() !== ADMIN_PLACEHOLDER_CREDENTIALS.email
-        || password !== ADMIN_PLACEHOLDER_CREDENTIALS.password
-      ) {
-        setError('Invalid credentials. Use demo credentials below.');
-        setLoading(false);
-        return;
-      }
-
-      // BACKEND INTEGRATION: POST /api/admin/login
-      // Send: { email: "admin@ctransit.ng", password: "admin_password" }
-      // Response: { success: true, token: "jwt_token", user: { name, email, role } }
-      // TODO: Replace with actual API endpoint when backend is ready
-      setAdminSession({
-        name: 'Operations Admin',
-        email: ADMIN_PLACEHOLDER_CREDENTIALS.email,
-        role: 'Super Admin',
-      });
-
-      navigate('/admin/dashboard', { replace: true });
-    }, 800);
+    try {
+      await loginAdmin(email, password);
+      navigate("/admin/dashboard", { replace: true });
+    } catch (err) {
+      // Keep error message vague — never confirm which field was wrong
+      const serverMsg = err.response?.data?.message;
+      setError(serverMsg || "Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,12 +53,16 @@ export default function AdminLogin() {
               <span className={styles.badge}>C-Transit Control</span>
             </div>
             <h1 className={styles.title}>Admin Access</h1>
-            <p className={styles.subtitle}>Secure portal for operations teams</p>
+            <p className={styles.subtitle}>
+              Secure portal for operations teams
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="adminEmail" className={styles.label}>Admin Email</label>
+              <label htmlFor="adminEmail" className={styles.label}>
+                Admin Email
+              </label>
               <input
                 id="adminEmail"
                 type="email"
@@ -88,7 +75,9 @@ export default function AdminLogin() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="adminPassword" className={styles.label}>Password</label>
+              <label htmlFor="adminPassword" className={styles.label}>
+                Password
+              </label>
               <input
                 id="adminPassword"
                 type="password"
@@ -110,9 +99,15 @@ export default function AdminLogin() {
               </motion.div>
             )}
 
-            <PrimaryButton type="submit" disabled={loading} className={styles.submitBtn}>
+            <PrimaryButton
+              type="submit"
+              disabled={loading}
+              className={styles.submitBtn}
+            >
               {loading ? (
-                <><span>Verifying...</span></>
+                <>
+                  <span>Verifying...</span>
+                </>
               ) : (
                 <>
                   <span>Sign In</span>

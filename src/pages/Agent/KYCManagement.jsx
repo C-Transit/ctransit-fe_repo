@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheck, FaTimes, FaClock, FaUser, FaIdCard, FaCalendar, FaSearch, FaEye } from 'react-icons/fa';
-import agentApi from '../../config/agentApi';
+import agentApi from '../../config/AgentApi';
 import styles from './KYCManagement.module.css';
 
 export default function KYCManagement() {

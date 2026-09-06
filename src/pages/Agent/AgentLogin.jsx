@@ -1,45 +1,60 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from 'react-icons/fa';
-import agentApi from '../../config/agentApi';
-import useAgentAuth from '../../hooks/useAgentAuth';
-import styles from './AgentLogin.module.css';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
+import agentApi from "../../config/AgentApi";
+import useAgentAuth from "../../hooks/useAgentAuth";
+import styles from "./AgentLogin.module.css";
 
 export default function AgentLogin() {
   const { login } = useAgentAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
 
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      setError("Please enter both email and password.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await agentApi.post('/agents/login', {
-        email,
+      // ✅ Bug fix: was posting to /agents/login (wrong path).
+      // Real endpoint: POST /api/auth/agent/login
+      // agentApi baseURL = USER_API_URL = https://...vercel.app/api
+      // So the path here must be /auth/agent/login
+      const response = await agentApi.post("/auth/agent/login", {
+        email: email.trim().toLowerCase(),
         password,
       });
 
-      if (response.data && response.data.data) {
-        const { token, agent } = response.data.data;
-        login(token, agent);
+      // ✅ Bug fix: was destructuring from response.data.data (undefined)
+      // Real response shape: { success, token, refreshToken, agent: {...} }
+      const { token, agent, refreshToken } = response.data;
+
+      if (!token || !agent) {
+        throw new Error("Invalid response from server");
       }
+
+      if (refreshToken) {
+        localStorage.setItem("agentRefreshToken", refreshToken);
+      }
+
+      login(token, agent);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       } else if (err.response?.status === 404) {
-        setError('Agent account not found');
+        setError("Agent account not found");
       } else {
-        setError(err.response?.data?.message || 'Login failed. Please try again.');
+        setError(
+          err.response?.data?.message || "Login failed. Please try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -60,12 +75,16 @@ export default function AgentLogin() {
               <span className={styles.badge}>C-Transit Agent</span>
             </div>
             <h1 className={styles.title}>Agent Portal</h1>
-            <p className={styles.subtitle}>Manage KYC verifications and driver registrations</p>
+            <p className={styles.subtitle}>
+              Manage KYC verifications and driver registrations
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="agentEmail" className={styles.label}>Agent Email</label>
+              <label htmlFor="agentEmail" className={styles.label}>
+                Agent Email
+              </label>
               <input
                 id="agentEmail"
                 type="email"
@@ -78,7 +97,9 @@ export default function AgentLogin() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="agentPassword" className={styles.label}>Password</label>
+              <label htmlFor="agentPassword" className={styles.label}>
+                Password
+              </label>
               <input
                 id="agentPassword"
                 type="password"
@@ -100,7 +121,11 @@ export default function AgentLogin() {
               </motion.div>
             )}
 
-            <button type="submit" disabled={loading} className={styles.submitBtn}>
+            <button
+              type="submit"
+              disabled={loading}
+              className={styles.submitBtn}
+            >
               {loading ? (
                 <span>Verifying...</span>
               ) : (
@@ -121,7 +146,9 @@ export default function AgentLogin() {
         >
           <div className={styles.infoHeader}>
             <h2 className={styles.infoTitle}>Agent Dashboard</h2>
-            <p className={styles.infoSubtitle}>Powerful tools for KYC management</p>
+            <p className={styles.infoSubtitle}>
+              Powerful tools for KYC management
+            </p>
           </div>
 
           <ul className={styles.featureList}>

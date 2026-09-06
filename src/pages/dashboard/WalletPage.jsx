@@ -39,13 +39,18 @@ export default function WalletPage({ walletBalance, onBack, onBalanceUpdate }) {
         }
       );
 
-      if (res.data && res.data.data && res.data.data.transactions) {
-        const tripsData = res.data.data.transactions;
+      const resData = res.data;
+      const tripsData = resData?.data?.transactions 
+        || resData?.transactions 
+        || (Array.isArray(resData?.data) ? resData.data : null)
+        || (Array.isArray(resData) ? resData : []);
+
+      if (Array.isArray(tripsData)) {
         const normalized = tripsData.map(t => ({
-          id: `${t.terminal_id}-${t.synced_at}-${t.amount}`,
-          title: t.type === 'RIDE' ? `Fare Payment - ${t.terminal_id}` : 'Wallet Funded',
-          date: t.synced_at,
-          amount: t.type === 'RIDE' ? -Math.abs(Number(t.amount)) : Math.abs(Number(t.amount)),
+          id: `${t.terminal_id || 'T'}-${t.synced_at || Date.now()}-${t.amount || 0}`,
+          title: t.type === 'RIDE' ? `Fare Payment - ${t.terminal_id || 'Terminal'}` : 'Wallet Funded',
+          date: t.synced_at || t.createdAt || new Date().toISOString(),
+          amount: t.type === 'RIDE' ? -Math.abs(Number(t.amount || 0)) : Math.abs(Number(t.amount || 0)),
           type: t.type === 'RIDE' ? 'fare' : 'fund',
         }));
         setTransactions(normalized);
@@ -280,7 +285,11 @@ export default function WalletPage({ walletBalance, onBack, onBalanceUpdate }) {
               <div className={styles.txInfo}>
                 <p className={styles.txTitle}>{tx.title}</p>
                 <p className={styles.txDate}>
-                  {new Date(tx.date).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}
+                  {(() => {
+                    if (!tx.date) return 'Recently';
+                    const d = new Date(tx.date);
+                    return isNaN(d.getTime()) ? 'Recently' : d.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
+                  })()}
                 </p>
               </div>
               <div className={styles.txAmount}>

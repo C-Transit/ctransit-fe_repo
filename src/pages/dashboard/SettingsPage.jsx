@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   FaArrowLeft,
   FaTrash,
@@ -13,27 +13,26 @@ import {
   FaArrowRight,
   FaWifi,
   FaTimesCircle,
-} from 'react-icons/fa';
-import styles from './SettingsPage.module.css';
-import KYCModal from '../../components/KYCModal';
-import { AUTH_API_URL, KYC_API_URL } from '../../config/api';
-
+} from "react-icons/fa";
+import styles from "./SettingsPage.module.css";
+import KYCModal from "../../components/KYCModal";
+import { AUTH_API_URL, KYC_API_URL } from "../../config/api";
 
 export default function Settings() {
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
-  const [actionModal, setActionModal] = useState({ title: '', message: '' });
-  const [successMessage, setSuccessMessage] = useState('');
+  const [actionModal, setActionModal] = useState({ title: "", message: "" });
+  const [successMessage, setSuccessMessage] = useState("");
   const toastTimerRef = useRef(null);
 
   const [preferences, setPreferences] = useState({
-    language: 'english',
-    theme: 'light',
-    currency: 'NGN',
+    language: "english",
+    theme: "light",
+    currency: "NGN",
     emailNotif: true,
     pushNotif: true,
-  /* ──  ───────────────────  smsNotif: false,────────────────── */
+    /* ──  ───────────────────  smsNotif: false,────────────────── */
     busAlerts: true,
     paymentAlerts: true,
     tripReminders: true,
@@ -41,13 +40,13 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    const savedTheme    = localStorage.getItem('user_theme');
-    const savedLanguage = localStorage.getItem('user_language');
-    const savedCurrency = localStorage.getItem('user_currency');
+    const savedTheme = localStorage.getItem("user_theme");
+    const savedLanguage = localStorage.getItem("user_language");
+    const savedCurrency = localStorage.getItem("user_currency");
     if (savedTheme || savedLanguage || savedCurrency) {
-      setPreferences(prev => ({
+      setPreferences((prev) => ({
         ...prev,
-        ...(savedTheme    ? { theme: savedTheme }       : {}),
+        ...(savedTheme ? { theme: savedTheme } : {}),
         ...(savedLanguage ? { language: savedLanguage } : {}),
         ...(savedCurrency ? { currency: savedCurrency } : {}),
       }));
@@ -56,9 +55,9 @@ export default function Settings() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = preferences.theme;
-    localStorage.setItem('user_theme',    preferences.theme);
-    localStorage.setItem('user_language', preferences.language);
-    localStorage.setItem('user_currency', preferences.currency);
+    localStorage.setItem("user_theme", preferences.theme);
+    localStorage.setItem("user_language", preferences.language);
+    localStorage.setItem("user_currency", preferences.currency);
   }, [preferences.theme, preferences.language, preferences.currency]);
 
   // FIX 3: cleanup timer on unmount to avoid state update on unmounted component
@@ -69,13 +68,13 @@ export default function Settings() {
   }, []);
 
   const handleSavePreferences = (key, value) => {
-    setPreferences(prev => ({ ...prev, [key]: value }));
+    setPreferences((prev) => ({ ...prev, [key]: value }));
   };
 
   const showToast = (message) => {
     setSuccessMessage(message);
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => setSuccessMessage(''), 2500);
+    toastTimerRef.current = setTimeout(() => setSuccessMessage(""), 2500);
   };
 
   const openActionModal = (title, message) => {
@@ -85,24 +84,28 @@ export default function Settings() {
 
   const handleDeleteAccount = () => {
     setShowDeleteConfirm(false);
-    showToast('Delete request captured. Your account removal flow would continue here.');
+    showToast(
+      "Delete request captured. Your account removal flow would continue here."
+    );
   };
 
   const handleDownloadData = () => {
     // API not ready yet — toast only
-    showToast('Your data export has been prepared.');
+    showToast("Your data export has been prepared.");
   };
 
   const containerVariants = {
-    hidden:  { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    },
   };
 
   const itemVariants = {
-    hidden:  { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   };
-
 
   return (
     <motion.div
@@ -114,7 +117,7 @@ export default function Settings() {
       <div className={styles.header}>
         <motion.button
           className={styles.backBtn}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate("/dashboard")}
           whileHover={{ x: -4 }}
         >
           <FaArrowLeft /> Back
@@ -134,10 +137,16 @@ export default function Settings() {
 
       <div className={styles.container}>
         <motion.div variants={itemVariants}>
-          <GeneralSettings preferences={preferences} onSave={handleSavePreferences} />
+          <GeneralSettings
+            preferences={preferences}
+            onSave={handleSavePreferences}
+          />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <NotificationSettings preferences={preferences} onSave={handleSavePreferences} />
+          <NotificationSettings
+            preferences={preferences}
+            onSave={handleSavePreferences}
+          />
         </motion.div>
         <motion.div variants={itemVariants}>
           <CardLinking onShowInfo={openActionModal} onToast={showToast} />
@@ -171,11 +180,14 @@ export default function Settings() {
   );
 }
 
-
 /* ── General Settings ──────────────────────────────────────────────────────── */
 function GeneralSettings({ preferences, onSave }) {
   return (
-    <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div
+      className={styles.settingsCard}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <h2>General Settings</h2>
 
       <div className={styles.settingItem}>
@@ -183,7 +195,11 @@ function GeneralSettings({ preferences, onSave }) {
           <label>Language</label>
           <p>Choose your preferred language</p>
         </div>
-        <select value={preferences.language} onChange={e => onSave('language', e.target.value)} className={styles.select}>
+        <select
+          value={preferences.language}
+          onChange={(e) => onSave("language", e.target.value)}
+          className={styles.select}
+        >
           <option value="english">English</option>
         </select>
       </div>
@@ -196,16 +212,26 @@ function GeneralSettings({ preferences, onSave }) {
         <div className={styles.themeButtons}>
           <motion.button
             type="button"
-            className={`${styles.themeBtn} ${preferences.theme === 'light' ? styles.active : ''}`}
-            onClick={() => onSave('theme', 'light')}
+            className={`${styles.themeBtn} ${
+              preferences.theme === "light" ? styles.active : ""
+            }`}
+            onClick={() => onSave("theme", "light")}
             whileHover={{ scale: 1.05 }}
-          > Light</motion.button>
+          >
+            {" "}
+            Light
+          </motion.button>
           <motion.button
             type="button"
-            className={`${styles.themeBtn} ${preferences.theme === 'dark' ? styles.active : ''}`}
-            onClick={() => onSave('theme', 'dark')}
+            className={`${styles.themeBtn} ${
+              preferences.theme === "dark" ? styles.active : ""
+            }`}
+            onClick={() => onSave("theme", "dark")}
             whileHover={{ scale: 1.05 }}
-          > Dark</motion.button>
+          >
+            {" "}
+            Dark
+          </motion.button>
         </div>
       </div>
 
@@ -225,32 +251,64 @@ function GeneralSettings({ preferences, onSave }) {
 /* ── Notification Settings ─────────────────────────────────────────────────── */
 function NotificationSettings({ preferences, onSave }) {
   const methods = [
-    { key: 'emailNotif', label: 'Email Notifications', desc: 'Receive updates via email' },
-    { key: 'pushNotif',  label: 'Push Notifications',  desc: 'Receive app notifications' },
-  /* ──  ───────────────────  { key: 'smsNotif',   label: 'SMS Alerts',           desc: 'Receive text messages' },──────────────────────────────── */
+    {
+      key: "emailNotif",
+      label: "Email Notifications",
+      desc: "Receive updates via email",
+    },
+    {
+      key: "pushNotif",
+      label: "Push Notifications",
+      desc: "Receive app notifications",
+    },
+    /* ──  ───────────────────  { key: 'smsNotif',   label: 'SMS Alerts',           desc: 'Receive text messages' },──────────────────────────────── */
   ];
 
   const types = [
-    { key: 'busAlerts',     label: ' Bus Arrival Alerts',    desc: 'Get notified when bus is near' },
-    { key: 'paymentAlerts', label: ' Payment Confirmations', desc: 'Confirm after each transaction' },
-    { key: 'tripReminders', label: ' Trip Reminders',        desc: 'Remind before your scheduled trips' },
-    { key: 'promos',        label: ' Promotions & Offers',   desc: 'Latest deals and special offers' },
+    {
+      key: "busAlerts",
+      label: " Bus Arrival Alerts",
+      desc: "Get notified when bus is near",
+    },
+    {
+      key: "paymentAlerts",
+      label: " Payment Confirmations",
+      desc: "Confirm after each transaction",
+    },
+    {
+      key: "tripReminders",
+      label: " Trip Reminders",
+      desc: "Remind before your scheduled trips",
+    },
+    {
+      key: "promos",
+      label: " Promotions & Offers",
+      desc: "Latest deals and special offers",
+    },
   ];
 
   return (
-    <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div
+      className={styles.settingsCard}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <h2>Notification Preferences</h2>
 
       <div className={styles.sectionGroup}>
         <h3>Notification Methods</h3>
-        {methods.map(m => (
+        {methods.map((m) => (
           <div key={m.key} className={styles.toggleItem}>
             <div className={styles.toggleLabel}>
               <label>{m.label}</label>
               <p>{m.desc}</p>
             </div>
             <label className={styles.toggle}>
-              <input type="checkbox" checked={preferences[m.key]} onChange={e => onSave(m.key, e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={preferences[m.key]}
+                onChange={(e) => onSave(m.key, e.target.checked)}
+              />
               <span className={styles.slider}></span>
             </label>
           </div>
@@ -259,14 +317,18 @@ function NotificationSettings({ preferences, onSave }) {
 
       <div className={styles.sectionGroup}>
         <h3>Notification Types</h3>
-        {types.map(t => (
+        {types.map((t) => (
           <div key={t.key} className={styles.toggleItem}>
             <div className={styles.toggleLabel}>
               <label>{t.label}</label>
               <p>{t.desc}</p>
             </div>
             <label className={styles.toggle}>
-              <input type="checkbox" checked={preferences[t.key]} onChange={e => onSave(t.key, e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={preferences[t.key]}
+                onChange={(e) => onSave(t.key, e.target.checked)}
+              />
               <span className={styles.slider}></span>
             </label>
           </div>
@@ -283,9 +345,9 @@ const OTP_LENGTH = 6; // FIX: Define OTP_LENGTH at the top of the component or o
 function CardLinking({ onShowInfo, onToast }) {
   const [cards, setCards] = useState([]);
   const [showLinkForm, setShowLinkForm] = useState(false);
-  const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
+  const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const [verifying, setVerifying] = useState(false);
-  const [linkError, setLinkError] = useState('');
+  const [linkError, setLinkError] = useState("");
   const [isLinked, setIsLinked] = useState(false); // FIX: Track card linked state
   const [linkLoading, setLinkLoading] = useState(true); // FIX: Track loading state
   const otpRefs = useRef([]);
@@ -293,39 +355,43 @@ function CardLinking({ onShowInfo, onToast }) {
   // FIX: Fetch existing card status on mount
   useEffect(() => {
     const fetchCardStatus = async () => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
         setLinkLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`${AUTH_API_URL}/card-status`, {
-          method: 'GET',
+        // ✅ Bug fix: was calling /card-status (404 not found)
+        // Real endpoint: GET /api/auth/card-link-status
+        const response = await fetch(`${AUTH_API_URL}/card-link-status`, {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         if (response.ok) {
           const result = await response.json();
-          if (result.card || result.data?.card) {
-            const cardData = result.card || result.data.card;
-            setCards([{
-              id: cardData.id || Date.now(),
-              uid: cardData.uid || 'Linked Card',
-              label: cardData.label || 'My Transit Card',
-              linked: true,
-              linkedAt: cardData.linkedAt || new Date().toISOString().split('T')[0],
-            }]);
+          // ✅ Real response: { success, status: "LINKED"|"PENDING"|"NO_ACTIVE_OTP", cardUid? }
+          if (result.status === "LINKED") {
+            setCards([
+              {
+                id: Date.now(),
+                uid: result.cardUid || "Linked Card",
+                label: "My Transit Card",
+                linked: true,
+                linkedAt: new Date().toISOString().split("T")[0],
+              },
+            ]);
             setIsLinked(true);
-            localStorage.setItem('cardLinked', 'true');
+            localStorage.setItem("cardLinked", "true");
           }
         }
       } catch (err) {
         // FIX: Check localStorage fallback
-        if (localStorage.getItem('cardLinked') === 'true') {
+        if (localStorage.getItem("cardLinked") === "true") {
           setIsLinked(true);
         }
       } finally {
@@ -337,16 +403,16 @@ function CardLinking({ onShowInfo, onToast }) {
   }, []);
 
   const resetOtp = () => {
-    setOtp(Array(OTP_LENGTH).fill(''));
-    setLinkError('');
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setLinkError("");
   };
 
   const handleOtpChange = (index, value) => {
-    const digit = value.replace(/\D/g, '').slice(-1); // only last digit, numbers only
+    const digit = value.replace(/\D/g, "").slice(-1); // only last digit, numbers only
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
-    setLinkError('');
+    setLinkError("");
 
     if (digit && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
@@ -354,34 +420,39 @@ function CardLinking({ onShowInfo, onToast }) {
   };
 
   const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
   };
 
   const handleOtpPaste = (e) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH);
     if (!pasted) return;
     e.preventDefault();
-    const next = Array(OTP_LENGTH).fill('');
-    pasted.split('').forEach((d, i) => { next[i] = d; });
+    const next = Array(OTP_LENGTH).fill("");
+    pasted.split("").forEach((d, i) => {
+      next[i] = d;
+    });
     setOtp(next);
     otpRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
   };
 
   const handleVerify = async () => {
-    const code = otp.join('');
+    const code = otp.join("");
     if (code.length !== OTP_LENGTH || verifying) return;
 
     setVerifying(true);
-    setLinkError('');
+    setLinkError("");
 
     try {
       const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({ otp: code }),
       });
@@ -390,29 +461,35 @@ function CardLinking({ onShowInfo, onToast }) {
 
       if (!response.ok) {
         // FIX: Better error handling
-        if (result.message?.toLowerCase().includes('expired')) {
-          throw new Error('OTP has expired. Please request a new one.');
+        if (result.message?.toLowerCase().includes("expired")) {
+          throw new Error("OTP has expired. Please request a new one.");
         }
-        throw new Error(result.message || 'Verification failed. Please try again.');
+        throw new Error(
+          result.message || "Verification failed. Please try again."
+        );
       }
 
       // FIX: Handle success properly
       setIsLinked(true);
-      localStorage.setItem('cardLinked', 'true');
-      
-      setCards([{
-        id: Date.now(),
-        uid: result.card?.uid || 'NFC-' + Math.random().toString(16).slice(2, 6).toUpperCase(),
-        label: result.card?.label || 'My Transit Card',
-        linked: true,
-        linkedAt: new Date().toISOString().split('T')[0],
-      }]);
-      
-      onToast('Card linked successfully!');
+      localStorage.setItem("cardLinked", "true");
+
+      setCards([
+        {
+          id: Date.now(),
+          uid:
+            result.card?.uid ||
+            "NFC-" + Math.random().toString(16).slice(2, 6).toUpperCase(),
+          label: result.card?.label || "My Transit Card",
+          linked: true,
+          linkedAt: new Date().toISOString().split("T")[0],
+        },
+      ]);
+
+      onToast("Card linked successfully!");
       setShowLinkForm(false);
       resetOtp();
     } catch (err) {
-      setLinkError(err.message || 'Something went wrong. Please try again.');
+      setLinkError(err.message || "Something went wrong. Please try again.");
     } finally {
       setVerifying(false);
     }
@@ -421,25 +498,40 @@ function CardLinking({ onShowInfo, onToast }) {
   // FIX: Show loading state
   if (linkLoading) {
     return (
-      <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        className={styles.settingsCard}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <h2>C-transit Card Linking</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading card status...</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
+          Loading card status...
+        </p>
       </motion.div>
     );
   }
 
   return (
-    <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div
+      className={styles.settingsCard}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <div className={styles.cardSectionHeader}>
         <div>
           <h2>C-transit Card Linking</h2>
-          <p className={styles.cardSectionDesc}>Manage physical C-transit cards linked to your account.</p>
+          <p className={styles.cardSectionDesc}>
+            Manage physical C-transit cards linked to your account.
+          </p>
         </div>
         {/* FIX: Only show link button if not already linked */}
         {!isLinked && (
           <motion.button
             className={styles.linkCardBtn}
-            onClick={() => { setShowLinkForm(v => !v); resetOtp(); }}
+            onClick={() => {
+              setShowLinkForm((v) => !v);
+              resetOtp();
+            }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -457,11 +549,18 @@ function CardLinking({ onShowInfo, onToast }) {
           <p className={styles.kycDesc}>
             Your transit card has been successfully linked to your account.
           </p>
-          {cards.map(card => (
+          {cards.map((card) => (
             <div key={card.id} className={styles.linkedCard}>
-              <p><strong>Card UID:</strong> {card.uid}</p>
-              <p><strong>Label:</strong> {card.label}</p>
-              <p><strong>Linked:</strong> {new Date(card.linkedAt).toLocaleDateString()}</p>
+              <p>
+                <strong>Card UID:</strong> {card.uid}
+              </p>
+              <p>
+                <strong>Label:</strong> {card.label}
+              </p>
+              <p>
+                <strong>Linked:</strong>{" "}
+                {new Date(card.linkedAt).toLocaleDateString()}
+              </p>
             </div>
           ))}
         </div>
@@ -472,20 +571,23 @@ function CardLinking({ onShowInfo, onToast }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <p className={styles.linkHint}>Enter the OTP code sent to your registered device to link your card.</p>
+            <p className={styles.linkHint}>
+              Enter the OTP code sent to your registered device to link your
+              card.
+            </p>
 
             <div className={styles.otpRow}>
               {otp.map((digit, i) => (
                 <input
                   key={i}
-                  ref={el => (otpRefs.current[i] = el)}
+                  ref={(el) => (otpRefs.current[i] = el)}
                   className={styles.otpInput}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
                   value={digit}
-                  onChange={e => handleOtpChange(i, e.target.value)}
-                  onKeyDown={e => handleOtpKeyDown(i, e)}
+                  onChange={(e) => handleOtpChange(i, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   onPaste={handleOtpPaste}
                 />
               ))}
@@ -494,16 +596,22 @@ function CardLinking({ onShowInfo, onToast }) {
             {linkError && <p className={styles.fieldError}>{linkError}</p>}
 
             <div className={styles.linkFormActions}>
-              <button className={styles.cancelBtn} onClick={() => { setShowLinkForm(false); resetOtp(); }}>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => {
+                  setShowLinkForm(false);
+                  resetOtp();
+                }}
+              >
                 Cancel
               </button>
               <motion.button
                 className={styles.actionBtn}
                 onClick={handleVerify}
-                disabled={otp.join('').length !== OTP_LENGTH || verifying}
+                disabled={otp.join("").length !== OTP_LENGTH || verifying}
                 whileHover={{ scale: 1.02 }}
               >
-                <FaWifi /> {verifying ? 'Verifying...' : 'Verify & Link'}
+                <FaWifi /> {verifying ? "Verifying..." : "Verify & Link"}
               </motion.button>
             </div>
           </motion.div>
@@ -515,13 +623,13 @@ function CardLinking({ onShowInfo, onToast }) {
 /* ── KYC Section ───────────────────────────────────────────────────────────── */
 function KYCSection({ onToast }) {
   const [showKYCModal, setShowKYCModal] = useState(false);
-  const [kycStatus, setKycStatus] = useState('unverified');
+  const [kycStatus, setKycStatus] = useState("unverified");
   const [statusLoading, setStatusLoading] = useState(true);
 
   // Fetch real KYC status on mount
   useEffect(() => {
     const fetchKYCStatus = async () => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
         setStatusLoading(false);
         return;
@@ -529,30 +637,36 @@ function KYCSection({ onToast }) {
 
       try {
         const response = await fetch(`${KYC_API_URL}/status`, {
-          method: 'GET',
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         const result = await response.json();
 
-        if (!response.ok) throw new Error(result.message || 'Failed to fetch KYC status');
+        // ✅ Bug fix: backend returns PENDING | APPROVED | REJECTED (uppercase enum)
+        // UI was checking for 'unverified'|'pending'|'verified' — never matched.
+        // Normalise to the UI's expected lowercase values here.
+        const rawStatus =
+          result.data?.status || result.status || result.data?.kycStatus;
+        const statusMap = {
+          APPROVED: "verified",
+          PENDING: "pending",
+          REJECTED: "rejected",
+        };
+        const status = statusMap[rawStatus] || "unverified";
 
-        // Handle different response structures
-        const status = result.data?.status || result.status || result.data?.kycStatus || 'unverified';
-        
-        // Store status in localStorage as backup
-        if (status === 'pending' || status === 'verified') {
-          localStorage.setItem('kycStatus', status);
+        if (status !== "unverified") {
+          localStorage.setItem("kycStatus", status);
         }
-        
+
         setKycStatus(status);
       } catch (err) {
-        console.error('KYC status fetch failed:', err.message);
+        console.error("KYC status fetch failed:", err.message);
         // Fall back to localStorage if API fails
-        const savedStatus = localStorage.getItem('kycStatus');
+        const savedStatus = localStorage.getItem("kycStatus");
         if (savedStatus) {
           setKycStatus(savedStatus);
         }
@@ -566,48 +680,65 @@ function KYCSection({ onToast }) {
 
   const statusConfig = {
     unverified: {
-      label: 'Not Verified',
+      label: "Not Verified",
       color: styles.kycBadgeRed,
       icon: <FaTimesCircle />,
-      desc: 'Your identity has not been verified. Verify now to unlock full account features.',
+      desc: "Your identity has not been verified. Verify now to unlock full account features.",
     },
     pending: {
-      label: 'Verification Pending',
+      label: "Verification Pending",
       color: styles.kycBadgeYellow,
       icon: <FaInfoCircle />,
-      desc: 'Your documents are under review. This usually takes 1–2 business days.',
+      desc: "Your documents are under review. This usually takes 1–2 business days.",
     },
     verified: {
-      label: 'Verified',
+      label: "Verified",
       color: styles.kycBadgeGreen,
       icon: <FaCheckCircle />,
-      desc: 'Your identity has been successfully verified.',
+      desc: "Your identity has been successfully verified.",
+    },
+    // ✅ Added — backend can return REJECTED
+    rejected: {
+      label: "Verification Rejected",
+      color: styles.kycBadgeRed,
+      icon: <FaTimesCircle />,
+      desc: "Your verification was rejected. Please re-submit with a clearer ID card photo.",
     },
   };
 
-  const config = statusConfig[kycStatus] || statusConfig['unverified'];
+  const config = statusConfig[kycStatus] || statusConfig["unverified"];
 
   const handleKYCClose = (result) => {
     setShowKYCModal(false);
     if (result?.success) {
-      setKycStatus('pending');
-      onToast(result.message || 'KYC submitted successfully.');
+      setKycStatus("pending");
+      onToast(result.message || "KYC submitted successfully.");
     }
   };
 
   //  Show loading while fetching status
   if (statusLoading) {
     return (
-      <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        className={styles.settingsCard}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <h2>Identity Verification (KYC)</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading verification status...</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
+          Loading verification status...
+        </p>
       </motion.div>
     );
   }
 
   return (
     <>
-      <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        className={styles.settingsCard}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <h2>Identity Verification (KYC)</h2>
 
         <div className={styles.kycStatusCard}>
@@ -616,20 +747,28 @@ function KYCSection({ onToast }) {
           </div>
           <p className={styles.kycDesc}>{config.desc}</p>
 
-          {kycStatus !== 'verified' && (
+          {kycStatus !== "verified" && (
             <div className={styles.kycFeatures}>
               <p className={styles.kycFeaturesTitle}>Verification unlocks:</p>
               <ul>
-                <li><FaCheckCircle /> Higher wallet limits</li>
-                <li><FaCheckCircle /> Transfer to other users</li>
-                <li><FaCheckCircle /> Full transaction history</li>
-                <li><FaCheckCircle /> Priority support</li>
+                <li>
+                  <FaCheckCircle /> Higher wallet limits
+                </li>
+                <li>
+                  <FaCheckCircle /> Transfer to other users
+                </li>
+                <li>
+                  <FaCheckCircle /> Full transaction history
+                </li>
+                <li>
+                  <FaCheckCircle /> Priority support
+                </li>
               </ul>
             </div>
           )}
         </div>
 
-        {kycStatus === 'unverified' && (
+        {(kycStatus === "unverified" || kycStatus === "rejected") && (
           <motion.button
             className={styles.kycBtn}
             onClick={() => setShowKYCModal(true)}
@@ -640,25 +779,27 @@ function KYCSection({ onToast }) {
           </motion.button>
         )}
 
-        {kycStatus === 'pending' && (
+        {kycStatus === "pending" && (
           <div className={styles.kycPendingNote}>
-            Your submission is being reviewed. We'll notify you once it's complete.
+            Your submission is being reviewed. We'll notify you once it's
+            complete.
           </div>
         )}
       </motion.div>
 
-      {showKYCModal && (
-        <KYCModal onClose={handleKYCClose} />
-      )}
+      {showKYCModal && <KYCModal onClose={handleKYCClose} />}
     </>
   );
 }
 
-
 /* ── Privacy Settings ──────────────────────────────────────────────────────── */
 function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
   return (
-    <motion.div className={styles.settingsCard} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div
+      className={styles.settingsCard}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <h2>Privacy & Security</h2>
 
       <div className={styles.sectionGroup}>
@@ -670,7 +811,12 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
           </div>
           <motion.button
             className={styles.actionBtn}
-            onClick={() => onShowInfo('Two-Factor Authentication', '2FA setup would connect to the backend here.')}
+            onClick={() =>
+              onShowInfo(
+                "Two-Factor Authentication",
+                "2FA setup would connect to the backend here."
+              )
+            }
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -688,7 +834,12 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
           </div>
           <motion.button
             className={styles.actionBtn}
-            onClick={() => onShowInfo('Active Sessions', 'This section would list devices, IPs, and login timestamps once connected to the API.')}
+            onClick={() =>
+              onShowInfo(
+                "Active Sessions",
+                "This section would list devices, IPs, and login timestamps once connected to the API."
+              )
+            }
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -704,7 +855,11 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
             <label> Download Your Data</label>
             <p>Get a copy of all your data</p>
           </div>
-          <motion.button className={styles.actionBtn} onClick={onDownload} whileHover={{ scale: 1.02 }}>
+          <motion.button
+            className={styles.actionBtn}
+            onClick={onDownload}
+            whileHover={{ scale: 1.02 }}
+          >
             <FaDownload /> Download
           </motion.button>
         </div>
@@ -726,8 +881,14 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
       <div className={styles.sectionGroup}>
         <h3>Legal</h3>
         <div className={styles.legalLinks}>
-          <a href="/policy" className={styles.link}> Privacy Policy</a>
-          <a href="/terms" className={styles.link}> Terms & Conditions</a>
+          <a href="/policy" className={styles.link}>
+            {" "}
+            Privacy Policy
+          </a>
+          <a href="/terms" className={styles.link}>
+            {" "}
+            Terms & Conditions
+          </a>
         </div>
       </div>
     </motion.div>
@@ -739,12 +900,26 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
 // FIX 7: apply singleAction class so the single Close button isn't left-aligned
 function ActionInfoModal({ title, message, onClose }) {
   return (
-    <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <motion.div className={styles.modal} initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
+    <motion.div
+      className={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <motion.div
+        className={styles.modal}
+        initial={{ scale: 0.9 }}
+        animate={{ scale: 1 }}
+      >
         <h2>{title}</h2>
-        <p className={styles.infoText}><FaInfoCircle /> {message}</p>
+        <p className={styles.infoText}>
+          <FaInfoCircle /> {message}
+        </p>
         <div className={`${styles.modalActions} ${styles.singleAction}`}>
-          <motion.button className={styles.cancelBtn} onClick={onClose} whileHover={{ scale: 1.02 }}>
+          <motion.button
+            className={styles.cancelBtn}
+            onClick={onClose}
+            whileHover={{ scale: 1.02 }}
+          >
             Close
           </motion.button>
         </div>
@@ -755,38 +930,54 @@ function ActionInfoModal({ title, message, onClose }) {
 
 // FIX 5: password validation — require minimum 6 characters to match a real password
 function DeleteConfirmModal({ onConfirm, onCancel }) {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleConfirm = () => {
     if (password.length < 6) {
-      setError('Please enter your full account password.');
+      setError("Please enter your full account password.");
       return;
     }
-    setError('');
+    setError("");
     onConfirm(password);
   };
 
   return (
-    <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <motion.div className={styles.modal} initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+    <motion.div
+      className={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <motion.div
+        className={styles.modal}
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+      >
         <h2>Delete Account</h2>
         <p className={styles.warningText}>
-           This action is permanent and cannot be undone. All your data will be deleted.
+          This action is permanent and cannot be undone. All your data will be
+          deleted.
         </p>
         <div className={styles.formGroup}>
           <label>Enter your password to confirm</label>
           <input
             type="password"
             value={password}
-            onChange={e => { setPassword(e.target.value); setError(''); }}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
             placeholder="Enter password"
             className={styles.input}
           />
           {error && <p className={styles.fieldError}>{error}</p>}
         </div>
         <div className={styles.modalActions}>
-          <motion.button className={styles.cancelBtn} onClick={onCancel} whileHover={{ scale: 1.02 }}>
+          <motion.button
+            className={styles.cancelBtn}
+            onClick={onCancel}
+            whileHover={{ scale: 1.02 }}
+          >
             Cancel
           </motion.button>
           <motion.button

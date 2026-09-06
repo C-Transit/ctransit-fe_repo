@@ -1001,6 +1001,7 @@ export default function AdminDashboard() {
   const [loadingCards, setLoadingCards] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [showOtaUploadModal, setShowOtaUploadModal] = useState(false);
   
   // Agents state - simplified
   const [agents, setAgents] = useState([]);
@@ -1289,6 +1290,21 @@ export default function AdminDashboard() {
           <small>
             Backend integration: connect this modal to POST /api/admin/notifications/broadcast with audience filters.
           </small>
+        </div>
+      </Modal>
+
+      <Modal open={showOtaUploadModal} title="Upload OTA Firmware Upgrade" onClose={() => setShowOtaUploadModal(false)}>
+        <div className={styles.modalContent}>
+          <label htmlFor="firmwareFile">Select Firmware File (.bin)</label>
+          <input type="file" id="firmwareFile" accept=".bin,.zip" />
+          <div className={styles.modalActions}>
+            <PrimaryButton variant="ghost" onClick={() => setShowOtaUploadModal(false)}>
+              Cancel
+            </PrimaryButton>
+            <PrimaryButton onClick={() => setShowOtaUploadModal(false)}>
+              Upload & Deploy
+            </PrimaryButton>
+          </div>
         </div>
       </Modal>
     </div>

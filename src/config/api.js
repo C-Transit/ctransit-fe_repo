@@ -1,7 +1,9 @@
-// Base API URL: Uses the environment variable VITE_API_URL if available, otherwise defaults to the production URL.
-const baseApiUrl = "https://c-transit-pink.vercel.app";
+// Base URL reads from the Vite env variable VITE_API_URL.
+// Set this in Vercel → Project → Settings → Environment Variables.
+// Fallback keeps the old URL working during transition.
+const baseApiUrl =
+  import.meta.env.VITE_API_URL || "https://c-transit-pink.vercel.app";
 
-// Authentication API endpoint: Used for all authentication-related requests.
 export const AUTH_API_URL = `${baseApiUrl}/api/auth`;
 export const USER_API_URL = `${baseApiUrl}/api`;
 export const KYC_API_URL = `${baseApiUrl}/api/kyc`;

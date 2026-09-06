@@ -23,11 +23,14 @@ export default function SidebarDrawer({
    
   const { logout } = useContext(AuthContext);
 
-  const userInitials = (UserData?.firstName  || 'User')
-    .split(' ')
+  const rawName = UserData?.firstName || UserData?.firstname || UserData?.fullname || UserData?.email || 'User';
+  const userInitials = String(rawName)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
-    .map(n => n[0].toUpperCase())
-    .join('');
+    .map(n => n.charAt(0).toUpperCase())
+    .join('') || 'U';
 
   const navItems = [
     { id: 'home', label: 'Dashboard', icon: FaHome },

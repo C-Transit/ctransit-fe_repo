@@ -382,47 +382,47 @@ body {
 }
 
 /* Dark mode button styles */
-::global(html[data-theme="dark"]) .button-primary {
+html[data-theme="dark"] .button-primary {
   background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
 }
 
-::global(html[data-theme="dark"]) .button-primary:hover {
+html[data-theme="dark"] .button-primary:hover {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
-::global(html[data-theme="dark"]) .button-secondary {
+html[data-theme="dark"] .button-secondary {
   background: var(--color-dark-bg-secondary);
   color: #60a5fa;
   border-color: #1e40af;
 }
 
-::global(html[data-theme="dark"]) .button-secondary:hover {
+html[data-theme="dark"] .button-secondary:hover {
   border-color: #60a5fa;
   background: var(--color-dark-bg-tertiary);
 }
 
-::global(html[data-theme="dark"]) .button-danger {
+html[data-theme="dark"] .button-danger {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
 }
 
-::global(html[data-theme="dark"]) .button-danger:hover {
+html[data-theme="dark"] .button-danger:hover {
   box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
 }
 
-::global(html[data-theme="dark"]) .button-success {
+html[data-theme="dark"] .button-success {
   background: linear-gradient(135deg, #10b981 0%, #047857 100%);
 }
 
-::global(html[data-theme="dark"]) .button-success:hover {
+html[data-theme="dark"] .button-success:hover {
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
-::global(html[data-theme="dark"]) .button-text {
+html[data-theme="dark"] .button-text {
   background: transparent;
   color: #60a5fa;
 }
 
-::global(html[data-theme="dark"]) .button-text:hover {
+html[data-theme="dark"] .button-text:hover {
   background: rgba(59, 130, 246, 0.1);
   color: #93c5fd;
 }
