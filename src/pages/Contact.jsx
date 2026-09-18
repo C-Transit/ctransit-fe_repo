@@ -14,9 +14,9 @@ import {
 import styles from './Contact.module.css';
 
 const CONTACT_CARDS = [
-  { icon: <FaEnvelope />, label: 'Email Support', value: 'support@ctransit.me' }, // ⚠️ confirm real address
-  { icon: <FaWhatsapp />, label: 'WhatsApp Support', value: '+234 9045 955 670' }, // ⚠️ fill in real number
-  { icon: <FaPhone />, label: 'Phone Support', value: '0909045955670' }, // ⚠️ fill in real number
+  { icon: <FaEnvelope />, label: 'Email Support', value: 'support@ctransit.me' }, 
+  { icon: <FaWhatsapp />, label: 'WhatsApp Support', value: '+234 9045 955 670' }, 
+  { icon: <FaPhone />, label: 'Phone Support', value: '09045955670' },
   { icon: <FaClock />, label: 'Support Hours', value: 'Mon – Fri, 8:00 AM – 6:00 PM' },
 ];
 
