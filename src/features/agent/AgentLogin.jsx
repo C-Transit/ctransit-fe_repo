@@ -157,7 +157,7 @@ export default function AgentLogin() {
           </form>
         </motion.section>
 
-        <motion.aside
+        {/* <motion.aside
           className={styles.infoSection}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -199,7 +199,7 @@ export default function AgentLogin() {
               </div>
             </li>
           </ul>
-        </motion.aside>
+        </motion.aside> */}
       </div>
     </div>
   );
