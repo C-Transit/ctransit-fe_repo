@@ -47,7 +47,7 @@ export default function AgentApp() {
             }
           />
 
-          {/* Agent & Driver Dashboard */}
+          {/* Agent Dashboard */}
           <Route
             path="/"
             element={
@@ -84,3 +84,5 @@ export default function AgentApp() {
     </ToastProvider>
   );
 }
+
+

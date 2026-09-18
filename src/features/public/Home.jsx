@@ -484,6 +484,7 @@ export default function Home() {
             <h5>Product</h5>
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
+            <Link to="/driver/login">Driver Portal</Link>
           </div>
 
          <div className={styles.footerColumn}>

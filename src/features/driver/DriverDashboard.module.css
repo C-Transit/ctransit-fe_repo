@@ -1,0 +1,440 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.welcomeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.greetingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.welcomeTitle {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.welcomeSubtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.refreshBtn:hover {
+  background: #f1f5f9;
+  color: #0284c7;
+  border-color: #94a3b8;
+}
+
+/* 4-Questions Hero Grid */
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.heroCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heroCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.questionBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.iconCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.cardTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.primaryAmount {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+
+.subMeta {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+
+.actionRow {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.withdrawBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.withdrawBtn:hover {
+  background: #0369a1;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.statusCompleted {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.statusProcessing {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.statusPending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.statusFailed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Quick Verification Widget Section */
+.verificationSection {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.verifyInputGroup {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.verifyInput {
+  flex: 1;
+  min-width: 240px;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.verifyInput:focus {
+  outline: none;
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.verifyBtn {
+  padding: 0.7rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.15s ease;
+}
+
+.verifyBtn:hover:not(:disabled) {
+  background: #0369a1;
+}
+
+.verifyResultBox {
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.resultInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.resultIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.resultDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.resultTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.resultMeta {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Recent Rides Feed */
+.tableContainer {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.tableHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.viewAllLink {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.viewAllLink:hover {
+  text-decoration: underline;
+}
+
+.ridesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rideItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.rideItem:hover {
+  background: #f1f5f9;
+}
+
+.rideLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.rideIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.rideMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.passengerId {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rideTime {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.rideRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rideFare {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #15803d;
+}
+
+/* Empty & Error States */
+.emptyBox {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 0.88rem;
+}
+
+.retrySmallBtn {
+  background: #ffffff;
+  border: 1px solid #f87171;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b91c1c;
+  cursor: pointer;
+}

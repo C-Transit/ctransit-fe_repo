@@ -6,7 +6,6 @@ import DriverRegistration from './DriverRegistration';
 import LinkCard from './LinkCard';
 import AgentUsers from './AgentUsers';
 import AgentTerminals from './AgentTerminals';
-import { DriverTrips, DriverEarnings, DriverVehicle } from '../driver';
 import useAgentAuth from '../../hooks/useAgentAuth';
 import { generateAgentDisplayId } from '../../utils/identifierUtils';
 
@@ -36,12 +35,6 @@ export default function AgentDashboard() {
         return <AgentUsers />;
       case 'terminals':
         return <AgentTerminals />;
-      case 'driver-trips':
-        return <DriverTrips />;
-      case 'driver-vehicle':
-        return <DriverVehicle />;
-      case 'driver-earnings':
-        return <DriverEarnings />;
       case 'settings':
         return (
           <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
@@ -67,3 +60,4 @@ export default function AgentDashboard() {
     </AgentLayout>
   );
 }
+
