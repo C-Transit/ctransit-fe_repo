@@ -9,19 +9,11 @@ export default function BottomNav({
   onCardPress,
 }) {
   const tabs = [
-<<<<<<< HEAD
-    { id: 'home', label: 'Home', icon: FaHome },
-    { id: 'history', label: 'History', icon: FaClock },
-  
-    { id: 'wallet', label: 'Wallet', icon: FaCreditCard },
-    { id: 'profile', label: 'Profile', icon: FaUser },
-=======
     { id: "home", label: "Home", icon: FaHome },
     { id: "history", label: "History", icon: FaClock },
     { id: "card", label: "Card", icon: FaWifi, special: true },
     { id: "wallet", label: "Wallet", icon: FaCreditCard },
     { id: "profile", label: "Profile", icon: FaUser },
->>>>>>> d321500ae8dd39d8350efcece51626e221c11140
   ];
 
   const handleTabClick = (tabId) => {
@@ -37,11 +29,7 @@ export default function BottomNav({
     <nav className={styles.nav}>
       {tabs.map((tab) => {
         const Icon = tab.icon;
-<<<<<<< HEAD
         const isActive = activePage && activePage.toLowerCase() === tab.id.toLowerCase();
-=======
-        const isActive = activePage?.toLowerCase() === tab.id;
->>>>>>> d321500ae8dd39d8350efcece51626e221c11140
 
         return (
           <button

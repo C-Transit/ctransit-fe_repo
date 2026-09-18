@@ -9,7 +9,7 @@ import {
   FaClock,
   FaCheckCircle,
   FaExclamationCircle,
-  FaPaperPlane,
+  FaPaperPlane, 
 } from 'react-icons/fa';
 import styles from './Contact.module.css';
 
