@@ -19,14 +19,26 @@
   overflow-y: auto;
 }
 
-@media (max-width: 980px) {
+@media (min-width: 768px) and (max-width: 980px) {
+  .mainContent {
+    margin-left: 72px;
+  }
+}
+
+@media (max-width: 767px) {
   .mainContent {
     margin-left: 0;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .content {
     padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 12px;
   }
 }
