@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
+// import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
 import { agentLogin } from "../../api/agentApi";
 import useAgentAuth from "../../hooks/useAgentAuth";
 import styles from "./AgentLogin.module.css";
