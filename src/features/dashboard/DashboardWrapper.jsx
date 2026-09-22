@@ -37,7 +37,7 @@ export default function DashboardWrapper() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
 
       if (!token) {
         navigate('/auth/login');
@@ -80,7 +80,7 @@ export default function DashboardWrapper() {
       try {
         const tripsResponse = await axios.get(
           `${USER_API_URL}/transactions/history`,
-          { headers }
+          { headers, params: { limit: 5 } }
         );
 
         const tripsResData = tripsResponse.data;

@@ -356,7 +356,7 @@ function CardLinking({ onShowInfo, onToast }) {
   // FIX: Fetch existing card status on mount
   useEffect(() => {
     const fetchCardStatus = async () => {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
       if (!token) {
         setLinkLoading(false);
         return;
@@ -454,11 +454,12 @@ function CardLinking({ onShowInfo, onToast }) {
     setLinkError("");
 
     try {
+      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
       const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ otp: code }),
       });
@@ -635,7 +636,7 @@ function KYCSection({ onToast }) {
   // Fetch real KYC status on mount
   useEffect(() => {
     const fetchKYCStatus = async () => {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
       if (!token) {
         setStatusLoading(false);
         return;

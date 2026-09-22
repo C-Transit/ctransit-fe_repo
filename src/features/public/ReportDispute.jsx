@@ -33,33 +33,39 @@ export default function ReportDispute() {
     setLoading(true);
     setError('');
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to report a dispute.');
+      setLoading(false);
+      return;
+    }
+
     const fullDescription = `[${resolvedIssue}] ${description.trim()}`;
+    if (fullDescription.length < 10) {
+      setError('Please provide at least 10 characters describing the issue.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      if (token) {
-        await axios.post(
-          DISPUTES_API_URL,
-          {
-            transactionId: transactionId.trim() || undefined,
-            description: fullDescription,
+      await axios.post(
+        DISPUTES_API_URL,
+        {
+          ...(transactionId?.trim() ? { transactionId: transactionId.trim() } : {}),
+          description: fullDescription,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
+        }
+      );
       setSuccess(true);
       sessionStorage.setItem('authSuccessMessage', 'Your dispute report has been submitted to support.');
       setTimeout(() => navigate('/history'), 2200);
     } catch (err) {
-      console.warn('Dispute submission fallback:', err);
-      // If endpoint returns specific error or needs fallback
-      setSuccess(true);
-      sessionStorage.setItem('authSuccessMessage', 'Your dispute report has been logged and sent to administrators.');
-      setTimeout(() => navigate('/history'), 2200);
+      const errMsg = err.response?.data?.message || err.message || 'Failed to submit dispute. Please try again.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

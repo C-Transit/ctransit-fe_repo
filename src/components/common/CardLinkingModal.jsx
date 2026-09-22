@@ -33,7 +33,7 @@ export default function CardLinkingModal({ isOpen, onClose }) {
 
     if (!/^\d{6}$/.test(pin)) return;
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     if (!token) {
       setError('Session expired. Please log in again.');
       return;
@@ -43,7 +43,7 @@ export default function CardLinkingModal({ isOpen, onClose }) {
     setError('');
 
     try {
-      const response = await fetch(`${AUTH_API_URL}/auth/confirm-card`, {
+      const response = await fetch(`${AUTH_API_URL}/confirm-card`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
