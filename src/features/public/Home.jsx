@@ -237,6 +237,7 @@ export default function Home() {
         <div className={styles.navLinks}>
           <a href="#how-it-works">How It Works</a>
           <a href="#why-ctransit">Solutions</a>
+          <a href="/about"> About</a>
         </div>
 
           <div className={styles.navRight}>
@@ -289,7 +290,7 @@ export default function Home() {
                 <div className={styles.statusBar}>
                   <span>C-Transit</span>
                   <span className={styles.checkmark}>✓</span>
-                  <span>10:30 AM</span>
+                  <span>10:30 AM</span> //edit to real time
                 </div>
                 <div className={styles.screenContent}>
                   <div className={styles.nfcAnimation}>

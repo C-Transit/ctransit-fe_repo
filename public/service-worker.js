@@ -1,5 +1,5 @@
 // 1. BUMP THE CACHE VERSION TO FORCE AN UPDATE
-const CACHE_NAME = "c-transit-cache-v5";
+const CACHE_NAME = "c-transit-cache-v6";
 
 // 2. REAL STATIC ASSETS (use existing SVG icons)
 const STATIC_ASSETS = [
@@ -24,7 +24,7 @@ self.addEventListener("install", (event) => {
           console.warn(`[SW] Warning: Failed to pre-cache ${asset}:`, err);
         }
       }
-    })
+    }),
   );
 });
 
@@ -37,10 +37,10 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
+            .map((key) => caches.delete(key)),
+        ),
       )
-      .then(() => self.clients.claim()) // take control immediately
+      .then(() => self.clients.claim()), // take control immediately
   );
 });
 
@@ -71,9 +71,9 @@ self.addEventListener("fetch", (event) => {
         () =>
           new Response(
             JSON.stringify({ error: "You are offline. Please reconnect." }),
-            { headers: { "Content-Type": "application/json" }, status: 503 }
-          )
-      )
+            { headers: { "Content-Type": "application/json" }, status: 503 },
+          ),
+      ),
     );
     return;
   }
@@ -86,14 +86,15 @@ self.addEventListener("fetch", (event) => {
         const cachedOffline = await cache.match("/offline.html");
         if (cachedOffline) return cachedOffline;
 
-        const cachedIndex = await cache.match("/index.html") || await cache.match("/");
+        const cachedIndex =
+          (await cache.match("/index.html")) || (await cache.match("/"));
         if (cachedIndex) return cachedIndex;
 
         return new Response(
           "<!doctype html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>C-Transit Offline</title></head><body style='font-family:sans-serif;text-align:center;padding:40px;'><h2>You are offline</h2><p>Please check your connection and reload.</p><button onclick='location.reload()'>Retry</button></body></html>",
-          { headers: { "Content-Type": "text/html" }, status: 200 }
+          { headers: { "Content-Type": "text/html" }, status: 200 },
         );
-      })
+      }),
     );
     return;
   }
@@ -107,14 +108,16 @@ self.addEventListener("fetch", (event) => {
           .then((response) => {
             if (response.ok && response.type === "basic") {
               const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              caches
+                .open(CACHE_NAME)
+                .then((cache) => cache.put(request, clone));
             }
             return response;
           })
           .catch(() => {
             // Return empty response for missing static sub-resources rather than failing
             return new Response("", { status: 404 });
-          })
-    )
+          }),
+    ),
   );
 });
