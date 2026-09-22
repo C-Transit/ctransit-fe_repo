@@ -438,6 +438,123 @@
   margin-top: 8px;
 }
 
+/* ─── Virtual Account Funding Box ────────────────────────────────────────── */
+.vaCard {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.vaAccountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vaAccountNumber {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 1px;
+}
+
+.vaCopyBtn {
+  border: none;
+  background: #E5E7EB;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.vaCopyBtn:hover {
+  background: #D1D5DB;
+}
+
+.vaBankLabel {
+  margin: 12px 0 0 0;
+  font-size: 11px;
+  color: #6B7280;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.vaBankName {
+  margin: 2px 0 0 0;
+  font-weight: 600;
+  color: #111827;
+  font-size: 15px;
+}
+
+.vaChecking {
+  font-size: 13px;
+  color: #1A56DB;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vaPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1A56DB;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+.kycContent {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.kycIconWrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #FEF3C7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.kycTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #92400E;
+}
+
+.kycDesc {
+  margin: 8px 0 16px 0;
+  color: #6B7280;
+  font-size: 13px;
+}
+
+.kycBtn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: #1A56DB;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
 /* ─── Wallet Header with Icons ──────────────────────────────────────────── */
 .walletHeader {
   display: flex;

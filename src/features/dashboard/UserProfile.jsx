@@ -43,7 +43,7 @@ export default function UserProfile() {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         
         if (!token) {
           navigate('/login');
@@ -56,14 +56,14 @@ export default function UserProfile() {
           },
         });
 
-        if (response.data.data?.profile) {
-          const profile = response.data.data.profile;
+        const rawProfile = response.data?.data?.profile || response.data?.profile || response.data?.data?.user || response.data?.data || {};
+        if (rawProfile) {
           setUserData({
-            firstname: profile.firstname || "",
-            lastname: profile.lastname || "",
-            email: profile.email || "",
-            matricNumber: profile.matricNumber || "",
-            phone: profile.kyc?.phoneNumber || "",
+            firstname: rawProfile.firstname || rawProfile.firstName || "",
+            lastname: rawProfile.lastname || rawProfile.lastName || "",
+            email: rawProfile.email || "",
+            matricNumber: rawProfile.matricNumber || rawProfile.matric_number || "",
+            phone: rawProfile.kyc?.phoneNumber || rawProfile.phone || "",
           });
         }
 
@@ -97,40 +97,42 @@ export default function UserProfile() {
 
 
  
-  // Response: { success: true, user: {...updatedUserData} }
+  // Response: { success: true, message: "Profile updated" }
   const handleSaveProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       
       const response = await axios.patch(`${USER_API_URL}/users/update-profile`, {
-        firstname: userData.firstname,
-        lastname: userData.lastname,
-        phone: userData.phone,
+        firstname: userData.firstname?.trim(),
+        lastname: userData.lastname?.trim(),
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.data.user) {
-        setUserData(response.data.user);
+      if (response.data?.user || response.data?.data) {
+        const u = response.data.user || response.data.data;
+        setUserData(prev => ({
+          ...prev,
+          firstname: u.firstname || prev.firstname,
+          lastname: u.lastname || prev.lastname,
+        }));
       }
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      // Show error message to user
     }
   };
 
-  // Response: { success: true, message: "Password changed" }
-  const handleChangePassword = async (currentPass, newPass, confirmPass) => {
+  // Response: { success: true, message: "Password changed successfully" }
+  const handleChangePassword = async (currentPass, newPass) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       
-      await axios.post(`${USER_API_URL}/users/change-password`, {
+      await axios.patch(`${USER_API_URL}/users/change-password`, {
         currentPassword: currentPass,
         newPassword: newPass,
-        confirmPassword: confirmPass,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -138,10 +140,9 @@ export default function UserProfile() {
       });
 
       setShowPasswordModal(false);
-      // Show success message
     } catch (error) {
       console.error('Failed to change password:', error);
-      // Show error message to user
+      throw error;
     }
   };
 

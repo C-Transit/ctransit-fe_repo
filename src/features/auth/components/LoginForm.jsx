@@ -96,7 +96,15 @@ export default function LoginForm() {
         password: formData.password,
       });
 
-      localStorage.setItem('token', response.data.token);
+      const token = response.data?.accessToken || response.data?.token;
+      if (token) {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+      if (response.data?.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
       sessionStorage.setItem('authSuccessMessage', 'Login successful. Welcome back.');
       sessionStorage.setItem('kycReminderMessage', 'Complete your KYC to unlock card linking, reports, and wallet features.');
 

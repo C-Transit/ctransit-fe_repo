@@ -9,21 +9,31 @@ export default function TapHistoryPage({ onBack }) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [taps, setTaps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
 
   const filters = ['All', 'Today', 'This Week', 'This Month', 'Custom'];
 
-  const fetchHistory = useCallback(async (pageNum = 1, append = false) => {
+  const fetchHistory = useCallback(async (cursor = null, append = false) => {
     try {
-      setLoading(true);
-      const token = localStorage.getItem('authToken');
-      const headers = { Authorization: `Bearer ${token}` };
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const params = { limit: 20 };
+      if (cursor) {
+        params.cursor = cursor;
+      }
 
       const res = await axios.get(
         `${USER_API_URL}/transactions/history`,
-        { headers, params: { page: pageNum, limit: 20 } }
+        { headers, params }
       );
 
       const resData = res.data;
@@ -31,6 +41,9 @@ export default function TapHistoryPage({ onBack }) {
         || resData?.transactions 
         || (Array.isArray(resData?.data) ? resData.data : null)
         || (Array.isArray(resData) ? resData : []);
+
+      const incomingHasMore = Boolean(resData?.data?.hasMore);
+      const incomingNextCursor = resData?.data?.nextCursor || null;
     
       if (Array.isArray(tripsData)) {
         const normalized = tripsData.map(t => ({
@@ -43,28 +56,31 @@ export default function TapHistoryPage({ onBack }) {
         }));
 
         setTaps(prev => append ? [...prev, ...normalized] : normalized);
-        setHasMore(normalized.length === 20);
+        setHasMore(incomingHasMore);
+        setNextCursor(incomingNextCursor);
         setError(null);
       } else {
-        setTaps([]);
+        if (!append) setTaps([]);
         setHasMore(false);
+        setNextCursor(null);
       }
     } catch (err) {
       console.error('Failed to load tap history:', err);
       setError('Failed to load history');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchHistory(1, false);
+    fetchHistory(null, false);
   }, [fetchHistory]);
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchHistory(nextPage, true);
+    if (hasMore && nextCursor && !loadingMore) {
+      fetchHistory(nextCursor, true);
+    }
   };
 
   // ── Client-side date filter logic ──────────────────────────────
@@ -178,8 +194,8 @@ export default function TapHistoryPage({ onBack }) {
       </div>
 
       {hasMore && !loading && taps.length > 0 && (
-        <button className={styles.loadMoreBtn} onClick={handleLoadMore}>
-          Load More
+        <button className={styles.loadMoreBtn} onClick={handleLoadMore} disabled={loadingMore}>
+          {loadingMore ? 'Loading more...' : 'Load More'}
         </button>
       )}
     </div>
