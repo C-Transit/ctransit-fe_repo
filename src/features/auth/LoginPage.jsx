@@ -11,7 +11,6 @@ import styles from './LoginPage.module.css';
 
 /**
  * Login Screen
- * Route: /auth/login
  */
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -80,7 +79,6 @@ const [formData, setFormData] = useState({
     if (result.success) {
       addToast('Login successful. Welcome back!', 'success');
       setTimeout(() => {
-        // Navigate to dashboard or role selection
         navigate('/dashboard');
       }, 1500);
     } else {
@@ -116,7 +114,7 @@ const [formData, setFormData] = useState({
         )}
 
         <InputField
-          label="Email or Phone"
+          label="Email"
           placeholder="Enter your email"
           name="emailOrPhone"
           type="text"
