@@ -12,9 +12,6 @@ import {
   FaWallet,
   FaWifi,
   FaTimes,
-  FaEye,
-  FaEyeSlash,
-  FaSync,
   FaCopy,
   FaCheck,
   FaExclamationTriangle,
@@ -120,7 +117,6 @@ export default function DashboardHome({
   const [walletBalance, setWalletBalance] = useState(walletBalanceProp);
   const [balanceError, setBalanceError] = useState(null);
   const [hideBalance, setHideBalance] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   // ─── Virtual Account Funding Modal States ──────────────────────────────────
   const [showFundModal, setShowFundModal] = useState(false);
@@ -143,26 +139,35 @@ export default function DashboardHome({
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  // ─── Refresh fetches wallet balance only ───────────────────────────────────
-  const refreshBalance = async () => {
-    setRefreshing(true);
-    setBalanceError(null);
-    try {
-      const res = await axios.get(`${USER_API_URL}/wallets/details`, {
-        headers: getAuthHeader(),
-      });
-      // Response: { success: true, data: { balance, accountNumber, bank, bankName } }
-      const fresh =
-        res.data?.data?.balance ?? res.data?.balance ?? walletBalance;
-      setWalletBalance(fresh);
-      if (onBalanceUpdate) onBalanceUpdate(fresh);
-    } catch (err) {
-      console.error("Balance refresh failed:", err);
-      setBalanceError("Failed to refresh");
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  // ─── Keep the wallet balance current without a manual refresh button ───────
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncBalance = async () => {
+      try {
+        const res = await axios.get(`${USER_API_URL}/wallets/details`, {
+          headers: getAuthHeader(),
+        });
+        const fresh = res.data?.data?.balance ?? res.data?.balance;
+
+        if (isCancelled || fresh === undefined) return;
+
+        setWalletBalance(fresh);
+        setBalanceError(null);
+        if (onBalanceUpdate) onBalanceUpdate(fresh);
+      } catch {
+        if (!isCancelled) setBalanceError("Unable to update balance");
+      }
+    };
+
+    syncBalance();
+    const intervalId = setInterval(syncBalance, 30000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [onBalanceUpdate]);
 
   // ─── Handle Open Funding (Kora Virtual Account Flow) ───────────────────────
   const handleOpenFunding = async () => {
@@ -317,29 +322,16 @@ export default function DashboardHome({
       <div className={styles.walletCard}>
         <div className={styles.walletHeader}>
           <p className={styles.walletLabel}>Wallet Balance</p>
-          <div className={styles.walletIcons}>
-            <button
-              className={styles.iconBtn}
-              onClick={() => setHideBalance(!hideBalance)}
-              title={hideBalance ? "Show Balance" : "Hide Balance"}
-            >
-              {hideBalance ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={refreshBalance}
-              disabled={refreshing}
-              title="Refresh Balance"
-            >
-              <FaSync size={16} className={refreshing ? styles.spinning : ""} />
-            </button>
-          </div>
         </div>
 
-        <p className={styles.walletBalance}>
-          {refreshing ? (
-            "Refreshing..."
-          ) : balanceError ? (
+        <button
+          type="button"
+          className={styles.walletBalance}
+          onClick={() => setHideBalance(!hideBalance)}
+          aria-label={hideBalance ? "Show wallet balance" : "Hide wallet balance"}
+          title={hideBalance ? "Show balance" : "Hide balance"}
+        >
+          {balanceError ? (
             <span style={{ color: "#EF4444", fontSize: "14px" }}>
               {balanceError}
             </span>
@@ -350,7 +342,7 @@ export default function DashboardHome({
               minimumFractionDigits: 2,
             })}`
           )}
-        </p>
+        </button>
         <p className={styles.walletAvailable}>Available Balance</p>
         <div className={styles.walletActions}>
           <button
