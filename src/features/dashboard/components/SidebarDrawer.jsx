@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import {
   FaTimes,
@@ -20,11 +20,13 @@ export default function SidebarDrawer({
   onNavigate,
   UserData
 }) {
-   
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const { logout } = useContext(AuthContext);
 
-  const rawName = UserData?.firstName || UserData?.firstname || UserData?.fullname || UserData?.email || 'User';
-  const userInitials = String(rawName)
+  const firstName = UserData?.firstName || UserData?.firstname || '';
+  const lastName = UserData?.lastName || UserData?.lastname || '';
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || UserData?.fullname || 'User';
+  const userInitials = String(displayName)
     .trim()
     .split(/\s+/)
     .filter(Boolean)
@@ -43,6 +45,12 @@ export default function SidebarDrawer({
   ];
 
   const handleLogout = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = () => {
+    setIsLogoutDialogOpen(false);
+
     logout();
     onClose();
   };
@@ -61,7 +69,7 @@ export default function SidebarDrawer({
 
         <div className={styles.userSection}>
           <div className={styles.avatar}>{userInitials}</div>
-          <p className={styles.userName}>{UserData?.firstName || 'User'}</p>
+          <p className={styles.userName}>{displayName}</p>
           <p className={styles.userEmail}>
             {UserData?.email || 'user@ctransit.com'}
           </p>
@@ -71,8 +79,6 @@ export default function SidebarDrawer({
         <nav className={styles.navSection}>
           {navItems.map(item => {
             const Icon = item.icon;
-            
-            // ✅ FIX: Check if activePage exists and compare properly
             const isActive = activePage && activePage.toLowerCase() === item.id.toLowerCase();
 
             return (
@@ -100,6 +106,44 @@ export default function SidebarDrawer({
           </button>
         </div>
       </aside>
+
+      {isLogoutDialogOpen && (
+        <div
+          className={styles.dialogOverlay}
+          role="presentation"
+          onClick={() => setIsLogoutDialogOpen(false)}
+        >
+          <div
+            className={styles.dialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-dialog-title"
+            aria-describedby="logout-dialog-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="logout-dialog-title">Log out</h2>
+            <p id="logout-dialog-description">
+              Are you sure you want to log out of your account?
+            </p>
+            <div className={styles.dialogActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setIsLogoutDialogOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmLogoutBtn}
+                onClick={confirmLogout}
+              >
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
