@@ -503,7 +503,7 @@
 .phoneMockup {
   position: relative;
   width: 375px;
-  max-width: 100%;
+  max-width: 55%;
 }
 
 .phoneScreen {
