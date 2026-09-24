@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
+// import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
 import { agentLogin } from "../../api/agentApi";
 import useAgentAuth from "../../hooks/useAgentAuth";
 import styles from "./AgentLogin.module.css";
@@ -157,7 +158,7 @@ export default function AgentLogin() {
           </form>
         </motion.section>
 
-        <motion.aside
+        {/* <motion.aside
           className={styles.infoSection}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -199,7 +200,7 @@ export default function AgentLogin() {
               </div>
             </li>
           </ul>
-        </motion.aside>
+        </motion.aside> */}
       </div>
     </div>
   );

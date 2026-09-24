@@ -16,7 +16,7 @@
   padding: 1.25rem;
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.35);
   position: relative;
-   max-height: 90vh;
+  max-height: 90vh;
   overflow-y: auto;
 }
 .closeBtn {
@@ -112,7 +112,7 @@
   color: #fff;
   font-weight: 800;
   cursor: pointer;
-  width:100%;
+  width: 100%;
 }
 
 .submitBtn:disabled {

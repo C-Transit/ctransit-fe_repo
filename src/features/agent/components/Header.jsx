@@ -15,7 +15,9 @@ export default function AgentHeader({ onMenuClick, agentData, onLogout }) {
       <div className={styles.headerRight}>
         <button className={styles.notificationBtn}>
           <FaBell size={18} />
-          <span className={styles.notificationDot} />
+          {agentData?.notifications?.length > 0 && (
+            <span className={styles.notificationBadge}>{agentData.notifications.length}</span>
+          )}
         </button>
         
         <div className={styles.userMenu}>

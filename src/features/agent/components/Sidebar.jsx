@@ -11,6 +11,7 @@ import {
   FaUserCog,
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import cTransitLogo from '../../../assets/images/new-c-transit-logo.png';
 import styles from './Sidebar.module.css';
 
 const agentNavItems = [
@@ -38,11 +39,13 @@ export default function AgentSidebar({
       <motion.aside
         className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${mobileOpen ? styles.mobileOpen : ''}`}
         initial={false}
-        animate={{ x: mobileOpen ? 0 : undefined }}
+        animate={{ X: mobileOpen ? collapsed ? -280 : -280 : collapsed ? 0 : -280 }}
         transition={{ duration: 0.24, ease: 'easeOut' }}
       >
         <div className={styles.logoSection}>
-          <div className={styles.logoBadge}>CT</div>
+          <div className={styles.logoBadge}>
+            <img src={cTransitLogo} alt="C-Transit" className={styles.logoImage} />
+          </div>
           {!collapsed && <h1 className={styles.logoText}>Agent Portal</h1>}
           <button className={styles.mobileCloseBtn} onClick={onCloseMobile}>
             <FaTimes />
