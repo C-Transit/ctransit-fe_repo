@@ -1,32 +1,59 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap");
 
 .wrapper {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   background:
-    radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.18), transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.16), transparent 50%),
-    linear-gradient(180deg, #f0f7ff 0%, #f8fbff 100%);
+    radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.2), transparent 34%),
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(14, 165, 233, 0.14),
+      transparent 30%
+    ),
+    #f7faff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.wrapper::before,
+.wrapper::after {
+  position: absolute;
+  z-index: -1;
+  width: 22rem;
+  height: 22rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 50%;
+  content: "";
+  animation: float 8s ease-in-out infinite;
+}
+
+.wrapper::before {
+  top: -10rem;
+  left: -8rem;
+}
+
+.wrapper::after {
+  right: -9rem;
+  bottom: -11rem;
+  animation-delay: -3s;
 }
 
 .container {
   width: 100%;
-  max-width: 1100px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  max-width: 470px;
 }
 
 /* Form Section */
 .formSection {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 1.2rem;
-  padding: 2rem 1.5rem;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border-radius: 1.5rem;
+  padding: 2.5rem clamp(1.5rem, 5vw, 3rem);
+  box-shadow: 0 24px 70px rgba(30, 64, 175, 0.14);
   transition: box-shadow 0.3s ease;
 }
 
@@ -35,7 +62,23 @@
 }
 
 .formHeader {
-  margin-bottom: 1.8rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.brandMark {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 1.25rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: linear-gradient(145deg, #2563eb, #0f3ba8);
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.25);
+  font-size: 1.25rem;
+  animation: pulseMark 3s ease-in-out infinite;
 }
 
 .badgeWrapper {
@@ -46,7 +89,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  background: #eff6ff;
   color: #1e3a8a;
   border-radius: 999px;
   font-weight: 700;
@@ -59,7 +102,7 @@
 .title {
   margin: 0.6rem 0 0.4rem;
   font-family: "Sora", "Source Sans 3", sans-serif;
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 5vw, 2.15rem);
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.03em;
@@ -80,6 +123,10 @@
   margin-bottom: 1.5rem;
 }
 
+.passwordInputWrapper {
+  position: relative;
+}
+
 .formGroup {
   display: grid;
   gap: 0.5rem;
@@ -96,7 +143,7 @@
 
 .input {
   width: 100%;
-  height: 2.75rem;
+  height: 3rem;
   padding: 0 1rem;
   border: 1.5px solid #e2e8f0;
   border-radius: 0.9rem;
@@ -107,6 +154,31 @@
   font-family: inherit;
   outline: none;
   transition: all 0.2s ease;
+}
+
+.passwordInputWrapper .input {
+  padding-right: 3rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.passwordToggle:hover,
+.passwordToggle:focus-visible {
+  color: #2563eb;
 }
 
 .input::placeholder {
@@ -130,13 +202,33 @@
 }
 
 .submitBtn {
-  height: 2.75rem;
+  min-height: 3rem;
   font-weight: 700;
   font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, 14px, 0) scale(1.03);
+  }
+}
+
+@keyframes pulseMark {
+  0%,
+  100% {
+    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.25);
+  }
+  50% {
+    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.38);
+  }
 }
 
 /* Demo Box */
@@ -306,12 +398,7 @@
     padding: 1.2rem;
   }
 
-  .container {
-    gap: 1.5rem;
-  }
-
-  .formSection,
-  .infoSection {
+  .formSection {
     padding: 1.5rem 1.2rem;
   }
 

@@ -27,7 +27,7 @@ const TARGET_ENTRIES = {
     main: path.resolve(__dirname, "src/apps/agent/main.jsx"),
     app: path.resolve(__dirname, "src/apps/agent/App.jsx"),
     htmlScript: "/src/apps/agent/main.jsx",
-    title: "C-Transit Agent & Driver Portal",
+    title: "C-Transit Agent Portal",
   },
   driver: {
     name: "driver",

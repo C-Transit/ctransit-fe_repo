@@ -107,10 +107,6 @@ export default function DashboardHome({
   recentTaps,
   onViewAll,
   onBalanceUpdate,
-  // ✅ walletBalance is now passed from DashboardWrapper (read from Postgres
-  // via /users/myprofile). Removed the separate /wallets/details call that
-  // hit the payment provider and returned 500 for users without a virtual
-  // account, causing the blank wallet area on the dashboard.
   walletBalance: walletBalanceProp = 0,
 }) {
   const [activeChartData, setActiveChartData] = useState([]);

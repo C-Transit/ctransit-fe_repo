@@ -7,7 +7,7 @@
   width: min(280px, 100vw);
   background: linear-gradient(180deg, #112a6e 0%, #1e3a8a 70%, #13317f 100%);
   color: #dbeafe;
-  padding: 1rem 0.8rem;<span className={styles.notificationDot} />
+  padding: 1rem 0.8rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
