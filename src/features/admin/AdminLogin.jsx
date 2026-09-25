@@ -38,9 +38,10 @@ export default function AdminLogin() {
     }
   };
 
+  // Auto-fill dev credentials for testing purposes
   const handleFillDevCredentials = () => {
-    const devEmail = import.meta.env.VITE_DEV_ADMIN_EMAIL || "admin@ctransit.ng";
-    const devPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || "Admin@12345";
+    const devEmail = import.meta.env.VITE_DEV_ADMIN_EMAIL || "admin@ctransit.me";
+    const devPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || "Exynos@5x";
     setEmail(devEmail);
     setPassword(devPass);
   };
@@ -146,7 +147,7 @@ export default function AdminLogin() {
         </motion.section>
 
         {/* Right Column: Security Info */}
-        <motion.aside
+        {/* <motion.aside
           className={styles.infoSection}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -186,7 +187,7 @@ export default function AdminLogin() {
               </div>
             </li>
           </ul>
-        </motion.aside>
+        </motion.aside> */}
       </div>
     </div>
   );
