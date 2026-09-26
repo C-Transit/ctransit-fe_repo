@@ -399,10 +399,13 @@ export default function DashboardHome({
         </div>
       </div>
 
-      {/* ── Fare Analytics ── */}
+      {/* ── Fare Debits ── */}
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Fare Analytics</h3>
+          <div>
+            <h3 className={styles.sectionTitle}>Fare Debits</h3>
+            <p className={styles.sectionSubtitle}>Ride fares debited from your wallet</p>
+          </div>
         </div>
 
         <div className={styles.chartCard}>
@@ -414,7 +417,7 @@ export default function DashboardHome({
                 <YAxis fontSize={10} stroke="#9CA3AF" />
                 <Tooltip
                   formatter={(value) =>
-                    `₦${Number(value).toLocaleString("en-NG")}`
+                    `-₦${Number(value).toLocaleString("en-NG")}`
                   }
                   contentStyle={{
                     borderRadius: 8,

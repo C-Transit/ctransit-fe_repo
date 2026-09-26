@@ -10,6 +10,7 @@ export default function DashboardLayout({
   activePage = "home", // ← Keep as activePage
   onNavigate,
   UserData,
+  unreadCount = 0,
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // ✅ Card modal state — opened when user taps Card in BottomNav
@@ -39,7 +40,7 @@ export default function DashboardLayout({
         onMenuClick={() => setSidebarOpen(true)}
         onSettingsClick={() => onNavigate("settings")}
         onNotificationsClick={() => onNavigate("notifications")}
-        unreadCount={1}
+        unreadCount={unreadCount}
       />
 
       {/* Scrollable Page Content */}

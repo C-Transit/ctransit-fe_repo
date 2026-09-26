@@ -13,7 +13,7 @@ import HelpCenter from "../public/HelpPage";
 import ContactSupport from "../public/Contact";
 import axios from "axios";
 
-import { USER_API_URL } from "../../api/api";
+import { NOT_API_URL, USER_API_URL } from "../../api/api";
 
 // ─── NEW: Kora top-up integration ────────────────────────────────────────────
 import { usePaymentReturn } from "../../hooks/usePaymentReturn";
@@ -30,6 +30,7 @@ export default function DashboardWrapper() {
   const [recentTaps, setRecentTaps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   // ─── NEW: Top-up form modal state ─────────────────────────────────────────
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -156,6 +157,38 @@ export default function DashboardWrapper() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  const fetchUnreadNotificationCount = useCallback(async () => {
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(NOT_API_URL, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return;
+
+      const result = await response.json();
+      const notifications = result.notifications || result.data || (Array.isArray(result) ? result : []);
+      const unreadCount = Number(result.unreadCount);
+
+      setUnreadNotificationCount(
+        Number.isFinite(unreadCount)
+          ? unreadCount
+          : Array.isArray(notifications)
+            ? notifications.filter((notification) => !notification.isRead).length
+            : 0
+      );
+    } catch {
+      // Keep the last known count when notification polling fails.
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadNotificationCount();
+    const intervalId = setInterval(fetchUnreadNotificationCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [fetchUnreadNotificationCount]);
+
   // ─── NEW: When Kora payment succeeds, update displayed balance ────────────
   useEffect(() => {
     if (payStatus === "SUCCESS" && payNewBalance != null) {
@@ -191,6 +224,8 @@ export default function DashboardWrapper() {
     onViewAll: () => handleNavigate("history"),
     onContactSupport: () => handleNavigate("contact"),
     onBalanceUpdate: handleBalanceUpdate,
+    unreadNotificationCount,
+    onUnreadCountChange: setUnreadNotificationCount,
     // NEW: lets DashboardHome wire the "Top Up" button to this modal
     onTopUp: () => setShowTopUpModal(true),
   };
@@ -254,6 +289,7 @@ export default function DashboardWrapper() {
       onNavigate={handleNavigate}
       onLogout={handleLogout}
       UserData={userData}
+      unreadCount={unreadNotificationCount}
     >
       {/* ── NEW: Payment return status banner ────────────────────────────── */}
       {payStatus !== "IDLE" && (

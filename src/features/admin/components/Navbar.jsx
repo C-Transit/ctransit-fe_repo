@@ -19,7 +19,7 @@ export default function Navbar({
 }) {
   return (
     <header className={styles.navbar}>
-      <button className={styles.hamburgerBtn} onClick={onToggleMobileSidebar} aria-label="Open menu">
+      <button type="button" className={styles.hamburgerBtn} onClick={onToggleMobileSidebar} aria-label="Open menu">
         <FaBars />
       </button>
 

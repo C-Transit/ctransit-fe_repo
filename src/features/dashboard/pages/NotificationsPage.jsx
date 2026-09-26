@@ -3,7 +3,7 @@ import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import styles from './NotificationsPage.module.css';
 import { NOT_API_URL } from '../../../api/api';
 
-export default function NotificationsPage({ onBack }) {
+export default function NotificationsPage({ onBack, onUnreadCountChange }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,6 +30,14 @@ export default function NotificationsPage({ onBack }) {
       // Backend returns: { success: true, notifications: [...], unreadCount: N }
       const data = result.notifications || result.data || (Array.isArray(result) ? result : []);
       setNotifications(data);
+      const unreadCount = Number(result.unreadCount);
+      onUnreadCountChange?.(
+        Number.isFinite(unreadCount)
+          ? unreadCount
+          : Array.isArray(data)
+            ? data.filter((notification) => !notification.isRead).length
+            : 0
+      );
     } catch (err) {
       setError(err.message || 'Failed to load notifications');
     } finally {
@@ -44,9 +52,11 @@ export default function NotificationsPage({ onBack }) {
   // Mark single notification as read
   const handleMarkAsRead = async (id) => {
     // Optimistic update using isRead field
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
-    );
+    setNotifications(prev => {
+      const updated = prev.map(n => (n.id === id ? { ...n, isRead: true } : n));
+      onUnreadCountChange?.(updated.filter(n => !n.isRead).length);
+      return updated;
+    });
 
     try {
       // Backend uses PATCH /api/notifications/:id/mark-read
@@ -68,7 +78,10 @@ export default function NotificationsPage({ onBack }) {
   // Mark all notifications as read
   const handleMarkAllAsRead = async () => {
     // Optimistic update
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setNotifications(prev => {
+      onUnreadCountChange?.(0);
+      return prev.map(n => ({ ...n, isRead: true }));
+    });
 
     try {
       // Backend uses PATCH /api/notifications/mark-all-read

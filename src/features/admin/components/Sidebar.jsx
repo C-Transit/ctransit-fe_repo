@@ -12,8 +12,6 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 
-import { motion } from 'framer-motion';
-
 import styles from './Sidebar.module.css';
 
 import logo from '../../../assets/images/new-c-transit-logo.png'
@@ -41,18 +39,15 @@ export default function Sidebar({
     <>
       {mobileOpen && <div className={styles.mobileBackdrop} onClick={onCloseMobile} aria-hidden="true" />}
 
-      <motion.aside
+      <aside
         className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${mobileOpen ? styles.mobileOpen : ''}`.trim()}
-        initial={false}
-        animate={{ x: mobileOpen ? 0 : undefined }}
-        transition={{ duration: 0.24, ease: 'easeOut' }}
       >
         <div className={styles.logoSection}>
           <div className={styles.logoBadge}>
             <img src={logo} alt="c-transit logo" className={styles.logoImage}/>
           </div>
           {!collapsed && <h1 className={styles.logoText}>C-Transit Admin</h1>}
-          <button className={styles.mobileCloseBtn} onClick={onCloseMobile} aria-label="Close sidebar">
+          <button type="button" className={styles.mobileCloseBtn} onClick={onCloseMobile} aria-label="Close sidebar">
             <FaTimes />
           </button>
         </div>
@@ -70,11 +65,11 @@ export default function Sidebar({
           ))}
         </nav>
 
-        <button className={styles.collapseBtn} onClick={onToggleCollapse} aria-label="Toggle sidebar">
+        <button type="button" className={styles.collapseBtn} onClick={onToggleCollapse} aria-label="Toggle sidebar">
           {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
           {!collapsed && <span>Collapse</span>}
         </button>
-      </motion.aside>
+      </aside>
     </>
   );
 }

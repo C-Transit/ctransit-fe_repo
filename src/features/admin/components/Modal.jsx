@@ -23,7 +23,7 @@ export default function Modal({ open, title, onClose, children }) {
           >
             <div className={styles.head}>
               <h3>{title}</h3>
-              <button onClick={onClose} aria-label="Close modal">
+              <button type="button" onClick={onClose} aria-label="Close modal">
                 <FaTimes />
               </button>
             </div>

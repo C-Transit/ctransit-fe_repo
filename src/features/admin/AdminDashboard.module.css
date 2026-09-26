@@ -168,6 +168,7 @@
 /* Agents Table */
 .agentsTable {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   background: var(--bg-alt);
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -628,6 +629,128 @@
   border-left: 3px solid #10b981;
   border-radius: 0.4rem;
   margin: 0.5rem 0;
+}
+
+/* Responsive dashboard layout */
+@media (max-width: 1100px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heatStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .main,
+  .mainExpanded {
+    margin-left: 0;
+  }
+
+  .welcomeSection {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actionGroup {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 0.75rem;
+  }
+
+  .cardGrid,
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heatStrip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .agentsSection,
+  .overviewSection,
+  .usersSection,
+  .notificationsSection,
+  .supportSection,
+  .paymentsSection,
+  .reportsSection,
+  .rolesSection {
+    padding: 1rem;
+  }
+
+  .sectionHeader,
+  .filterContainer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchInput,
+  .filterSelect,
+  .refreshBtn {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .agentForm {
+    padding: 1rem;
+  }
+
+  .actionBtn,
+  .pageBtn,
+  .toggleFormBtn,
+  .submitBtn {
+    min-height: 44px;
+  }
+
+  .pagination {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .notificationsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .queryBox {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 0.5rem;
+  }
+
+  .welcomeSection h1 {
+    font-size: 1.35rem;
+  }
+
+  .actionGroup button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .heatStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
 }
 /* Agent Management Section Styles */
 .sectionHeader {

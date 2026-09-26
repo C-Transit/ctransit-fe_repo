@@ -486,7 +486,7 @@ function AgentsSection() {
             )}
 
             <div className={styles.modalActions}>
-              <PrimaryButton variant="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+              <PrimaryButton variant="ghost" type="button" onClick={(event) => { event.preventDefault(); setShowCreateModal(false); }}>
                 Cancel
               </PrimaryButton>
               <PrimaryButton type="submit" disabled={creating}>
@@ -544,7 +544,7 @@ function AgentsSection() {
               <p>No agent information available.</p>
             )}
             <div className={styles.modalActions}>
-              <PrimaryButton variant="ghost" onClick={() => setShowViewModal(false)}>
+              <PrimaryButton variant="ghost" type="button" onClick={(event) => { event.preventDefault(); setShowViewModal(false); }}>
                 Close
               </PrimaryButton>
             </div>
@@ -567,7 +567,7 @@ function AgentsSection() {
               </div>
             )}
             <div className={styles.modalActions}>
-              <PrimaryButton variant="ghost" onClick={() => setShowStatusModal(false)}>
+              <PrimaryButton variant="ghost" type="button" onClick={(event) => { event.preventDefault(); setShowStatusModal(false); }}>
                 Cancel
               </PrimaryButton>
               <PrimaryButton onClick={handleConfirmStatusChange} disabled={updatingStatus}>
@@ -868,7 +868,7 @@ function DisputesSection() {
             )}
 
             <div className={styles.modalActions}>
-              <PrimaryButton variant="ghost" type="button" onClick={() => setShowStatusModal(false)}>
+              <PrimaryButton variant="ghost" type="button" onClick={(event) => { event.preventDefault(); setShowStatusModal(false); }}>
                 Cancel
               </PrimaryButton>
               <PrimaryButton type="submit" disabled={updating}>

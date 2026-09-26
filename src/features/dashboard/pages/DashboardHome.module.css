@@ -219,6 +219,12 @@
   margin: 0;
 }
 
+.sectionSubtitle {
+  margin: 3px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
 .viewAll {
   font-size: 13px;
   font-weight: 500;

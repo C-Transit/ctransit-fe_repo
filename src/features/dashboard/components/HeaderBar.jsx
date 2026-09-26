@@ -24,7 +24,11 @@ export default function HeaderBar({ onMenuClick, onSettingsClick, onNotification
         <div style={{ position: 'relative' }}>
           <button className={styles.iconBtn} aria-label="Notifications" onClick={onNotificationsClick}>
             <FaBell size={22} />
-            {unreadCount > 0 && <div className={styles.notifBadge} />}
+            {unreadCount > 0 && (
+              <span className={styles.notifBadge} aria-label={`${unreadCount} unread notifications`}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
