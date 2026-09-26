@@ -108,6 +108,7 @@ export default function DashboardHome({
   onViewAll,
   onBalanceUpdate,
   walletBalance: walletBalanceProp = 0,
+  onTopUp,
 }) {
   const [activeChartData, setActiveChartData] = useState([]);
   const [walletBalance, setWalletBalance] = useState(walletBalanceProp);
@@ -324,7 +325,9 @@ export default function DashboardHome({
           type="button"
           className={styles.walletBalance}
           onClick={() => setHideBalance(!hideBalance)}
-          aria-label={hideBalance ? "Show wallet balance" : "Hide wallet balance"}
+          aria-label={
+            hideBalance ? "Show wallet balance" : "Hide wallet balance"
+          }
           title={hideBalance ? "Show balance" : "Hide balance"}
         >
           {balanceError ? (
@@ -343,7 +346,7 @@ export default function DashboardHome({
         <div className={styles.walletActions}>
           <button
             className={styles.fundBtn}
-            onClick={handleOpenFunding}
+            onClick={onTopUp ?? handleOpenFunding}
           >
             <FaWallet size={14} />
             Top Up
@@ -475,7 +478,8 @@ export default function DashboardHome({
                 </div>
                 <h4 className={styles.kycTitle}>Verification Required</h4>
                 <p className={styles.kycDesc}>
-                  Please complete student identity verification (KYC) before activating your dedicated bank transfer funding account.
+                  Please complete student identity verification (KYC) before
+                  activating your dedicated bank transfer funding account.
                 </p>
                 <button
                   className={styles.kycBtn}
@@ -489,11 +493,19 @@ export default function DashboardHome({
             ) : (
               <div className={styles.modalBody}>
                 <p className={styles.modalDescription}>
-                  Transfer funds to this dedicated virtual account from your bank app. Your C-Transit wallet will be credited automatically.
+                  Transfer funds to this dedicated virtual account from your
+                  bank app. Your C-Transit wallet will be credited
+                  automatically.
                 </p>
 
                 {vaLoading ? (
-                  <p style={{ textAlign: "center", padding: "24px 0", color: "#6B7280" }}>
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "24px 0",
+                      color: "#6B7280",
+                    }}
+                  >
                     Generating your dedicated funding account...
                   </p>
                 ) : vaError ? (
@@ -516,7 +528,9 @@ export default function DashboardHome({
 
                     <p className={styles.vaBankLabel}>Bank Name</p>
                     <p className={styles.vaBankName}>
-                      {virtualAccount.bankName || virtualAccount.bank || "Provider Bank"}
+                      {virtualAccount.bankName ||
+                        virtualAccount.bank ||
+                        "Provider Bank"}
                     </p>
 
                     <div className={styles.vaChecking}>
@@ -526,7 +540,10 @@ export default function DashboardHome({
                   </div>
                 ) : null}
 
-                <div className={styles.modalFooter} style={{ marginTop: "16px" }}>
+                <div
+                  className={styles.modalFooter}
+                  style={{ marginTop: "16px" }}
+                >
                   <button
                     className={styles.cancelBtn}
                     onClick={() => {
