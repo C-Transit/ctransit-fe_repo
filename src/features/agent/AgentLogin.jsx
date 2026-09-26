@@ -82,7 +82,7 @@ export default function AgentLogin() {
             <div className={styles.badgeWrapper}>
               <span className={styles.badge}>C-Transit</span>
             </div>
-            <h1 className={styles.title}>Agent and Driver Portal</h1>
+            <h1 className={styles.title}>Agent Portal</h1>
             <p className={styles.subtitle}>
               Secure access for authorized agents
             </p>
