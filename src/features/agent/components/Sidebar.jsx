@@ -44,8 +44,8 @@ export default function AgentSidebar({
       >
         <div className={styles.logoSection}>
           <div className={styles.logoBadge}>
-            <img src={cTransitLogo} alt="C-Transit" className={styles.logoImage} />
-          </div>
+            <img src={cTransitLogo} alt="C-Transit Logo" className={styles.logoImage} />
+          </div>  
           {!collapsed && <h1 className={styles.logoText}>Agent Portal</h1>}
           <button className={styles.mobileCloseBtn} onClick={onCloseMobile}>
             <FaTimes />

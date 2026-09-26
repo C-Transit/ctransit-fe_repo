@@ -39,6 +39,7 @@ export default function AdminLogin() {
     }
   };
 
+  // Auto-fill dev credentials for testing purposes
   const handleFillDevCredentials = () => {
     const devEmail = import.meta.env.VITE_DEV_ADMIN_EMAIL || "admin@ctransit.me";
     const devPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || "Exynos@5x";
@@ -164,6 +165,49 @@ export default function AdminLogin() {
             )}
           </form>
         </motion.section>
+
+        {/* Right Column: Security Info */}
+        {/* <motion.aside
+          className={styles.infoSection}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <div className={styles.infoHeader}>
+            <h2 className={styles.infoTitle}>Security Features</h2>
+            <p className={styles.infoSubtitle}>Enterprise-grade protection</p>
+          </div>
+
+          <ul className={styles.featureList}>
+            <li className={styles.featureItem}>
+              <div className={styles.featureIcon}>
+                <FaShieldAlt />
+              </div>
+              <div className={styles.featureContent}>
+                <h3>Role-Based Access</h3>
+                <p>Multi-level privilege boundaries</p>
+              </div>
+            </li>
+            <li className={styles.featureItem}>
+              <div className={styles.featureIcon}>
+                <FaLock />
+              </div>
+              <div className={styles.featureContent}>
+                <h3>Encrypted Sessions</h3>
+                <p>Secure token management</p>
+              </div>
+            </li>
+            <li className={styles.featureItem}>
+              <div className={styles.featureIcon}>
+                <FaUserTie />
+              </div>
+              <div className={styles.featureContent}>
+                <h3>Audit Logging</h3>
+                <p>Complete action tracking</p>
+              </div>
+            </li>
+          </ul>
+        </motion.aside> */}
       </div>
     </div>
   );

@@ -16,7 +16,7 @@
 }
 
 .collapsed {
-  width: 88px;
+  width: 77px;
 }
 
 .logoSection {
@@ -30,7 +30,7 @@
   width: 2.1rem;
   height: 2.1rem;
   border-radius: 0.7rem;
-  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #7dd3fc 0%, #45bff3 100%);
   color: #0f172a;
   display: grid;
   place-items: center;
@@ -42,6 +42,10 @@
   font-size: 1.05rem;
   letter-spacing: -0.02em;
   color: #eff6ff;
+}
+
+.logoImage {
+  width: 1.5rem;
 }
 
 .mobileCloseBtn {
@@ -77,7 +81,10 @@
   padding: 0 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .navItem:hover {
@@ -90,7 +97,11 @@
 }
 
 .active {
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.28) 0%, rgba(147, 197, 253, 0.24) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(125, 211, 252, 0.28) 0%,
+    rgba(147, 197, 253, 0.24) 100%
+  );
   color: #fff;
 }
 

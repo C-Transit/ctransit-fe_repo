@@ -16,6 +16,8 @@ import { motion } from 'framer-motion';
 
 import styles from './Sidebar.module.css';
 
+import logo from '../../../assets/images/new-c-transit-logo.png'
+
 const navItems = [
   { id: 'overview', label: 'Overview', icon: FaChartPie },
   { id: 'users', label: 'Users', icon: FaUsers },
@@ -46,7 +48,9 @@ export default function Sidebar({
         transition={{ duration: 0.24, ease: 'easeOut' }}
       >
         <div className={styles.logoSection}>
-          <div className={styles.logoBadge}>CT</div>
+          <div className={styles.logoBadge}>
+            <img src={logo} alt="c-transit logo" className={styles.logoImage}/>
+          </div>
           {!collapsed && <h1 className={styles.logoText}>C-Transit Admin</h1>}
           <button className={styles.mobileCloseBtn} onClick={onCloseMobile} aria-label="Close sidebar">
             <FaTimes />
