@@ -1,4 +1,7 @@
-import { FaBell, FaMoon, FaSearch, FaSun, FaUserCircle, FaBars } from 'react-icons/fa';
+// Disabled Dark mode
+// import { FaBell, FaMoon, FaSearch, FaSun, FaUserCircle, FaBars } from 'react-icons/fa';
+
+import { FaBell, FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
 
 import { motion } from 'framer-motion';
 
@@ -7,8 +10,8 @@ import styles from './Navbar.module.css';
 export default function Navbar({
   searchValue,
   onSearchChange,
-  darkMode,
-  onToggleDarkMode,
+  // darkMode,
+  // onToggleDarkMode,
   notificationCount,
   adminName,
   onToggleProfileMenu,
@@ -31,9 +34,11 @@ export default function Navbar({
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.iconBtn} onClick={onToggleDarkMode} aria-label="Toggle dark mode">
+
+        {/* Disabled Dark Mode */}
+        {/* <button className={styles.iconBtn} onClick={onToggleDarkMode} aria-label="Toggle dark mode">
           {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
+        </button> */}
 
         <button className={styles.iconBtn} aria-label="Open notifications">
           <FaBell />
