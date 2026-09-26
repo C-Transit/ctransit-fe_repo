@@ -20,6 +20,8 @@ export const ADMIN_API_URL = `${baseApiUrl}/admin`;
 export const API_ADMIN_URL = `${baseApiUrl}/api/admin`;
 export const AGENTS_API_URL = `${baseApiUrl}/api/agents`;
 export const AUTH_AGENT_API_URL = `${baseApiUrl}/api/auth/agent`;
+export const DRIVERS_API_URL = `${baseApiUrl}/api/drivers`;
+export const TERMINALS_API_URL = `${baseApiUrl}/api/terminals`;
 
 export default {
   baseApiUrl,
@@ -39,4 +41,6 @@ export default {
   API_ADMIN_URL,
   AGENTS_API_URL,
   AUTH_AGENT_API_URL,
+  DRIVERS_API_URL,
+  TERMINALS_API_URL,
 };

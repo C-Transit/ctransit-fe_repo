@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-// import { FaLock, FaChartLine, FaHandshake, FaArrowRight } from "react-icons/fa";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { agentLogin } from "../../api/agentApi";
 import useAgentAuth from "../../hooks/useAgentAuth";
 import styles from "./AgentLogin.module.css";
@@ -12,6 +11,7 @@ export default function AgentLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -70,13 +70,21 @@ export default function AgentLogin() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
+          <motion.div
+            className={styles.brandMark}
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.15, type: "spring" }}
+          >
+            <FaLock />
+          </motion.div>
           <div className={styles.formHeader}>
             <div className={styles.badgeWrapper}>
-              <span className={styles.badge}>C-Transit Agent</span>
+              <span className={styles.badge}>C-Transit</span>
             </div>
-            <h1 className={styles.title}>Agent Portal</h1>
+            <h1 className={styles.title}>Agent and Driver Portal</h1>
             <p className={styles.subtitle}>
-              Manage KYC verifications and driver registrations
+              Secure access for authorized agents
             </p>
           </div>
 
@@ -100,15 +108,27 @@ export default function AgentLogin() {
               <label htmlFor="agentPassword" className={styles.label}>
                 Password
               </label>
-              <input
-                id="agentPassword"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className={styles.input}
-                required
-              />
+              <div className={styles.passwordInputWrapper}>
+                <input
+                  id="agentPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className={styles.input}
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
             {error && (
@@ -158,49 +178,6 @@ export default function AgentLogin() {
           </form>
         </motion.section>
 
-        {/* <motion.aside
-          className={styles.infoSection}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          <div className={styles.infoHeader}>
-            <h2 className={styles.infoTitle}>Agent Dashboard</h2>
-            <p className={styles.infoSubtitle}>
-              Powerful tools for KYC management
-            </p>
-          </div>
-
-          <ul className={styles.featureList}>
-            <li className={styles.featureItem}>
-              <div className={styles.featureIcon}>
-                <FaChartLine />
-              </div>
-              <div className={styles.featureContent}>
-                <h3>KYC Overview</h3>
-                <p>View pending, approved, and rejected verifications</p>
-              </div>
-            </li>
-            <li className={styles.featureItem}>
-              <div className={styles.featureIcon}>
-                <FaHandshake />
-              </div>
-              <div className={styles.featureContent}>
-                <h3>Driver Registration</h3>
-                <p>Register new drivers and manage their profiles</p>
-              </div>
-            </li>
-            <li className={styles.featureItem}>
-              <div className={styles.featureIcon}>
-                <FaLock />
-              </div>
-              <div className={styles.featureContent}>
-                <h3>Secure Access</h3>
-                <p>Protected portal for authorized agents only</p>
-              </div>
-            </li>
-          </ul>
-        </motion.aside> */}
       </div>
     </div>
   );

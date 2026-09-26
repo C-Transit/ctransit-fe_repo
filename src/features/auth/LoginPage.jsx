@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import SharedAuthLayout from './components/SharedAuthLayout';
 import InputField from './components/InputField';
@@ -11,7 +11,6 @@ import styles from './LoginPage.module.css';
 
 /**
  * Login Screen
- * Route: /auth/login
  */
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -80,7 +79,6 @@ const [formData, setFormData] = useState({
     if (result.success) {
       addToast('Login successful. Welcome back!', 'success');
       setTimeout(() => {
-        // Navigate to dashboard or role selection
         navigate('/dashboard');
       }, 1500);
     } else {
@@ -116,7 +114,7 @@ const [formData, setFormData] = useState({
         )}
 
         <InputField
-          label="Email or Phone"
+          label="Email"
           placeholder="Enter your email"
           name="emailOrPhone"
           type="text"

@@ -84,7 +84,7 @@ export default function KYCModal({ onClose }) {
       return;
     }
 
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
   
     if (!token) {
       setError("Session expired. Please log in again.");

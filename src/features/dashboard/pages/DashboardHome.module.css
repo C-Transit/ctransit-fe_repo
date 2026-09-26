@@ -36,7 +36,11 @@
 
 /* ── Wallet Card ──────────────────────────────────────────────────────────── */
 .walletCard {
-   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, #1440a0) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark, #1440a0) 100%
+  );
   border-radius: var(--radius-lg);
   padding: 28px;
   margin: 0 0 16px 0;
@@ -84,7 +88,9 @@
   cursor: pointer;
   min-width: 140px;
   width: auto;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
   white-space: nowrap;
 }
 
@@ -112,10 +118,10 @@
 .statsRow {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;          /* stay on one row on desktop */
+  flex-wrap: nowrap; /* stay on one row on desktop */
   gap: 12px;
   margin: 0 0 20px 0;
-   scroll-snap-type: x mandatory;
+  scroll-snap-type: x mandatory;
 }
 
 .statsCard {
@@ -124,14 +130,14 @@
   border-radius: var(--radius-md);
   padding: 16px 18px;
   flex: 1;
-  min-width: 0;               /* allow flex children to shrink */
+  min-width: 0; /* allow flex children to shrink */
   box-sizing: border-box;
   scroll-snap-align: start;
 }
 
 .statsLabel {
   font-size: 10px;
-  font-weight:400;
+  font-weight: 400;
   color: var(--text-secondary);
   margin: 0 0 6px 0;
   text-transform: uppercase;
@@ -274,7 +280,7 @@
   background: none;
   cursor: pointer;
   padding: 4px;
-  color: #6B7280;
+  color: #6b7280;
   transition: color 0.2s;
 }
 
@@ -287,7 +293,7 @@
 }
 
 .modalDescription {
-  color: #6B7280;
+  color: #6b7280;
   font-size: 14px;
   margin-bottom: 16px;
 }
@@ -312,7 +318,7 @@
   padding: 14px 16px 14px 40px;
   font-size: 24px;
   font-weight: 600;
-  border: 2px solid #E5E7EB;
+  border: 2px solid #e5e7eb;
   border-radius: 10px;
   outline: none;
   transition: border-color 0.2s;
@@ -320,11 +326,11 @@
 }
 
 .amountInput:focus {
-  border-color: #1A56DB;
+  border-color: #1a56db;
 }
 
 .amountInput::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
   font-weight: 400;
 }
 
@@ -337,8 +343,8 @@
 
 .quickAmountBtn {
   padding: 10px 8px;
-  background: #F3F4F6;
-  border: 1px solid #E5E7EB;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -348,9 +354,9 @@
 }
 
 .quickAmountBtn:hover {
-  background: #1A56DB;
+  background: #1a56db;
   color: white;
-  border-color: #1A56DB;
+  border-color: #1a56db;
 }
 
 .modalFooter {
@@ -361,24 +367,24 @@
 .cancelBtn {
   flex: 1;
   padding: 12px;
-  background: #F3F4F6;
+  background: #f3f4f6;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #6B7280;
+  color: #6b7280;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .cancelBtn:hover {
-  background: #E5E7EB;
+  background: #e5e7eb;
 }
 
 .topUpBtn {
   flex: 2;
   padding: 12px;
-  background: #1A56DB;
+  background: #1a56db;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -389,11 +395,11 @@
 }
 
 .topUpBtn:hover:not(:disabled) {
-  background: #1E40AF;
+  background: #1e40af;
 }
 
 .topUpBtn:disabled {
-  background: #93A3C4;
+  background: #93a3c4;
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -408,7 +414,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #DCFCE7;
+  background: #dcfce7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -419,26 +425,143 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #16A34A;
+  color: #16a34a;
 }
 
 .successAmount {
   margin: 8px 0 0 0;
-  color: #6B7280;
+  color: #6b7280;
   font-size: 14px;
 }
 
 /* ─── Error Content ──────────────────────────────────────────────────────── */
 .errorContent {
   padding: 12px;
-  background: #FEF2F2;
+  background: #fef2f2;
   border-radius: 8px;
-  color: #DC2626;
+  color: #dc2626;
   font-size: 14px;
   margin-top: 8px;
 }
 
-/* ─── Wallet Header with Icons ──────────────────────────────────────────── */
+/* ─── Virtual Account Funding Box ────────────────────────────────────────── */
+.vaCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.vaAccountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vaAccountNumber {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 1px;
+}
+
+.vaCopyBtn {
+  border: none;
+  background: #e5e7eb;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.vaCopyBtn:hover {
+  background: #d1d5db;
+}
+
+.vaBankLabel {
+  margin: 12px 0 0 0;
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.vaBankName {
+  margin: 2px 0 0 0;
+  font-weight: 600;
+  color: #111827;
+  font-size: 15px;
+}
+
+.vaChecking {
+  font-size: 13px;
+  color: #1a56db;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vaPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1a56db;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+.kycContent {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.kycIconWrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.kycTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.kycDesc {
+  margin: 8px 0 16px 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.kycBtn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: #1a56db;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* ─── Wallet Header ─────────────────────────────────────────────────────── */
 .walletHeader {
   display: flex;
   justify-content: space-between;
@@ -446,58 +569,12 @@
   margin-bottom: 8px;
 }
 
-.walletIcons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.iconBtn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-
-.iconBtn:hover {
-  background: rgba(255, 255, 255, 0.35);
-  transform: scale(1.05);
-}
-
-.iconBtn:active {
-  transform: scale(0.95);
-}
-
-.iconBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ─── Spinning animation for refresh ──────────────────────────────────── */
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* ─── Balance display adjustments ────────────────────────────────────── */
 .walletBalance {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 28px;
   font-weight: 700;
   margin: 4px 0;
@@ -505,6 +582,13 @@
   min-height: 36px;
   display: flex;
   align-items: center;
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.walletBalance:hover {
+  opacity: 0.85;
 }
 
 .walletAvailable {
@@ -515,7 +599,7 @@
 
 /* Ensure the wallet card has proper spacing for the new header */
 .walletCard {
-  background: linear-gradient(135deg, #1A56DB 0%, #1E40AF 100%);
+  background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%);
   border-radius: 16px;
   padding: 20px;
   color: white;
@@ -585,7 +669,9 @@
   border-radius: var(--radius-sm);
   padding: 5px 12px;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .tab:hover {
@@ -613,7 +699,7 @@
   gap: 14px;
   padding: 16px 18px;
   border-bottom: 1px solid var(--border-light);
-   transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 .tapRow:hover {
   background-color: var(--bg-page);
@@ -695,7 +781,6 @@
   background-color: var(--bg-warning-badge, rgba(245, 158, 11, 0.15));
   color: var(--text-warning-badge, #fbbf24);
 }
-
 
 /* ── Chart Card ───────────────────────────────────────────────────────────── */
 .chartCard {

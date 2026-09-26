@@ -4,13 +4,13 @@
   "id": "/",
   "icons": [
     {
-      "src": "/icons/icon-192x192.svg",
+      "src": "/c-transit-icon.svg",
       "type": "image/svg+xml",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.svg",
+      "src": "/c-transit-icon.svg",
       "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any maskable"

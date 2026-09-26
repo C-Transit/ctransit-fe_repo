@@ -18,7 +18,7 @@ export default function WalletPage({ walletBalance, onBack, onBalanceUpdate }) {
 
   // ─── Auth Headers ──────────────────────────────────────────────────────────
   const authHeaders = () => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     if (!token) {
       return {};
     }
@@ -35,7 +35,7 @@ export default function WalletPage({ walletBalance, onBack, onBalanceUpdate }) {
         `${USER_API_URL}/transactions/history`,
         { 
           headers, 
-          params: { page: 1, limit: 5 } 
+          params: { limit: 5 } 
         }
       );
 

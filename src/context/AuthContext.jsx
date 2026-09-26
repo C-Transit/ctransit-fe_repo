@@ -19,6 +19,7 @@ export function AuthProvider({ children }) {
   // Helper function to centralize session initialization/saving
   const setSession = useCallback((token, userData) => {
     localStorage.setItem("authToken", token);
+    localStorage.setItem("token", token);
     localStorage.setItem("authUser", JSON.stringify(userData));
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(userData);
@@ -31,6 +32,7 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
     setError(null);
     localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     localStorage.removeItem("authUser");
     localStorage.removeItem("refreshToken");
     delete axios.defaults.headers.common["Authorization"];
@@ -39,7 +41,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem("authToken");
+        const storedToken = localStorage.getItem("authToken") || localStorage.getItem("token");
         const storedUser = localStorage.getItem("authUser");
 
         if (storedToken && storedUser) {
@@ -260,7 +262,15 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      try {
+        await axios.post(`${AUTH_API_URL}/logout`, { refreshToken });
+      } catch {
+        // Ignore network failure on logout
+      }
+    }
     clearSession();
   }, [clearSession]);
 

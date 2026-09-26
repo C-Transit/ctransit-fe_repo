@@ -237,6 +237,7 @@ export default function Home() {
         <div className={styles.navLinks}>
           <a href="#how-it-works">How It Works</a>
           <a href="#why-ctransit">Solutions</a>
+          <a href="/about"> About</a>
         </div>
 
           <div className={styles.navRight}>
@@ -289,7 +290,7 @@ export default function Home() {
                 <div className={styles.statusBar}>
                   <span>C-Transit</span>
                   <span className={styles.checkmark}>✓</span>
-                  <span>10:30 AM</span>
+                  <span>{new Date().toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span> 
                 </div>
                 <div className={styles.screenContent}>
                   <div className={styles.nfcAnimation}>
@@ -298,7 +299,7 @@ export default function Home() {
                     <div className={styles.nfcRing} style={{ animationDelay: '1s' }}></div>
                   </div>
                   <p className={styles.tapText}>TAP YOUR CARD</p>
-                  <p className={styles.tapSubtext}>Place your C-transit card on the terminal</p>
+                  <p className={styles.tapSubtext}>Place your School ID Card or C-transit card on the terminal</p>
                 </div>
               </div>
               <div className={styles.phoneGlow}></div>
@@ -498,7 +499,6 @@ export default function Home() {
             <Link to="/help">Help Center</Link>
             <a href="/privacy">Privacy Policy</a>
             <a href="/terms">Terms of Service</a>
-            <a href="#status">Status</a>
           </div>
         </div>
 

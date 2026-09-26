@@ -12,9 +12,9 @@ import {
   FaWallet,
   FaWifi,
   FaTimes,
-  FaEye,
-  FaEyeSlash,
-  FaSync,
+  FaCopy,
+  FaCheck,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import styles from "./DashboardHome.module.css";
 import axios from "axios";
@@ -107,25 +107,23 @@ export default function DashboardHome({
   recentTaps,
   onViewAll,
   onBalanceUpdate,
-  // ✅ walletBalance is now passed from DashboardWrapper (read from Postgres
-  // via /users/myprofile). Removed the separate /wallets/details call that
-  // hit the payment provider and returned 500 for users without a virtual
-  // account, causing the blank wallet area on the dashboard.
   walletBalance: walletBalanceProp = 0,
+  onTopUp,
 }) {
   const [activeChartData, setActiveChartData] = useState([]);
   const [walletBalance, setWalletBalance] = useState(walletBalanceProp);
-  const [balanceLoading, setBalanceLoading] = useState(false);
   const [balanceError, setBalanceError] = useState(null);
   const [hideBalance, setHideBalance] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
-  // ─── Top Up Modal States ──────────────────────────────────────────────────
-  const [showTopUpModal, setShowTopUpModal] = useState(false);
-  const [topUpAmount, setTopUpAmount] = useState("");
-  const [topUpLoading, setTopUpLoading] = useState(false);
-  const [topUpError, setTopUpError] = useState(null);
-  const [topUpSuccess, setTopUpSuccess] = useState(false);
+  // ─── Virtual Account Funding Modal States ──────────────────────────────────
+  const [showFundModal, setShowFundModal] = useState(false);
+  const [virtualAccount, setVirtualAccount] = useState(null);
+  const [vaLoading, setVaLoading] = useState(false);
+  const [vaError, setVaError] = useState(null);
+  const [showKycRequired, setShowKycRequired] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [creditedAmount, setCreditedAmount] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   // ─── Sync balance when prop updates (e.g. after DashboardWrapper refetch) ──
   useEffect(() => {
@@ -134,86 +132,138 @@ export default function DashboardHome({
 
   // ─── Auth Header Helper ───────────────────────────────────────────────────
   const getAuthHeader = () => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  // ─── Refresh fetches wallet balance only ───────────────────────────────────
-  const refreshBalance = async () => {
-    setRefreshing(true);
+  // ─── Keep the wallet balance current without a manual refresh button ───────
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncBalance = async () => {
+      try {
+        const res = await axios.get(`${USER_API_URL}/wallets/details`, {
+          headers: getAuthHeader(),
+        });
+        const fresh = res.data?.data?.balance ?? res.data?.balance;
+
+        if (isCancelled || fresh === undefined) return;
+
+        setWalletBalance(fresh);
+        setBalanceError(null);
+        if (onBalanceUpdate) onBalanceUpdate(fresh);
+      } catch {
+        if (!isCancelled) setBalanceError("Unable to update balance");
+      }
+    };
+
+    syncBalance();
+    const intervalId = setInterval(syncBalance, 30000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [onBalanceUpdate]);
+
+  // ─── Handle Open Funding (Kora Virtual Account Flow) ───────────────────────
+  const handleOpenFunding = async () => {
+    setShowFundModal(true);
+    setVaLoading(true);
+    setVaError(null);
+    setShowKycRequired(false);
+    setShowSuccess(false);
+
     try {
-      const res = await axios.get(`${USER_API_URL}/wallets/details`, {
-        headers: getAuthHeader(),
-      });
-      // Response: { success: true, data: { balance, accountNumber, bank, bankName } }
-      const fresh =
-        res.data?.data?.balance ?? res.data?.balance ?? walletBalance;
-      setWalletBalance(fresh);
-      if (onBalanceUpdate) onBalanceUpdate(fresh);
-    } catch (err) {
-      console.error("Balance refresh failed:", err);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // ─── Handle Top Up ──────────────────────────────────────────────────────────
-  const handleTopUp = async () => {
-    const amount = parseFloat(topUpAmount);
-    if (!topUpAmount || isNaN(amount) || amount <= 0) {
-      setTopUpError("Please enter a valid amount");
-      return;
-    }
-
-    setTopUpLoading(true);
-    setTopUpError(null);
-    setTopUpSuccess(false);
-
-    try {
-      const response = await axios.post(
-        `${USER_API_URL}/payments/topup`,
-        { amount },
-        { headers: getAuthHeader() }
-      );
-
-      // Backend returns: { success, message, data: { reference, amount, newBalance } }
-      const newBalance =
-        response.data?.data?.newBalance ?? walletBalance + amount;
-      setWalletBalance(newBalance);
-
-      if (onBalanceUpdate) {
-        onBalanceUpdate(newBalance);
+      const headers = getAuthHeader();
+      // Try to fetch existing virtual account first
+      try {
+        const fetchRes = await axios.get(`${USER_API_URL}/payments/fetch`, { headers });
+        const fetchedData = fetchRes.data?.data;
+        if (fetchedData?.accountNumber) {
+          setVirtualAccount(fetchedData);
+          setVaLoading(false);
+          return;
+        }
+      } catch {
+        // Fall back to creating one
       }
 
-      setTopUpSuccess(true);
-      setTopUpAmount("");
-
-      setTimeout(() => {
-        setShowTopUpModal(false);
-        setTopUpSuccess(false);
-      }, 2000);
-    } catch (err) {
-      console.error("Top up failed:", err);
-      if (err.response?.status === 403) {
-        setTopUpError(
-          "Please complete your KYC verification to top up your wallet."
-        );
-      } else if (err.response?.status === 401) {
-        setTopUpError("Session expired. Please login again.");
-      } else if (err.response?.status === 404) {
-        setTopUpError("Top up service is currently unavailable.");
-      } else if (err.response?.status === 500) {
-        setTopUpError("Server error. Please try again later.");
+      const res = await axios.post(`${USER_API_URL}/payments/create`, {}, { headers });
+      if (res.data?.data) {
+        setVirtualAccount(res.data.data);
       } else {
-        setTopUpError(
+        throw new Error("Could not generate virtual account");
+      }
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setShowKycRequired(true);
+      } else if (err.response?.status === 401) {
+        setVaError("Session expired. Please login again.");
+      } else {
+        setVaError(
           err.response?.data?.message ||
-            "Something went wrong. Please try again."
+            "Failed to load virtual account funding details."
         );
       }
     } finally {
-      setTopUpLoading(false);
+      setVaLoading(false);
     }
   };
+
+  const handleCopyAccount = () => {
+    if (virtualAccount?.accountNumber) {
+      navigator.clipboard.writeText(virtualAccount.accountNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // ─── Polling for incoming payment credit ───────────────────────────────────
+  useEffect(() => {
+    if (!showFundModal || showSuccess || showKycRequired) return;
+
+    let pollCount = 0;
+    const MAX_POLLS = 60;
+
+    const pollBalance = async () => {
+      try {
+        pollCount++;
+        const res = await axios.get(`${USER_API_URL}/wallets/details`, {
+          headers: getAuthHeader(),
+        });
+
+        const newBalance = res.data?.data?.balance ?? res.data?.balance ?? 0;
+
+        if (newBalance > walletBalance) {
+          const diff = newBalance - walletBalance;
+          setCreditedAmount(diff);
+          setWalletBalance(newBalance);
+          if (onBalanceUpdate) onBalanceUpdate(newBalance);
+          setShowSuccess(true);
+        }
+
+        if (pollCount >= MAX_POLLS) {
+          // Stop polling after 5 minutes
+        }
+      } catch {
+        // Silent fail for polling errors
+      }
+    };
+
+    const intervalId = setInterval(pollBalance, 5000);
+    return () => clearInterval(intervalId);
+  }, [showFundModal, showSuccess, showKycRequired, walletBalance, onBalanceUpdate]);
+
+  useEffect(() => {
+    if (!showSuccess) return;
+    const timeoutId = setTimeout(() => {
+      setShowFundModal(false);
+      setShowSuccess(false);
+      setCreditedAmount(0);
+    }, 3500);
+    return () => clearTimeout(timeoutId);
+  }, [showSuccess]);
 
   // Generate dynamic analytics points
   // Generate dynamic analytics points — exclude TOPUPs from fare chart
@@ -269,29 +319,18 @@ export default function DashboardHome({
       <div className={styles.walletCard}>
         <div className={styles.walletHeader}>
           <p className={styles.walletLabel}>Wallet Balance</p>
-          <div className={styles.walletIcons}>
-            <button
-              className={styles.iconBtn}
-              onClick={() => setHideBalance(!hideBalance)}
-              title={hideBalance ? "Show Balance" : "Hide Balance"}
-            >
-              {hideBalance ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={refreshBalance}
-              disabled={refreshing}
-              title="Refresh Balance"
-            >
-              <FaSync size={16} className={refreshing ? styles.spinning : ""} />
-            </button>
-          </div>
         </div>
 
-        <p className={styles.walletBalance}>
-          {balanceLoading ? (
-            "Loading..."
-          ) : balanceError ? (
+        <button
+          type="button"
+          className={styles.walletBalance}
+          onClick={() => setHideBalance(!hideBalance)}
+          aria-label={
+            hideBalance ? "Show wallet balance" : "Hide wallet balance"
+          }
+          title={hideBalance ? "Show balance" : "Hide balance"}
+        >
+          {balanceError ? (
             <span style={{ color: "#EF4444", fontSize: "14px" }}>
               {balanceError}
             </span>
@@ -302,12 +341,12 @@ export default function DashboardHome({
               minimumFractionDigits: 2,
             })}`
           )}
-        </p>
+        </button>
         <p className={styles.walletAvailable}>Available Balance</p>
         <div className={styles.walletActions}>
           <button
             className={styles.fundBtn}
-            onClick={() => setShowTopUpModal(true)}
+            onClick={onTopUp ?? handleOpenFunding}
           >
             <FaWallet size={14} />
             Top Up
@@ -400,18 +439,17 @@ export default function DashboardHome({
         </div>
       </div>
 
-      {/* ─── TOP UP MODAL ────────────────────────────────────────────────────── */}
-      {showTopUpModal && (
+      {/* ─── VIRTUAL ACCOUNT FUNDING MODAL ────────────────────────────────── */}
+      {showFundModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Top Up Wallet</h3>
+              <h3 className={styles.modalTitle}>Fund Wallet</h3>
               <button
                 onClick={() => {
-                  setShowTopUpModal(false);
-                  setTopUpError(null);
-                  setTopUpAmount("");
-                  setTopUpSuccess(false);
+                  setShowFundModal(false);
+                  setVaError(null);
+                  setShowKycRequired(false);
                 }}
                 className={styles.modalCloseBtn}
               >
@@ -419,107 +457,104 @@ export default function DashboardHome({
               </button>
             </div>
 
-            {topUpSuccess ? (
+            {showSuccess ? (
               <div className={styles.successContent}>
                 <div className={styles.successIconWrapper}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="#16A34A"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <FaCheck size={28} color="#16A34A" />
                 </div>
-                <h4 className={styles.successTitle}>Top Up Successful!</h4>
+                <h4 className={styles.successTitle}>Wallet Funded!</h4>
                 <p className={styles.successAmount}>
                   ₦
-                  {parseFloat(topUpAmount).toLocaleString("en-NG", {
+                  {Number(creditedAmount || 0).toLocaleString("en-NG", {
                     minimumFractionDigits: 2,
                   })}{" "}
-                  added to your wallet
+                  added to your available balance
                 </p>
               </div>
-            ) : (
-              <>
-                <div className={styles.modalBody}>
-                  <p className={styles.modalDescription}>
-                    Enter the amount you want to add to your wallet
-                  </p>
-
-                  <div className={styles.inputGroup}>
-                    <span className={styles.currencySymbol}>₦</span>
-                    <input
-                      type="number"
-                      className={styles.amountInput}
-                      placeholder="0.00"
-                      value={topUpAmount}
-                      onChange={(e) => {
-                        setTopUpAmount(e.target.value);
-                        setTopUpError(null);
-                      }}
-                      min="0"
-                      step="100"
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className={styles.quickAmounts}>
-                    <button
-                      className={styles.quickAmountBtn}
-                      onClick={() => {
-                        setTopUpAmount("1000");
-                        setTopUpError(null);
-                      }}
-                    >
-                      ₦1,000
-                    </button>
-                    <button
-                      className={styles.quickAmountBtn}
-                      onClick={() => {
-                        setTopUpAmount("2000");
-                        setTopUpError(null);
-                      }}
-                    >
-                      ₦2,000
-                    </button>
-                    <button
-                      className={styles.quickAmountBtn}
-                      onClick={() => {
-                        setTopUpAmount("5000");
-                        setTopUpError(null);
-                      }}
-                    >
-                      ₦5,000
-                    </button>
-                  </div>
-
-                  {topUpError && (
-                    <div className={styles.errorContent}>{topUpError}</div>
-                  )}
+            ) : showKycRequired ? (
+              <div className={styles.kycContent}>
+                <div className={styles.kycIconWrapper}>
+                  <FaExclamationTriangle size={28} color="#D97706" />
                 </div>
+                <h4 className={styles.kycTitle}>Verification Required</h4>
+                <p className={styles.kycDesc}>
+                  Please complete student identity verification (KYC) before
+                  activating your dedicated bank transfer funding account.
+                </p>
+                <button
+                  className={styles.kycBtn}
+                  onClick={() => {
+                    setShowFundModal(false);
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <div className={styles.modalBody}>
+                <p className={styles.modalDescription}>
+                  Transfer funds to this dedicated virtual account from your
+                  bank app. Your C-Transit wallet will be credited
+                  automatically.
+                </p>
 
-                <div className={styles.modalFooter}>
+                {vaLoading ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "24px 0",
+                      color: "#6B7280",
+                    }}
+                  >
+                    Generating your dedicated funding account...
+                  </p>
+                ) : vaError ? (
+                  <div className={styles.errorContent}>{vaError}</div>
+                ) : virtualAccount ? (
+                  <div className={styles.vaCard}>
+                    <p className={styles.vaBankLabel}>Account Number</p>
+                    <div className={styles.vaAccountRow}>
+                      <span className={styles.vaAccountNumber}>
+                        {virtualAccount.accountNumber || "—"}
+                      </span>
+                      <button
+                        className={styles.vaCopyBtn}
+                        onClick={handleCopyAccount}
+                      >
+                        <FaCopy size={12} />
+                        {copied ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+
+                    <p className={styles.vaBankLabel}>Bank Name</p>
+                    <p className={styles.vaBankName}>
+                      {virtualAccount.bankName ||
+                        virtualAccount.bank ||
+                        "Provider Bank"}
+                    </p>
+
+                    <div className={styles.vaChecking}>
+                      <span className={styles.vaPulse}></span>
+                      Listening for incoming transfer...
+                    </div>
+                  </div>
+                ) : null}
+
+                <div
+                  className={styles.modalFooter}
+                  style={{ marginTop: "16px" }}
+                >
                   <button
                     className={styles.cancelBtn}
                     onClick={() => {
-                      setShowTopUpModal(false);
-                      setTopUpError(null);
-                      setTopUpAmount("");
+                      setShowFundModal(false);
+                      setVaError(null);
                     }}
                   >
-                    Cancel
-                  </button>
-                  <button
-                    className={styles.topUpBtn}
-                    onClick={handleTopUp}
-                    disabled={topUpLoading || !topUpAmount}
-                  >
-                    {topUpLoading ? "Processing..." : "Top Up"}
+                    Done
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
