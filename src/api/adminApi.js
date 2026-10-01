@@ -283,6 +283,7 @@ export const syncAdminCardWhitelist = async () => {
 };
 
 /**
+<<<<<<< HEAD
  * Error parser for Admin Card Linking
  */
 export const getAdminCardLinkErrorMessage = (err) => {
@@ -372,6 +373,8 @@ export const unlinkAdminCard = async ({ cardUid, userIdentifier } = {}) => {
 };
 
 /**
+=======
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  * 13. Admin Logout
  * POST /api/auth/logout
  */

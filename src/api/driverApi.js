@@ -318,6 +318,7 @@ export const fetchDriverTerminalStatus = async (terminalId) => {
 };
 
 /**
+<<<<<<< HEAD
  * Error message parser for driver card linking
  */
 export const getDriverCardLinkErrorMessage = (err) => {
@@ -374,11 +375,22 @@ export const linkDriverCard = async ({ otp, pin }) => {
   const payload = {
     otp: String(otp || "").trim(),
     pin: String(pin || "").trim(),
+=======
+ * 11. Initiate Driver Card Linking (Card -> Driver binding)
+ * POST /api/drivers/card/link (Explicit Backend Dependency)
+ */
+export const linkDriverCard = async ({ otp, cardUid, driverId }) => {
+  const payload = {
+    otp: String(otp || "").trim(),
+    cardUid: String(cardUid || "").trim(),
+    driverId: String(driverId || "").trim(),
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   };
 
   return requestDriverWithFallback(
     "post",
     "/drivers/card/link",
+<<<<<<< HEAD
     [],
     payload,
     true
@@ -400,6 +412,12 @@ export const verifyDriverBank = async ({ bankCode, accountNumber }) => {
     "post",
     "/drivers/bank/verify",
     [],
+=======
+    [
+      "/agents/card/link",
+      "/cards/link",
+    ],
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
     payload,
     true
   );

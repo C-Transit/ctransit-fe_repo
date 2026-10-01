@@ -14,7 +14,10 @@ import {
   fetchDriverWithdrawals,
   requestDriverWithdrawal,
   fetchDriverDashboard,
+<<<<<<< HEAD
   verifyDriverBank,
+=======
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
 } from "../../api/driverApi";
 import DriverLayout from "./components/DriverLayout";
 import styles from "./DriverWithdrawals.module.css";
@@ -34,6 +37,7 @@ export default function DriverWithdrawals() {
   const [amount, setAmount] = useState("");
   const [remarks, setRemarks] = useState("");
   const [customBankName, setCustomBankName] = useState(driver?.bankName || "");
+<<<<<<< HEAD
   const [bankCode, setBankCode] = useState(driver?.bankCode || "058");
   const [customAccountNumber, setCustomAccountNumber] = useState(driver?.accountNumber || "");
   const [verifyingBank, setVerifyingBank] = useState(false);
@@ -85,6 +89,12 @@ export default function DriverWithdrawals() {
     }
   };
 
+=======
+  const [customAccountNumber, setCustomAccountNumber] = useState(driver?.accountNumber || "");
+
+  const minWithdrawal = 1000;
+
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   // Driver Settlement Bank Details
   const bankDetails = {
     bankName: driver?.bankName || customBankName || "Pending Configuration",
@@ -93,7 +103,11 @@ export default function DriverWithdrawals() {
       : customAccountNumber
       ? `••••${customAccountNumber.slice(-4)}`
       : "Not on file",
+<<<<<<< HEAD
     accountName: verifiedAccountName || `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`.trim().toUpperCase() || "AUTHORIZED DRIVER",
+=======
+    accountName: `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`.trim().toUpperCase() || "AUTHORIZED DRIVER",
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   };
 
   const loadWithdrawalData = useCallback(async () => {
@@ -307,6 +321,7 @@ export default function DriverWithdrawals() {
 
               {(!driver?.bankName || !driver?.accountNumber) && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", padding: "0.85rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+<<<<<<< HEAD
                   <div style={{ display: "flex", gap: "0.75rem" }}>
                     <div className={styles.formGroup} style={{ flex: 2 }}>
                       <label className={styles.label}>Settlement Commercial Bank</label>
@@ -391,6 +406,41 @@ export default function DriverWithdrawals() {
                       <strong>Verified Account Name:</strong> {verifiedAccountName}
                     </div>
                   )}
+=======
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Settlement Commercial Bank</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. First Bank, Access Bank, GTBank"
+                      value={customBankName}
+                      onChange={(e) => setCustomBankName(e.target.value)}
+                      style={{
+                        padding: "0.65rem 0.85rem",
+                        borderRadius: "8px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.88rem",
+                      }}
+                      required
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>10-Digit NUBAN Account Number</label>
+                    <input
+                      type="text"
+                      maxLength={10}
+                      placeholder="e.g. 0123456789"
+                      value={customAccountNumber}
+                      onChange={(e) => setCustomAccountNumber(e.target.value.replace(/\D/g, ""))}
+                      style={{
+                        padding: "0.65rem 0.85rem",
+                        borderRadius: "8px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.88rem",
+                      }}
+                      required
+                    />
+                  </div>
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
                 </div>
               )}
 

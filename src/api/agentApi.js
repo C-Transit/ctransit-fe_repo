@@ -207,6 +207,7 @@ export const fetchDrivers = async () => {
 };
 
 /**
+<<<<<<< HEAD
  * Error message parser for driver registration
  */
 export const getDriverRegisterErrorMessage = (err) => {
@@ -243,18 +244,36 @@ export const getDriverRegisterErrorMessage = (err) => {
  * 6. Register Driver
  * POST /api/agents/drivers/register
  * req.body: { firstname, lastname, phone, pin }
+=======
+ * 6. Register Driver
+ * POST /api/agents/drivers/register (fallback /api/auth/agent/drivers/register)
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  */
 export const registerDriver = async ({
   firstname,
   lastname,
+<<<<<<< HEAD
   phone,
   pin,
+=======
+  matricNumber,
+  phone,
+  vehicleType,
+  vehiclePlate,
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
 }) => {
   const payload = {
     firstname: firstname?.trim(),
     lastname: lastname?.trim(),
+<<<<<<< HEAD
     phone: phone?.trim(),
     pin: String(pin || "").trim(),
+=======
+    matricNumber: matricNumber?.trim(),
+    ...(phone ? { phone: phone.trim() } : {}),
+    ...(vehicleType ? { vehicleType } : {}),
+    ...(vehiclePlate ? { vehiclePlate: vehiclePlate.trim() } : {}),
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   };
   return requestAgentWithFallback(
     "post",
@@ -296,6 +315,7 @@ export const linkAgentCard = async ({ otp, studentId }) => {
 };
 
 /**
+<<<<<<< HEAD
  * 8b. Unlink Card (Agent)
  * POST /api/agents/card/unlink
  * req.body: provide exactly one of { cardUid } or { userIdentifier }
@@ -336,6 +356,8 @@ export const getUnlinkCardErrorMessage = (err) => {
 };
 
 /**
+=======
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  * 9. List Students (User Lookup)
  * GET /api/agents/users?page=1&limit=20&isVerified=true
  */

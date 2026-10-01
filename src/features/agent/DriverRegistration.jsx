@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaPhone, FaLock, FaSave, FaTimes, FaList, FaCheckCircle, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { registerDriver, fetchDrivers, getDriverRegisterErrorMessage } from '../../api/agentApi';
@@ -11,11 +12,28 @@ export default function DriverRegistration() {
     lastname: '',
     phone: '',
     pin: '',
+=======
+import { FaUser, FaPhone, FaIdCard, FaCar, FaSave, FaTimes, FaList, FaCheckCircle, FaSpinner } from 'react-icons/fa';
+import { registerDriver, fetchDrivers } from '../../api/agentApi';
+import styles from './DriverRegistration.module.css';
+
+export default function DriverRegistration() {
+  const [formData, setFormData] = useState({
+    firstname: '',
+    lastname: '',
+    matricNumber: '',
+    phone: '',
+    vehicleType: 'bus',
+    vehiclePlate: '',
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+<<<<<<< HEAD
   const [registeredDriver, setRegisteredDriver] = useState(null);
+=======
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   const [drivers, setDrivers] = useState([]);
   const [loadingDrivers, setLoadingDrivers] = useState(false);
 
@@ -37,6 +55,7 @@ export default function DriverRegistration() {
   }, [loadDriversList]);
 
   const handleChange = (e) => {
+<<<<<<< HEAD
     const { name, value } = e.target;
     if (name === 'pin') {
       const cleaned = value.replace(/\D/g, '').slice(0, 4);
@@ -44,12 +63,16 @@ export default function DriverRegistration() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+=======
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
     setError(null);
     setSuccess(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+<<<<<<< HEAD
     setError(null);
     setSuccess(false);
     setRegisteredDriver(null);
@@ -83,16 +106,44 @@ export default function DriverRegistration() {
 
       const driverObj = res?.driver || res?.data?.driver || res?.data || res;
       setRegisteredDriver(driverObj);
+=======
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      await registerDriver({
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        matricNumber: formData.matricNumber,
+        phone: formData.phone,
+        vehicleType: formData.vehicleType,
+        vehiclePlate: formData.vehiclePlate,
+      });
+
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
       setSuccess(true);
       setFormData({
         firstname: '',
         lastname: '',
+<<<<<<< HEAD
         phone: '',
         pin: '',
       });
       loadDriversList();
     } catch (err) {
       setError(getDriverRegisterErrorMessage(err));
+=======
+        matricNumber: '',
+        phone: '',
+        vehicleType: 'bus',
+        vehiclePlate: '',
+      });
+      loadDriversList();
+      setTimeout(() => setSuccess(false), 4000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to register driver. Please try again.');
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
     } finally {
       setLoading(false);
     }
@@ -102,7 +153,11 @@ export default function DriverRegistration() {
     <div className={styles.driverRegistration}>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Driver Registration</h1>
+<<<<<<< HEAD
         <p className={styles.pageSubtitle}>Create a new driver account with 4-digit PIN for campus shuttle operations</p>
+=======
+        <p className={styles.pageSubtitle}>Register new campus shuttle drivers to the C-Transit transport system</p>
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
       </div>
 
       <div className={styles.formContainer}>
@@ -143,6 +198,25 @@ export default function DriverRegistration() {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
+<<<<<<< HEAD
+=======
+              <label htmlFor="matricNumber" className={styles.label}>
+                <FaIdCard className={styles.labelIcon} /> Driver Staff / Matric ID
+              </label>
+              <input
+                id="matricNumber"
+                name="matricNumber"
+                type="text"
+                placeholder="e.g. DRV-2024-001 or Staff ID"
+                value={formData.matricNumber}
+                onChange={handleChange}
+                className={styles.input}
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
               <label htmlFor="phone" className={styles.label}>
                 <FaPhone className={styles.labelIcon} /> Phone Number
               </label>
@@ -150,6 +224,7 @@ export default function DriverRegistration() {
                 id="phone"
                 name="phone"
                 type="tel"
+<<<<<<< HEAD
                 placeholder="e.g. 08012345678 or +2348012345678"
                 value={formData.phone}
                 onChange={handleChange}
@@ -180,11 +255,55 @@ export default function DriverRegistration() {
               <span style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
                 Driver security PIN used for terminal and mobile login
               </span>
+=======
+                placeholder="08012345678"
+                value={formData.phone}
+                onChange={handleChange}
+                className={styles.input}
+              />
+            </div>
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="vehicleType" className={styles.label}>
+                <FaCar className={styles.labelIcon} /> Vehicle Type
+              </label>
+              <select
+                id="vehicleType"
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleChange}
+                className={styles.select}
+                required
+              >
+                <option value="bus">Campus Bus / Coaster</option>
+                <option value="minibus">Mini Bus / Keke</option>
+                <option value="van">Shuttle Van</option>
+                <option value="sedan">Sedan</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="vehiclePlate" className={styles.label}>
+                <FaCar className={styles.labelIcon} /> Vehicle Plate Number
+              </label>
+              <input
+                id="vehiclePlate"
+                name="vehiclePlate"
+                type="text"
+                placeholder="e.g. ABC-123-NG"
+                value={formData.vehiclePlate}
+                onChange={handleChange}
+                className={styles.input}
+              />
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
             </div>
           </div>
 
           {error && <div className={styles.errorBox}>{error}</div>}
           {success && (
+<<<<<<< HEAD
             <div className={styles.successBox} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FaCheckCircle /> Driver account created successfully!
@@ -217,6 +336,10 @@ export default function DriverRegistration() {
                   <FaArrowRight size={11} />
                 </button>
               </div>
+=======
+            <div className={styles.successBox}>
+              <FaCheckCircle style={{ marginRight: '8px' }} /> Driver registered successfully!
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
             </div>
           )}
 
@@ -228,8 +351,15 @@ export default function DriverRegistration() {
                 setFormData({
                   firstname: '',
                   lastname: '',
+<<<<<<< HEAD
                   phone: '',
                   pin: '',
+=======
+                  matricNumber: '',
+                  phone: '',
+                  vehicleType: 'bus',
+                  vehiclePlate: '',
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
                 });
                 setError(null);
                 setSuccess(false);
@@ -259,7 +389,11 @@ export default function DriverRegistration() {
                     {drv.firstname} {drv.lastname}
                   </div>
                   <div style={{ color: '#64748b', fontSize: '12px' }}>
+<<<<<<< HEAD
                     Phone: {drv.phone || 'N/A'} {drv.matricNumber ? `• ID: ${drv.matricNumber}` : ''}
+=======
+                    ID: {drv.matricNumber || drv.driverUid || 'N/A'} • {drv.vehicleType || 'Bus'}
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
                   </div>
                 </div>
               ))}

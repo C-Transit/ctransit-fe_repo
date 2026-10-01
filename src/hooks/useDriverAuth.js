@@ -73,16 +73,24 @@ export default function useDriverAuth() {
   }, []);
 
   const login = useCallback(
+<<<<<<< HEAD
     async (phone, pin) => {
       setIsLoading(true);
       try {
         const { profile } = await loginDriver(phone, pin);
+=======
+    async (identifier, password) => {
+      setIsLoading(true);
+      try {
+        const { profile } = await loginDriver(identifier, password);
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
         setDriver(profile);
         setIsAuthenticated(true);
         navigate("/driver", { replace: true });
         return { success: true, profile };
       } catch (err) {
         setIsAuthenticated(false);
+<<<<<<< HEAD
         const status = err.response?.status || err.status;
         const data = err.response?.data;
         const code = data?.code || data?.error || err.code;
@@ -95,6 +103,13 @@ export default function useDriverAuth() {
         } else if (status === 400) {
           message = data?.error || data?.message || err.message || "Please provide phone and pin";
         }
+=======
+        const message =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Invalid driver credentials. Please try again.";
+>>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
         return { success: false, error: message };
       } finally {
         setIsLoading(false);
