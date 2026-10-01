@@ -14,7 +14,9 @@ import { fetchDriverProfile } from "../api/driverApi";
 export default function useDriverAuth() {
   const navigate = useNavigate();
   const [driver, setDriver] = useState(() => getDriverProfile());
-  const [isAuthenticated, setIsAuthenticated] = useState(() => isDriverAuthenticated());
+  const [isAuthenticated, setIsAuthenticated] = useState(() =>
+    isDriverAuthenticated()
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Sync state on mount
@@ -43,22 +45,63 @@ export default function useDriverAuth() {
             const updated = {
               ...(storedProfile || {}),
               ...profileData,
-              id: profileData.id || profileData._id || profileData.driverId || storedProfile?.id,
-              firstname: profileData.firstname || profileData.firstName || storedProfile?.firstname || "Driver",
-              lastname: profileData.lastname || profileData.lastName || storedProfile?.lastname || "",
+              id:
+                profileData.id ||
+                profileData._id ||
+                profileData.driverId ||
+                storedProfile?.id,
+              firstname:
+                profileData.firstname ||
+                profileData.firstName ||
+                storedProfile?.firstname ||
+                "Driver",
+              lastname:
+                profileData.lastname ||
+                profileData.lastName ||
+                storedProfile?.lastname ||
+                "",
               email: profileData.email || storedProfile?.email,
-              matricNumber: profileData.matricNumber || profileData.matric_number || storedProfile?.matricNumber,
-              phone: profileData.phone || profileData.phoneNumber || storedProfile?.phone,
+              matricNumber:
+                profileData.matricNumber ||
+                profileData.matric_number ||
+                storedProfile?.matricNumber,
+              phone:
+                profileData.phone ||
+                profileData.phoneNumber ||
+                storedProfile?.phone,
               role: "DRIVER",
-              vehicleType: profileData.vehicleType || profileData.vehicle_type || storedProfile?.vehicleType,
-              vehiclePlate: profileData.vehiclePlate || profileData.vehicle_plate || storedProfile?.vehiclePlate,
-              terminalId: profileData.terminalId || profileData.terminal_id || storedProfile?.terminalId,
-              terminalStatus: (profileData.terminalStatus || storedProfile?.terminalStatus || "ONLINE").toUpperCase(),
-              bankName: profileData.bankName || profileData.bank_name || storedProfile?.bankName,
-              accountNumber: profileData.accountNumber || profileData.account_number || storedProfile?.accountNumber,
+              vehicleType:
+                profileData.vehicleType ||
+                profileData.vehicle_type ||
+                storedProfile?.vehicleType,
+              vehiclePlate:
+                profileData.vehiclePlate ||
+                profileData.vehicle_plate ||
+                storedProfile?.vehiclePlate,
+              terminalId:
+                profileData.terminalId ||
+                profileData.terminal_id ||
+                storedProfile?.terminalId,
+              terminalStatus: (
+                profileData.terminalStatus ||
+                storedProfile?.terminalStatus ||
+                "ONLINE"
+              ).toUpperCase(),
+              bankName:
+                profileData.bankName ||
+                profileData.bank_name ||
+                storedProfile?.bankName,
+              accountNumber:
+                profileData.accountNumber ||
+                profileData.account_number ||
+                storedProfile?.accountNumber,
             };
             setDriver(updated);
-            setDriverSession(getDriverToken(), localStorage.getItem("driver_refresh_token"), updated);
+            setDriverSession(
+              getDriverToken(),
+              localStorage.getItem("driver_refresh_token"),
+              updated
+            );
           }
         } catch {
           // Keep existing stored profile if network fails
@@ -73,24 +116,16 @@ export default function useDriverAuth() {
   }, []);
 
   const login = useCallback(
-<<<<<<< HEAD
     async (phone, pin) => {
       setIsLoading(true);
       try {
         const { profile } = await loginDriver(phone, pin);
-=======
-    async (identifier, password) => {
-      setIsLoading(true);
-      try {
-        const { profile } = await loginDriver(identifier, password);
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
         setDriver(profile);
         setIsAuthenticated(true);
         navigate("/driver", { replace: true });
         return { success: true, profile };
       } catch (err) {
         setIsAuthenticated(false);
-<<<<<<< HEAD
         const status = err.response?.status || err.status;
         const data = err.response?.data;
         const code = data?.code || data?.error || err.code;
@@ -101,15 +136,12 @@ export default function useDriverAuth() {
         } else if (status === 429 || code === "RATE_LIMITED") {
           message = "Too many attempts, try again later";
         } else if (status === 400) {
-          message = data?.error || data?.message || err.message || "Please provide phone and pin";
+          message =
+            data?.error ||
+            data?.message ||
+            err.message ||
+            "Please provide phone and pin";
         }
-=======
-        const message =
-          err.response?.data?.message ||
-          err.response?.data?.error ||
-          err.message ||
-          "Invalid driver credentials. Please try again.";
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
         return { success: false, error: message };
       } finally {
         setIsLoading(false);

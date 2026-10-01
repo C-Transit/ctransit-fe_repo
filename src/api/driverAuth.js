@@ -1,9 +1,5 @@
 import axios from "axios";
-<<<<<<< HEAD
 import { baseApiUrl } from "./api";
-=======
-import { baseApiUrl, AUTH_API_URL } from "./api";
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
 
 export const DRIVER_TOKEN_KEY = "driver_token";
 export const DRIVER_PROFILE_KEY = "driver_profile";
@@ -44,7 +40,6 @@ export function isDriverAuthenticated() {
 }
 
 /**
-<<<<<<< HEAD
  * Authenticates a driver using phone and 4-digit PIN against POST /api/drivers/login.
  * Rate-limited server-side (surfaces 429 directly).
  */
@@ -91,59 +86,14 @@ export async function loginDriver(phone, pin) {
       throw e;
     }
     if (status === 400) {
-      const e = new Error(data?.error || data?.message || "Please provide phone and pin");
+      const e = new Error(
+        data?.error || data?.message || "Please provide phone and pin"
+      );
       e.status = 400;
       e.code = code || "BAD_REQUEST";
       throw e;
     }
     throw err;
-=======
- * Authenticates a driver using credentials against backend auth endpoints.
- * Supports primary /api/auth/driver/login with fallbacks to /api/drivers/login and /api/auth/login.
- */
-export async function loginDriver(identifier, password) {
-  const cleanId = String(identifier || "").trim();
-  const isEmail = cleanId.includes("@");
-  
-  const payload = {
-    email: isEmail ? cleanId.toLowerCase() : undefined,
-    matricNumber: !isEmail ? cleanId : undefined,
-    identifier: cleanId,
-    username: cleanId,
-    password,
-  };
-
-  // Remove undefined fields
-  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
-
-  let responseData = null;
-  let lastError = null;
-
-  const loginEndpoints = [
-    `${baseApiUrl}/api/drivers/login`,
-    `${baseApiUrl}/api/auth/driver/login`,
-    `${AUTH_API_URL}/login`,
-  ];
-
-  for (const endpoint of loginEndpoints) {
-    try {
-      const res = await axios.post(endpoint, payload);
-      if (res.data) {
-        responseData = res.data;
-        break;
-      }
-    } catch (err) {
-      lastError = err;
-      // If 404, continue to next candidate endpoint; otherwise if 401/400 throw
-      if (err.response?.status !== 404 && err.response?.status !== 405) {
-        throw err;
-      }
-    }
-  }
-
-  if (!responseData && lastError) {
-    throw lastError;
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   }
 
   const accessToken =
@@ -153,90 +103,49 @@ export async function loginDriver(identifier, password) {
     responseData?.data?.token;
 
   const refreshToken =
-    responseData?.refreshToken ||
-    responseData?.data?.refreshToken;
+    responseData?.refreshToken || responseData?.data?.refreshToken;
 
   if (!accessToken) {
     throw new Error("No access token returned from server");
   }
 
-<<<<<<< HEAD
   // Extract driver profile
   const driverProfile =
-=======
-  // Extract or fetch driver profile
-  let driverProfile =
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
     responseData?.driver ||
     responseData?.user ||
     responseData?.profile ||
     responseData?.data?.driver ||
     responseData?.data?.user ||
     responseData?.data?.profile ||
-<<<<<<< HEAD
     responseData?.data ||
     {};
 
   const normalizedProfile = {
-    id: driverProfile.id || driverProfile._id || driverProfile.driverId || driverProfile.userId || `DRV-${cleanPhone}`,
+    id:
+      driverProfile.id ||
+      driverProfile._id ||
+      driverProfile.driverId ||
+      driverProfile.userId ||
+      `DRV-${cleanPhone}`,
     firstname: driverProfile.firstname || driverProfile.firstName || "Driver",
     lastname: driverProfile.lastname || driverProfile.lastName || "",
     phone: driverProfile.phone || driverProfile.phoneNumber || cleanPhone,
-    matricNumber: driverProfile.matricNumber || driverProfile.matric_number || "",
-=======
-    responseData?.data;
-
-  // If profile is not in the login response, fetch from /api/drivers/me
-  if (!driverProfile || typeof driverProfile !== "object" || !driverProfile.firstname) {
-    try {
-      const profRes = await axios.get(`${baseApiUrl}/api/drivers/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const raw =
-        profRes.data?.data?.profile ||
-        profRes.data?.data?.driver ||
-        profRes.data?.data?.user ||
-        profRes.data?.profile ||
-        profRes.data?.driver ||
-        profRes.data?.user ||
-        profRes.data?.data ||
-        profRes.data;
-      if (raw && typeof raw === "object") {
-        driverProfile = { ...driverProfile, ...raw };
-      }
-    } catch {
-      // Fallback: decode basic info from JWT
-      const jwtData = decodeJwtPayload(accessToken) || {};
-      driverProfile = {
-        id: jwtData.userId || jwtData.id || jwtData.sub || `DRV-${cleanId}`,
-        firstname: jwtData.firstname || jwtData.name?.split(" ")[0] || "Driver",
-        lastname: jwtData.lastname || jwtData.name?.split(" ")[1] || "",
-        email: jwtData.email || (isEmail ? cleanId : ""),
-        matricNumber: !isEmail ? cleanId : (jwtData.matricNumber || ""),
-        role: "DRIVER",
-      };
-    }
-  }
-
-  const normalizedProfile = {
-    id: driverProfile.id || driverProfile._id || driverProfile.driverId || driverProfile.userId || `DRV-${cleanId}`,
-    firstname: driverProfile.firstname || driverProfile.firstName || "Driver",
-    lastname: driverProfile.lastname || driverProfile.lastName || "",
-    email: driverProfile.email || (isEmail ? cleanId : ""),
-    matricNumber: driverProfile.matricNumber || driverProfile.matric_number || (!isEmail ? cleanId : ""),
-    phone: driverProfile.phone || driverProfile.phoneNumber || "",
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
+    matricNumber:
+      driverProfile.matricNumber || driverProfile.matric_number || "",
     role: "DRIVER",
     vehicleType: driverProfile.vehicleType || driverProfile.vehicle_type || "",
-    vehiclePlate: driverProfile.vehiclePlate || driverProfile.vehicle_plate || "",
-    terminalId: driverProfile.terminalId || driverProfile.terminal_id || "TRM-01",
+    vehiclePlate:
+      driverProfile.vehiclePlate || driverProfile.vehicle_plate || "",
+    terminalId:
+      driverProfile.terminalId || driverProfile.terminal_id || "TRM-01",
     terminalStatus: (driverProfile.terminalStatus || "ONLINE").toUpperCase(),
     bankName: driverProfile.bankName || driverProfile.bank_name || "",
-    accountNumber: driverProfile.accountNumber || driverProfile.account_number || "",
-<<<<<<< HEAD
-    driverWallet: driverProfile.driverWallet || { balance: 0, total_earnings: 0 },
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
+    accountNumber:
+      driverProfile.accountNumber || driverProfile.account_number || "",
+    driverWallet: driverProfile.driverWallet || {
+      balance: 0,
+      total_earnings: 0,
+    },
   };
 
   setDriverSession(accessToken, refreshToken, normalizedProfile);

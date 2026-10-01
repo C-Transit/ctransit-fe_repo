@@ -1,10 +1,6 @@
 import axios from "axios";
 import { baseApiUrl } from "./api";
-import {
-  getAdminToken,
-  setAdminSession,
-  clearAdminSession,
-} from "./adminAuth";
+import { getAdminToken, setAdminSession, clearAdminSession } from "./adminAuth";
 
 const adminApi = axios.create({
   baseURL: `${baseApiUrl}/api`,
@@ -72,9 +68,12 @@ adminApi.interceptors.response.use(
       }
 
       try {
-        const refreshResponse = await axios.post(`${baseApiUrl}/api/auth/refresh`, {
-          refreshToken,
-        });
+        const refreshResponse = await axios.post(
+          `${baseApiUrl}/api/auth/refresh`,
+          {
+            refreshToken,
+          }
+        );
 
         const newAccessToken =
           refreshResponse.data?.accessToken || refreshResponse.data?.token;
@@ -84,7 +83,9 @@ adminApi.interceptors.response.use(
         }
 
         const existingProfile = localStorage.getItem("admin_profile");
-        const parsedProfile = existingProfile ? JSON.parse(existingProfile) : {};
+        const parsedProfile = existingProfile
+          ? JSON.parse(existingProfile)
+          : {};
         setAdminSession(newAccessToken, refreshToken, parsedProfile);
 
         processQueue(null, newAccessToken);
@@ -104,13 +105,24 @@ adminApi.interceptors.response.use(
 );
 
 // Helper for fallback request (e.g. /api/admin vs /admin)
-const requestWithFallback = async (primaryMethod, primaryPath, fallbackPath, dataOrParams = null, isPostOrPatch = false) => {
+const requestWithFallback = async (
+  primaryMethod,
+  primaryPath,
+  fallbackPath,
+  dataOrParams = null,
+  isPostOrPatch = false
+) => {
   try {
     if (isPostOrPatch) {
-      const res = await adminApi[primaryMethod](primaryPath, dataOrParams || {});
+      const res = await adminApi[primaryMethod](
+        primaryPath,
+        dataOrParams || {}
+      );
       return res.data;
     }
-    const res = await adminApi[primaryMethod](primaryPath, { params: dataOrParams });
+    const res = await adminApi[primaryMethod](primaryPath, {
+      params: dataOrParams,
+    });
     return res.data;
   } catch (err) {
     if (err.response?.status === 404 && fallbackPath) {
@@ -122,7 +134,11 @@ const requestWithFallback = async (primaryMethod, primaryPath, fallbackPath, dat
       };
 
       if (isPostOrPatch) {
-        const fallbackRes = await axios[primaryMethod](fallbackUrl, dataOrParams || {}, { headers });
+        const fallbackRes = await axios[primaryMethod](
+          fallbackUrl,
+          dataOrParams || {},
+          { headers }
+        );
         return fallbackRes.data;
       }
       const fallbackRes = await axios[primaryMethod](fallbackUrl, {
@@ -149,7 +165,12 @@ export const fetchAdminOverview = async () => {
  * 2. Income Report
  * GET /api/admin/income (fallback /admin/income)
  */
-export const fetchAdminIncome = async ({ from, to, terminalId, driverUid } = {}) => {
+export const fetchAdminIncome = async ({
+  from,
+  to,
+  terminalId,
+  driverUid,
+} = {}) => {
   const params = {};
   if (from) params.from = from;
   if (to) params.to = to;
@@ -171,7 +192,11 @@ export const fetchAdminTerminals = async () => {
  * 4. List Agents
  * GET /api/admin/agents?page=1&limit=20&status=ACTIVE
  */
-export const fetchAdminAgents = async ({ page = 1, limit = 20, status = "ACTIVE" } = {}) => {
+export const fetchAdminAgents = async ({
+  page = 1,
+  limit = 20,
+  status = "ACTIVE",
+} = {}) => {
   const params = {};
   if (page) params.page = page;
   if (limit) params.limit = limit;
@@ -185,16 +210,28 @@ export const fetchAdminAgents = async ({ page = 1, limit = 20, status = "ACTIVE"
  * GET /api/admin/agents/:id
  */
 export const fetchAdminAgentById = async (agentId) => {
-  return requestWithFallback("get", `/admin/agents/${encodeURIComponent(agentId)}`, `/admin/agents/${encodeURIComponent(agentId)}`);
+  return requestWithFallback(
+    "get",
+    `/admin/agents/${encodeURIComponent(agentId)}`,
+    `/admin/agents/${encodeURIComponent(agentId)}`
+  );
 };
 
 /**
  * 6. Create Agent
  * POST /api/admin/agents
  */
-export const createAdminAgent = async ({ firstname, lastname, firstName, lastName, email, phone, password }) => {
-  const fName = (firstname || firstName || '').trim();
-  const lName = (lastname || lastName || '').trim();
+export const createAdminAgent = async ({
+  firstname,
+  lastname,
+  firstName,
+  lastName,
+  email,
+  phone,
+  password,
+}) => {
+  const fName = (firstname || firstName || "").trim();
+  const lName = (lastname || lastName || "").trim();
   const payload = {
     firstname: fName,
     lastname: lName,
@@ -204,7 +241,13 @@ export const createAdminAgent = async ({ firstname, lastname, firstName, lastNam
     phone: phone?.trim(),
     password,
   };
-  return requestWithFallback("post", "/admin/agents", "/admin/agents", payload, true);
+  return requestWithFallback(
+    "post",
+    "/admin/agents",
+    "/admin/agents",
+    payload,
+    true
+  );
 };
 
 /**
@@ -226,13 +269,22 @@ export const updateAdminAgentStatus = async (agentId, status) => {
  * 8. List Disputes
  * GET /api/admin/disputes?page=1&limit=20&status=OPEN
  */
-export const fetchAdminDisputes = async ({ page = 1, limit = 20, status = "OPEN" } = {}) => {
+export const fetchAdminDisputes = async ({
+  page = 1,
+  limit = 20,
+  status = "OPEN",
+} = {}) => {
   const params = {};
   if (page) params.page = page;
   if (limit) params.limit = limit;
   if (status && status !== "ALL") params.status = status.toUpperCase();
 
-  return requestWithFallback("get", "/admin/disputes", "/admin/disputes", params);
+  return requestWithFallback(
+    "get",
+    "/admin/disputes",
+    "/admin/disputes",
+    params
+  );
 };
 
 /**
@@ -240,14 +292,21 @@ export const fetchAdminDisputes = async ({ page = 1, limit = 20, status = "OPEN"
  * GET /api/admin/disputes/:id
  */
 export const fetchAdminDisputeById = async (disputeId) => {
-  return requestWithFallback("get", `/admin/disputes/${encodeURIComponent(disputeId)}`, `/admin/disputes/${encodeURIComponent(disputeId)}`);
+  return requestWithFallback(
+    "get",
+    `/admin/disputes/${encodeURIComponent(disputeId)}`,
+    `/admin/disputes/${encodeURIComponent(disputeId)}`
+  );
 };
 
 /**
  * 10. Update Dispute Status
  * PATCH /api/admin/disputes/:id/status
  */
-export const updateAdminDisputeStatus = async (disputeId, { status, resolution }) => {
+export const updateAdminDisputeStatus = async (
+  disputeId,
+  { status, resolution }
+) => {
   const payload = {
     status: status.toUpperCase(),
     ...(resolution ? { resolution: resolution.trim() } : {}),
@@ -265,13 +324,23 @@ export const updateAdminDisputeStatus = async (disputeId, { status, resolution }
  * 11. Send Student Notification
  * POST /api/admin/notifications
  */
-export const sendAdminStudentNotification = async ({ studentMatric, title, body }) => {
+export const sendAdminStudentNotification = async ({
+  studentMatric,
+  title,
+  body,
+}) => {
   const payload = {
     studentMatric: studentMatric?.trim(),
     title: title?.trim(),
     body: body?.trim(),
   };
-  return requestWithFallback("post", "/admin/notifications", "/admin/notifications", payload, true);
+  return requestWithFallback(
+    "post",
+    "/admin/notifications",
+    "/admin/notifications",
+    payload,
+    true
+  );
 };
 
 /**
@@ -279,11 +348,16 @@ export const sendAdminStudentNotification = async ({ studentMatric, title, body 
  * POST /api/admin/sync/whitelist
  */
 export const syncAdminCardWhitelist = async () => {
-  return requestWithFallback("post", "/admin/sync/whitelist", "/admin/sync/whitelist", {}, true);
+  return requestWithFallback(
+    "post",
+    "/admin/sync/whitelist",
+    "/admin/sync/whitelist",
+    {},
+    true
+  );
 };
 
 /**
-<<<<<<< HEAD
  * Error parser for Admin Card Linking
  */
 export const getAdminCardLinkErrorMessage = (err) => {
@@ -313,13 +387,23 @@ export const getAdminCardLinkErrorMessage = (err) => {
   if (str === "MISSING_TERMINAL_CONTEXT") {
     return "Missing terminal context. Please tap again.";
   }
-  if (str === "CARD_ALREADY_LINKED" || (status === 409 && str.includes("CARD_ALREADY"))) {
+  if (
+    str === "CARD_ALREADY_LINKED" ||
+    (status === 409 && str.includes("CARD_ALREADY"))
+  ) {
     return "This card belongs to someone else.";
   }
-  if (str === "ADMIN_ALREADY_HAS_CARD" || (status === 409 && str.includes("ADMIN_ALREADY"))) {
+  if (
+    str === "ADMIN_ALREADY_HAS_CARD" ||
+    (status === 409 && str.includes("ADMIN_ALREADY"))
+  ) {
     return "This admin already has a different card linked.";
   }
-  return data?.error || data?.message || "Failed to link admin card. Please try again.";
+  return (
+    data?.error ||
+    data?.message ||
+    "Failed to link admin card. Please try again."
+  );
 };
 
 /**
@@ -332,7 +416,13 @@ export const linkAdminCard = async ({ otp, pin }) => {
     otp: String(otp || "").trim(),
     pin: String(pin || "").trim(),
   };
-  return requestWithFallback("post", "/admin/card/link", "/admin/card/link", payload, true);
+  return requestWithFallback(
+    "post",
+    "/admin/card/link",
+    "/admin/card/link",
+    payload,
+    true
+  );
 };
 
 /**
@@ -350,10 +440,15 @@ export const getAdminUnlinkCardErrorMessage = (err) => {
   if (str === "MISSING_IDENTIFIER") {
     return "Identifier is missing";
   }
-  if (status === 400 && (!code || str.includes("Either") || str.includes("required"))) {
+  if (
+    status === 400 &&
+    (!code || str.includes("Either") || str.includes("required"))
+  ) {
     return "Either cardUid or userIdentifier must be provided";
   }
-  return data?.error || data?.message || "Failed to unlink card. Please try again.";
+  return (
+    data?.error || data?.message || "Failed to unlink card. Please try again."
+  );
 };
 
 /**
@@ -369,12 +464,16 @@ export const unlinkAdminCard = async ({ cardUid, userIdentifier } = {}) => {
     payload.userIdentifier = String(userIdentifier).trim();
   }
 
-  return requestWithFallback("post", "/admin/card/unlink", "/admin/card/unlink", payload, true);
+  return requestWithFallback(
+    "post",
+    "/admin/card/unlink",
+    "/admin/card/unlink",
+    payload,
+    true
+  );
 };
 
 /**
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  * 13. Admin Logout
  * POST /api/auth/logout
  */

@@ -112,7 +112,10 @@ const requestAgentWithFallback = async (
 ) => {
   try {
     if (isPostOrPatch) {
-      const res = await agentApi[primaryMethod](primaryPath, dataOrParams || {});
+      const res = await agentApi[primaryMethod](
+        primaryPath,
+        dataOrParams || {}
+      );
       return res.data;
     }
     const res = await agentApi[primaryMethod](primaryPath, {
@@ -188,7 +191,9 @@ export const approveAgentKYC = async (userId) => {
  * POST /api/agents/kyc/:userId/reject (fallback /api/auth/agent/kyc/:userId/reject)
  */
 export const rejectAgentKYC = async (userId, reason) => {
-  const payload = { reason: reason?.trim() || "Incomplete or unreadable document" };
+  const payload = {
+    reason: reason?.trim() || "Incomplete or unreadable document",
+  };
   return requestAgentWithFallback(
     "post",
     `/agents/kyc/${encodeURIComponent(userId)}/reject`,
@@ -203,11 +208,14 @@ export const rejectAgentKYC = async (userId, reason) => {
  * GET /api/agents/drivers (fallback /api/auth/agent/drivers)
  */
 export const fetchDrivers = async () => {
-  return requestAgentWithFallback("get", "/agents/drivers", "/auth/agent/drivers");
+  return requestAgentWithFallback(
+    "get",
+    "/agents/drivers",
+    "/auth/agent/drivers"
+  );
 };
 
 /**
-<<<<<<< HEAD
  * Error message parser for driver registration
  */
 export const getDriverRegisterErrorMessage = (err) => {
@@ -225,55 +233,48 @@ export const getDriverRegisterErrorMessage = (err) => {
   if (str === "INVALID_PIN_FORMAT" || str.includes("INVALID_PIN_FORMAT")) {
     return "PIN must be exactly 4 digits.";
   }
-  if (str === "PHONE_ALREADY_IN_USE" || str.includes("PHONE_ALREADY_IN_USE") || status === 409) {
+  if (
+    str === "PHONE_ALREADY_IN_USE" ||
+    str.includes("PHONE_ALREADY_IN_USE") ||
+    status === 409
+  ) {
     return "Another user already has this phone number.";
   }
-  if (str === "DRIVER_UID_GENERATION_FAILED" || str.includes("DRIVER_UID_GENERATION_FAILED") || (status === 500 && str.toLowerCase().includes("driver"))) {
+  if (
+    str === "DRIVER_UID_GENERATION_FAILED" ||
+    str.includes("DRIVER_UID_GENERATION_FAILED") ||
+    (status === 500 && str.toLowerCase().includes("driver"))
+  ) {
     return "Driver ID generation failed. Please retry the request.";
   }
   if (status === 400) {
-    if (data?.error && typeof data.error === "string" && !data.error.includes("_")) {
+    if (
+      data?.error &&
+      typeof data.error === "string" &&
+      !data.error.includes("_")
+    ) {
       return data.error;
     }
     return "firstname, lastname, phone, and pin are all required";
   }
-  return data?.error || data?.message || "Failed to register driver. Please try again.";
+  return (
+    data?.error ||
+    data?.message ||
+    "Failed to register driver. Please try again."
+  );
 };
 
 /**
  * 6. Register Driver
  * POST /api/agents/drivers/register
  * req.body: { firstname, lastname, phone, pin }
-=======
- * 6. Register Driver
- * POST /api/agents/drivers/register (fallback /api/auth/agent/drivers/register)
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  */
-export const registerDriver = async ({
-  firstname,
-  lastname,
-<<<<<<< HEAD
-  phone,
-  pin,
-=======
-  matricNumber,
-  phone,
-  vehicleType,
-  vehiclePlate,
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
-}) => {
+export const registerDriver = async ({ firstname, lastname, phone, pin }) => {
   const payload = {
     firstname: firstname?.trim(),
     lastname: lastname?.trim(),
-<<<<<<< HEAD
     phone: phone?.trim(),
     pin: String(pin || "").trim(),
-=======
-    matricNumber: matricNumber?.trim(),
-    ...(phone ? { phone: phone.trim() } : {}),
-    ...(vehicleType ? { vehicleType } : {}),
-    ...(vehiclePlate ? { vehiclePlate: vehiclePlate.trim() } : {}),
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   };
   return requestAgentWithFallback(
     "post",
@@ -315,7 +316,6 @@ export const linkAgentCard = async ({ otp, studentId }) => {
 };
 
 /**
-<<<<<<< HEAD
  * 8b. Unlink Card (Agent)
  * POST /api/agents/card/unlink
  * req.body: provide exactly one of { cardUid } or { userIdentifier }
@@ -349,15 +349,18 @@ export const getUnlinkCardErrorMessage = (err) => {
   if (str === "MISSING_IDENTIFIER") {
     return "Identifier is missing";
   }
-  if (status === 400 && (!code || str.includes("Either") || str.includes("required"))) {
+  if (
+    status === 400 &&
+    (!code || str.includes("Either") || str.includes("required"))
+  ) {
     return "Either cardUid or userIdentifier must be provided";
   }
-  return data?.error || data?.message || "Failed to unlink card. Please try again.";
+  return (
+    data?.error || data?.message || "Failed to unlink card. Please try again."
+  );
 };
 
 /**
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
  * 9. List Students (User Lookup)
  * GET /api/agents/users?page=1&limit=20&isVerified=true
  */
@@ -368,7 +371,8 @@ export const fetchAgentUsers = async ({
 } = {}) => {
   const params = {};
   if (isVerified === true || isVerified === "true") params.isVerified = "true";
-  else if (isVerified === false || isVerified === "false") params.isVerified = "false";
+  else if (isVerified === false || isVerified === "false")
+    params.isVerified = "false";
   if (page) params.page = page;
   if (limit) params.limit = limit;
 

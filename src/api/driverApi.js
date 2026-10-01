@@ -73,9 +73,12 @@ driverApi.interceptors.response.use(
       }
 
       try {
-        const refreshResponse = await axios.post(`${baseApiUrl}/api/auth/refresh`, {
-          refreshToken,
-        });
+        const refreshResponse = await axios.post(
+          `${baseApiUrl}/api/auth/refresh`,
+          {
+            refreshToken,
+          }
+        );
 
         const newAccessToken =
           refreshResponse.data?.accessToken || refreshResponse.data?.token;
@@ -111,7 +114,10 @@ const requestDriverWithFallback = async (
   dataOrParams = null,
   isPostOrPatch = false
 ) => {
-  const allPaths = [primaryPath, ...(Array.isArray(fallbackPaths) ? fallbackPaths : [fallbackPaths])];
+  const allPaths = [
+    primaryPath,
+    ...(Array.isArray(fallbackPaths) ? fallbackPaths : [fallbackPaths]),
+  ];
   let lastErr = null;
 
   for (const p of allPaths) {
@@ -165,7 +171,13 @@ export const fetchDriverDashboard = async () => {
  * 3. Fetch Driver Rides / Trips History (with pagination, date, status filters)
  * GET /api/drivers/rides or /api/drivers/trips or /api/transactions/history
  */
-export const fetchDriverRides = async ({ page = 1, limit = 20, date, status, search } = {}) => {
+export const fetchDriverRides = async ({
+  page = 1,
+  limit = 20,
+  date,
+  status,
+  search,
+} = {}) => {
   const params = { page, limit };
   if (date) params.date = date;
   if (status && status !== "ALL") params.status = status.toUpperCase();
@@ -174,11 +186,7 @@ export const fetchDriverRides = async ({ page = 1, limit = 20, date, status, sea
   return requestDriverWithFallback(
     "get",
     "/drivers/rides",
-    [
-      "/drivers/trips",
-      "/transactions/history",
-      "/transactions",
-    ],
+    ["/drivers/trips", "/transactions/history", "/transactions"],
     params
   );
 };
@@ -207,10 +215,7 @@ export const fetchDriverWithdrawals = async ({ page = 1, limit = 20 } = {}) => {
   return requestDriverWithFallback(
     "get",
     "/drivers/withdrawals",
-    [
-      "/wallets/withdrawals",
-      "/drivers/settlements",
-    ],
+    ["/wallets/withdrawals", "/drivers/settlements"],
     { page, limit }
   );
 };
@@ -253,14 +258,14 @@ export const requestDriverWithdrawal = async ({
  * 7. Fetch Driver Notifications
  * GET /api/drivers/notifications (fallback /api/notifications)
  */
-export const fetchDriverNotifications = async ({ page = 1, limit = 30 } = {}) => {
+export const fetchDriverNotifications = async ({
+  page = 1,
+  limit = 30,
+} = {}) => {
   return requestDriverWithFallback(
     "get",
     "/drivers/notifications",
-    [
-      "/notifications",
-      `${NOTIFICATIONS_API_URL}`,
-    ],
+    ["/notifications", `${NOTIFICATIONS_API_URL}`],
     { page, limit }
   );
 };
@@ -290,10 +295,7 @@ export const markAllDriverNotificationsAsRead = async () => {
   return requestDriverWithFallback(
     "patch",
     "/drivers/notifications/mark-all-read",
-    [
-      "/notifications/mark-all-read",
-      "/notifications/read-all",
-    ],
+    ["/notifications/mark-all-read", "/notifications/read-all"],
     {},
     true
   );
@@ -304,13 +306,17 @@ export const markAllDriverNotificationsAsRead = async () => {
  * GET /api/terminals/:terminalId or /api/drivers/terminal
  */
 export const fetchDriverTerminalStatus = async (terminalId) => {
-  const path = terminalId ? `/terminals/${encodeURIComponent(terminalId)}` : "/terminals/my-terminal";
+  const path = terminalId
+    ? `/terminals/${encodeURIComponent(terminalId)}`
+    : "/terminals/my-terminal";
   return requestDriverWithFallback(
     "get",
     path,
     [
       terminalId ? `/terminals/${encodeURIComponent(terminalId)}/status` : null,
-      terminalId ? `/drivers/terminal/${encodeURIComponent(terminalId)}` : "/drivers/terminal",
+      terminalId
+        ? `/drivers/terminal/${encodeURIComponent(terminalId)}`
+        : "/drivers/terminal",
       "/terminals/status",
       "/admin/terminals",
     ].filter(Boolean)
@@ -318,7 +324,6 @@ export const fetchDriverTerminalStatus = async (terminalId) => {
 };
 
 /**
-<<<<<<< HEAD
  * Error message parser for driver card linking
  */
 export const getDriverCardLinkErrorMessage = (err) => {
@@ -327,7 +332,10 @@ export const getDriverCardLinkErrorMessage = (err) => {
   const code = data?.code || data?.error || data?.message;
   const str = typeof code === "string" ? code.trim() : "";
 
-  if (str === "CARD_ALREADY_LINKED" || (status === 409 && str.includes("CARD"))) {
+  if (
+    str === "CARD_ALREADY_LINKED" ||
+    (status === 409 && str.includes("CARD"))
+  ) {
     return "This physical card belongs to someone else.";
   }
   if (str === "DRIVER_ALREADY_HAS_CARD") {
@@ -363,7 +371,11 @@ export const getDriverCardLinkErrorMessage = (err) => {
   if (str === "INVALID_PIN" || status === 401) {
     return "PIN doesn't match what was set at creation.";
   }
-  return data?.error || data?.message || "Failed to link card. Please verify and try again.";
+  return (
+    data?.error ||
+    data?.message ||
+    "Failed to link card. Please verify and try again."
+  );
 };
 
 /**
@@ -375,22 +387,11 @@ export const linkDriverCard = async ({ otp, pin }) => {
   const payload = {
     otp: String(otp || "").trim(),
     pin: String(pin || "").trim(),
-=======
- * 11. Initiate Driver Card Linking (Card -> Driver binding)
- * POST /api/drivers/card/link (Explicit Backend Dependency)
- */
-export const linkDriverCard = async ({ otp, cardUid, driverId }) => {
-  const payload = {
-    otp: String(otp || "").trim(),
-    cardUid: String(cardUid || "").trim(),
-    driverId: String(driverId || "").trim(),
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   };
 
   return requestDriverWithFallback(
     "post",
     "/drivers/card/link",
-<<<<<<< HEAD
     [],
     payload,
     true
@@ -412,12 +413,6 @@ export const verifyDriverBank = async ({ bankCode, accountNumber }) => {
     "post",
     "/drivers/bank/verify",
     [],
-=======
-    [
-      "/agents/card/link",
-      "/cards/link",
-    ],
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
     payload,
     true
   );

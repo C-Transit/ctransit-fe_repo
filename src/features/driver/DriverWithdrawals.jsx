@@ -14,10 +14,7 @@ import {
   fetchDriverWithdrawals,
   requestDriverWithdrawal,
   fetchDriverDashboard,
-<<<<<<< HEAD
   verifyDriverBank,
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
 } from "../../api/driverApi";
 import DriverLayout from "./components/DriverLayout";
 import styles from "./DriverWithdrawals.module.css";
@@ -37,9 +34,10 @@ export default function DriverWithdrawals() {
   const [amount, setAmount] = useState("");
   const [remarks, setRemarks] = useState("");
   const [customBankName, setCustomBankName] = useState(driver?.bankName || "");
-<<<<<<< HEAD
   const [bankCode, setBankCode] = useState(driver?.bankCode || "058");
-  const [customAccountNumber, setCustomAccountNumber] = useState(driver?.accountNumber || "");
+  const [customAccountNumber, setCustomAccountNumber] = useState(
+    driver?.accountNumber || ""
+  );
   const [verifyingBank, setVerifyingBank] = useState(false);
   const [verifiedAccountName, setVerifiedAccountName] = useState("");
   const [bankVerifyError, setBankVerifyError] = useState("");
@@ -81,20 +79,14 @@ export default function DriverWithdrawals() {
     } catch (err) {
       setBankVerifyError(
         err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to verify bank details with bank network."
+          err.response?.data?.error ||
+          "Failed to verify bank details with bank network."
       );
     } finally {
       setVerifyingBank(false);
     }
   };
 
-=======
-  const [customAccountNumber, setCustomAccountNumber] = useState(driver?.accountNumber || "");
-
-  const minWithdrawal = 1000;
-
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   // Driver Settlement Bank Details
   const bankDetails = {
     bankName: driver?.bankName || customBankName || "Pending Configuration",
@@ -103,11 +95,12 @@ export default function DriverWithdrawals() {
       : customAccountNumber
       ? `••••${customAccountNumber.slice(-4)}`
       : "Not on file",
-<<<<<<< HEAD
-    accountName: verifiedAccountName || `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`.trim().toUpperCase() || "AUTHORIZED DRIVER",
-=======
-    accountName: `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`.trim().toUpperCase() || "AUTHORIZED DRIVER",
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
+    accountName:
+      verifiedAccountName ||
+      `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`
+        .trim()
+        .toUpperCase() ||
+      "AUTHORIZED DRIVER",
   };
 
   const loadWithdrawalData = useCallback(async () => {
@@ -122,7 +115,12 @@ export default function DriverWithdrawals() {
       if (dashRes.status === "fulfilled" && dashRes.value) {
         const d = dashRes.value?.data || dashRes.value;
         const bal = Number(
-          d.availableBalance ?? d.withdrawableBalance ?? d.wallet?.balance ?? d.balance ?? d.todayEarnings ?? 0
+          d.availableBalance ??
+            d.withdrawableBalance ??
+            d.wallet?.balance ??
+            d.balance ??
+            d.todayEarnings ??
+            0
         );
         setAvailableBalance(bal);
       }
@@ -138,7 +136,8 @@ export default function DriverWithdrawals() {
           id: w.id || w._id || w.reference || `WTH-${Date.now()}`,
           amount: Number(w.amount || 0),
           status: (w.status || "PENDING").toUpperCase(),
-          date: w.createdAt || w.created_at || w.date || new Date().toISOString(),
+          date:
+            w.createdAt || w.created_at || w.date || new Date().toISOString(),
           reference: w.reference || w.txnRef || w.id || "N/A",
           remarks: w.remarks || "Direct driver settlement",
         }));
@@ -168,20 +167,34 @@ export default function DriverWithdrawals() {
     }
 
     if (numAmount < minWithdrawal) {
-      setError(`Minimum withdrawal amount is ₦${minWithdrawal.toLocaleString("en-NG")}.`);
+      setError(
+        `Minimum withdrawal amount is ₦${minWithdrawal.toLocaleString(
+          "en-NG"
+        )}.`
+      );
       return;
     }
 
     if (numAmount > availableBalance) {
-      setError(`Requested amount exceeds your available balance of ₦${availableBalance.toLocaleString("en-NG")}.`);
+      setError(
+        `Requested amount exceeds your available balance of ₦${availableBalance.toLocaleString(
+          "en-NG"
+        )}.`
+      );
       return;
     }
 
     const targetBankName = (driver?.bankName || customBankName || "").trim();
-    const targetAccountNumber = (driver?.accountNumber || customAccountNumber || "").trim();
+    const targetAccountNumber = (
+      driver?.accountNumber ||
+      customAccountNumber ||
+      ""
+    ).trim();
 
     if (!targetBankName || !targetAccountNumber) {
-      setError("Please specify your settlement bank name and 10-digit account number.");
+      setError(
+        "Please specify your settlement bank name and 10-digit account number."
+      );
       return;
     }
 
@@ -196,7 +209,11 @@ export default function DriverWithdrawals() {
       });
 
       if (res?.success || res?.status === "success" || res?.data) {
-        setSuccessMsg(`Withdrawal request of ₦${numAmount.toLocaleString("en-NG")} submitted successfully!`);
+        setSuccessMsg(
+          `Withdrawal request of ₦${numAmount.toLocaleString(
+            "en-NG"
+          )} submitted successfully!`
+        );
         setAmount("");
         setRemarks("");
         loadWithdrawalData();
@@ -205,12 +222,14 @@ export default function DriverWithdrawals() {
       }
     } catch (err) {
       if (err.response?.status === 404 || err.response?.status === 501) {
-        setError("Settlement service is not yet connected on the backend server.");
+        setError(
+          "Settlement service is not yet connected on the backend server."
+        );
       } else {
         setError(
           err.response?.data?.message ||
-          err.message ||
-          "Unable to submit withdrawal request. Please verify connection."
+            err.message ||
+            "Unable to submit withdrawal request. Please verify connection."
         );
       }
     } finally {
@@ -245,19 +264,42 @@ export default function DriverWithdrawals() {
         <div className={styles.pageHeader}>
           <h1 className={styles.title}>Withdrawal & Settlement</h1>
           <p className={styles.subtitle}>
-            Transfer your verified fare earnings directly to your registered bank account
+            Transfer your verified fare earnings directly to your registered
+            bank account
           </p>
         </div>
 
         {error && (
-          <div style={{ padding: "0.85rem 1.25rem", background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: "10px", color: "#b91c1c", display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            style={{
+              padding: "0.85rem 1.25rem",
+              background: "#fee2e2",
+              border: "1px solid #fca5a5",
+              borderRadius: "10px",
+              color: "#b91c1c",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <AlertCircle size={18} />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div style={{ padding: "0.85rem 1.25rem", background: "#dcfce7", border: "1px solid #86efac", borderRadius: "10px", color: "#15803d", display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            style={{
+              padding: "0.85rem 1.25rem",
+              background: "#dcfce7",
+              border: "1px solid #86efac",
+              borderRadius: "10px",
+              color: "#15803d",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <CheckCircle2 size={18} />
             <span>{successMsg}</span>
           </div>
@@ -268,10 +310,16 @@ export default function DriverWithdrawals() {
           {/* Left Column: Balance & Request Form */}
           <div className={styles.card}>
             <div className={styles.balanceBanner}>
-              <span className={styles.balanceLabel}>Available Withdrawable Balance</span>
-              <div className={styles.balanceValue}>{formatNaira(availableBalance)}</div>
+              <span className={styles.balanceLabel}>
+                Available Withdrawable Balance
+              </span>
+              <div className={styles.balanceValue}>
+                {formatNaira(availableBalance)}
+              </div>
               <span className={styles.balanceSub}>
-                • Minimum payout threshold: ₦{minWithdrawal.toLocaleString("en-NG")} • Automatic daily settlement available
+                • Minimum payout threshold: ₦
+                {minWithdrawal.toLocaleString("en-NG")} • Automatic daily
+                settlement available
               </span>
             </div>
 
@@ -311,20 +359,38 @@ export default function DriverWithdrawals() {
                   <button
                     type="button"
                     className={styles.chip}
-                    style={{ background: "#e0f2fe", color: "#0369a1", borderColor: "#7dd3fc" }}
-                    onClick={() => setAmount(String(Math.floor(availableBalance)))}
+                    style={{
+                      background: "#e0f2fe",
+                      color: "#0369a1",
+                      borderColor: "#7dd3fc",
+                    }}
+                    onClick={() =>
+                      setAmount(String(Math.floor(availableBalance)))
+                    }
                   >
-                    Max (₦{Math.floor(availableBalance).toLocaleString("en-NG")})
+                    Max (₦{Math.floor(availableBalance).toLocaleString("en-NG")}
+                    )
                   </button>
                 )}
               </div>
 
               {(!driver?.bankName || !driver?.accountNumber) && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", padding: "0.85rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-<<<<<<< HEAD
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.85rem",
+                    padding: "0.85rem",
+                    background: "#f8fafc",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
                   <div style={{ display: "flex", gap: "0.75rem" }}>
                     <div className={styles.formGroup} style={{ flex: 2 }}>
-                      <label className={styles.label}>Settlement Commercial Bank</label>
+                      <label className={styles.label}>
+                        Settlement Commercial Bank
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. GTBank, Access Bank"
@@ -358,14 +424,20 @@ export default function DriverWithdrawals() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>10-Digit NUBAN Account Number</label>
+                    <label className={styles.label}>
+                      10-Digit NUBAN Account Number
+                    </label>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <input
                         type="text"
                         maxLength={10}
                         placeholder="e.g. 0123456789"
                         value={customAccountNumber}
-                        onChange={(e) => setCustomAccountNumber(e.target.value.replace(/\D/g, ""))}
+                        onChange={(e) =>
+                          setCustomAccountNumber(
+                            e.target.value.replace(/\D/g, "")
+                          )
+                        }
                         style={{
                           flex: 1,
                           padding: "0.65rem 0.85rem",
@@ -378,7 +450,9 @@ export default function DriverWithdrawals() {
                       <button
                         type="button"
                         onClick={handleVerifyBankAccount}
-                        disabled={verifyingBank || customAccountNumber.length !== 10}
+                        disabled={
+                          verifyingBank || customAccountNumber.length !== 10
+                        }
                         style={{
                           padding: "0.65rem 1rem",
                           background: "#0284c7",
@@ -396,56 +470,42 @@ export default function DriverWithdrawals() {
                   </div>
 
                   {bankVerifyError && (
-                    <div style={{ padding: "0.5rem 0.75rem", background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: "6px", color: "#b91c1c", fontSize: "0.8rem" }}>
+                    <div
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        background: "#fee2e2",
+                        border: "1px solid #fca5a5",
+                        borderRadius: "6px",
+                        color: "#b91c1c",
+                        fontSize: "0.8rem",
+                      }}
+                    >
                       {bankVerifyError}
                     </div>
                   )}
 
                   {verifiedAccountName && (
-                    <div style={{ padding: "0.6rem 0.75rem", background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "6px", color: "#166534", fontSize: "0.82rem" }}>
-                      <strong>Verified Account Name:</strong> {verifiedAccountName}
+                    <div
+                      style={{
+                        padding: "0.6rem 0.75rem",
+                        background: "#f0fdf4",
+                        border: "1px solid #86efac",
+                        borderRadius: "6px",
+                        color: "#166534",
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      <strong>Verified Account Name:</strong>{" "}
+                      {verifiedAccountName}
                     </div>
                   )}
-=======
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Settlement Commercial Bank</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. First Bank, Access Bank, GTBank"
-                      value={customBankName}
-                      onChange={(e) => setCustomBankName(e.target.value)}
-                      style={{
-                        padding: "0.65rem 0.85rem",
-                        borderRadius: "8px",
-                        border: "1px solid #cbd5e1",
-                        fontSize: "0.88rem",
-                      }}
-                      required
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>10-Digit NUBAN Account Number</label>
-                    <input
-                      type="text"
-                      maxLength={10}
-                      placeholder="e.g. 0123456789"
-                      value={customAccountNumber}
-                      onChange={(e) => setCustomAccountNumber(e.target.value.replace(/\D/g, ""))}
-                      style={{
-                        padding: "0.65rem 0.85rem",
-                        borderRadius: "8px",
-                        border: "1px solid #cbd5e1",
-                        fontSize: "0.88rem",
-                      }}
-                      required
-                    />
-                  </div>
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
                 </div>
               )}
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Optional Settlement Remarks</label>
+                <label className={styles.label}>
+                  Optional Settlement Remarks
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Shift settlement for Monday"
@@ -466,14 +526,27 @@ export default function DriverWithdrawals() {
                 disabled={submitting || availableBalance < minWithdrawal}
               >
                 <Wallet size={16} />
-                <span>{submitting ? "Processing Settlement..." : "Confirm & Withdraw"}</span>
+                <span>
+                  {submitting
+                    ? "Processing Settlement..."
+                    : "Confirm & Withdraw"}
+                </span>
               </button>
             </form>
           </div>
 
           {/* Right Column: Bank Details & Rules */}
           <div className={styles.card}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: "700", color: "#0f172a", fontSize: "1.05rem" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontWeight: "700",
+                color: "#0f172a",
+                fontSize: "1.05rem",
+              }}
+            >
               <Building2 size={20} color="#0284c7" />
               <span>Registered Bank Account</span>
             </div>
@@ -485,28 +558,53 @@ export default function DriverWithdrawals() {
               </div>
               <div className={styles.bankRow}>
                 <span className={styles.bankLabel}>Account Number</span>
-                <span className={styles.bankVal}>{bankDetails.accountNumber}</span>
+                <span className={styles.bankVal}>
+                  {bankDetails.accountNumber}
+                </span>
               </div>
               <div className={styles.bankRow}>
                 <span className={styles.bankLabel}>Account Name</span>
-                <span className={styles.bankVal}>{bankDetails.accountName}</span>
+                <span className={styles.bankVal}>
+                  {bankDetails.accountName}
+                </span>
               </div>
             </div>
 
-            <div style={{ padding: "1rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "10px", display: "flex", gap: "0.75rem", fontSize: "0.82rem", color: "#166534" }}>
+            <div
+              style={{
+                padding: "1rem",
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "10px",
+                display: "flex",
+                gap: "0.75rem",
+                fontSize: "0.82rem",
+                color: "#166534",
+              }}
+            >
               <ShieldCheck size={20} style={{ flexShrink: 0 }} />
               <div>
                 <strong>Secure Direct Payouts</strong>
                 <p style={{ marginTop: "0.25rem", lineHeight: "1.4" }}>
-                  Funds are settled straight to your registered commercial bank account via NIBSS instant transfer.
+                  Funds are settled straight to your registered commercial bank
+                  account via NIBSS instant transfer.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.78rem", color: "#64748b" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "0.5rem",
+                fontSize: "0.78rem",
+                color: "#64748b",
+              }}
+            >
               <Info size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
               <span>
-                To change your bank account details, contact your Campus Transport Supervisor or Field Agent.
+                To change your bank account details, contact your Campus
+                Transport Supervisor or Field Agent.
               </span>
             </div>
           </div>
@@ -514,15 +612,37 @@ export default function DriverWithdrawals() {
 
         {/* Withdrawal History Log */}
         <section className={styles.historySection}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#0f172a" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: "700",
+                color: "#0f172a",
+              }}
+            >
               Withdrawal History & Status
             </h2>
             <button
               type="button"
               onClick={loadWithdrawalData}
               disabled={loading}
-              style={{ background: "none", border: "none", color: "#0284c7", fontSize: "0.82rem", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#0284c7",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
             >
               <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
               <span>{loading ? "Refreshing..." : "Refresh"}</span>
@@ -534,7 +654,9 @@ export default function DriverWithdrawals() {
               withdrawals.map((w) => (
                 <div key={w.id} className={styles.historyItem}>
                   <div className={styles.historyLeft}>
-                    <span className={styles.historyAmount}>{formatNaira(w.amount)}</span>
+                    <span className={styles.historyAmount}>
+                      {formatNaira(w.amount)}
+                    </span>
                     <span className={styles.historyDate}>
                       {formatDate(w.date)} • Ref: {w.reference}
                     </span>
@@ -556,8 +678,18 @@ export default function DriverWithdrawals() {
                 </div>
               ))
             ) : (
-              <div style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
-                <Clock size={32} color="#cbd5e1" style={{ margin: "0 auto 0.5rem" }} />
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "2rem",
+                  color: "#64748b",
+                }}
+              >
+                <Clock
+                  size={32}
+                  color="#cbd5e1"
+                  style={{ margin: "0 auto 0.5rem" }}
+                />
                 <p>No withdrawal requests found in your history.</p>
               </div>
             )}

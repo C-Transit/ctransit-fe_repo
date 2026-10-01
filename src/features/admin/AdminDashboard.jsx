@@ -12,11 +12,8 @@ import {
   FaUserShield,
   FaCheckCircle,
   FaExclamationTriangle,
-<<<<<<< HEAD
   FaCreditCard,
   FaUnlink,
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -51,13 +48,10 @@ import {
   updateAdminDisputeStatus,
   sendAdminStudentNotification,
   syncAdminCardWhitelist,
-<<<<<<< HEAD
   linkAdminCard,
   unlinkAdminCard,
   getAdminCardLinkErrorMessage,
   getAdminUnlinkCardErrorMessage,
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   logoutAdmin,
 } from '../../api/adminApi';
 import {
@@ -1224,7 +1218,6 @@ export default function AdminDashboard() {
   const [syncingWhitelist, setSyncingWhitelist] = useState(false);
   const [syncToast, setSyncToast] = useState('');
 
-<<<<<<< HEAD
   // Admin Card Link state (Endpoint 5)
   const [showAdminLinkModal, setShowAdminLinkModal] = useState(false);
   const [adminLinkOtp, setAdminLinkOtp] = useState('');
@@ -1308,8 +1301,6 @@ export default function AdminDashboard() {
     }
   };
 
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
   const fetchDashboardMetrics = async () => {
     setLoadingOverview(true);
     setOverviewError(null);
@@ -1480,15 +1471,12 @@ export default function AdminDashboard() {
           </div>
           {activeNav === 'overview' && (
             <div className={styles.actionGroup}>
-<<<<<<< HEAD
               <PrimaryButton variant="ghost" onClick={() => setShowAdminLinkModal(true)}>
                 <FaCreditCard /> Link Admin Card
               </PrimaryButton>
               <PrimaryButton variant="ghost" onClick={() => setShowAdminUnlinkModal(true)}>
                 <FaUnlink /> Unlink Card
               </PrimaryButton>
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
               <PrimaryButton onClick={() => setShowBroadcastModal(true)}>
                 <FaBell /> Send Notification
               </PrimaryButton>
@@ -1634,7 +1622,6 @@ export default function AdminDashboard() {
                 <small>RFID contactless cards</small>
               </div>
             </div>
-<<<<<<< HEAD
 
             <div style={{ marginTop: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: '300px', background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -1661,8 +1648,6 @@ export default function AdminDashboard() {
                 </PrimaryButton>
               </div>
             </div>
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
           </section>
         )}
         {activeNav === 'roles' && (
@@ -1673,7 +1658,6 @@ export default function AdminDashboard() {
         )}
       </div>
 
-<<<<<<< HEAD
       {/* Link Admin Card Modal (Endpoint 5) */}
       {showAdminLinkModal && (
         <Modal open={showAdminLinkModal} title="Link Admin RFID Card" onClose={() => setShowAdminLinkModal(false)}>
@@ -1800,8 +1784,6 @@ export default function AdminDashboard() {
         </Modal>
       )}
 
-=======
->>>>>>> 72cdc132266f78ca8234e380e965306a1cda93a1
       {/* Broadcast / Send Notification Quick Modal */}
       {showBroadcastModal && (
         <Modal open={showBroadcastModal} title="Send Student Notification" onClose={() => setShowBroadcastModal(false)}>
