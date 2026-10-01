@@ -1,0 +1,47 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 60;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100% - 1.5rem, 520px);
+  background: #fff;
+  border: 1px solid #dbe7ff;
+  border-radius: 1rem;
+  box-shadow: 0 26px 48px rgba(15, 23, 42, 0.24);
+  z-index: 61;
+}
+
+.head {
+  padding: 1rem;
+  border-bottom: 1px solid #e6eeff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.head h3 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.head button {
+  border: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: #e2ecff;
+  color: #1e3a8a;
+  cursor: pointer;
+}
+
+.body {
+  padding: 1rem;
+}

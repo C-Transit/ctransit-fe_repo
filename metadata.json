@@ -1,0 +1,6 @@
+{
+  "name": "C-Transit",
+  "description": "A Progressive Web App for Campus Transit.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

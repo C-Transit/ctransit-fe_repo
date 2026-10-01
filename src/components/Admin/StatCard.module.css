@@ -1,0 +1,81 @@
+.card {
+  background: #fff;
+  border: 1px solid #e2ebff;
+  border-radius: 1rem;
+  padding: 1rem;
+  min-height: 130px;
+  box-shadow: 0 10px 24px rgba(30, 58, 138, 0.08);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.head p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.iconWrap {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  display: grid;
+  place-items: center;
+  color: #1e3a8a;
+  background: #e6efff;
+}
+
+.card h3 {
+  margin: 0.65rem 0 0.25rem;
+  color: #0f172a;
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  letter-spacing: -0.02em;
+}
+
+.card small {
+  color: #0369a1;
+  font-weight: 700;
+}
+
+.skeletonWrap {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.skeletonLine,
+.skeletonValue,
+.skeletonLineSmall {
+  border-radius: 0.45rem;
+  background: linear-gradient(90deg, #e8eeff 0%, #dce8ff 50%, #e8eeff 100%);
+  background-size: 240% 100%;
+  animation: pulse 1.2s linear infinite;
+}
+
+.skeletonLine {
+  height: 0.8rem;
+  width: 58%;
+}
+
+.skeletonValue {
+  height: 1.6rem;
+  width: 75%;
+}
+
+.skeletonLineSmall {
+  height: 0.7rem;
+  width: 42%;
+}
+
+@keyframes pulse {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}

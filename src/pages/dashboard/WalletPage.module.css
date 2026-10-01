@@ -1,0 +1,693 @@
+@import "../../styles/tokens.css";
+
+.WalletPage{
+  padding: 15px 25px;
+}
+
+/* ---------- HEADER ---------- */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(9px, .5vw, 8px) 0;
+  margin-bottom: clamp(16px, 4vw, 20px);
+}
+
+.backBtn,
+.moreBtn {
+ display:none;
+}
+
+.pageTitle {
+  font-size: clamp(16px, 4vw, 20px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+/* ---------- NFC CARD ---------- */
+.nfcCard {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius-lg);
+  padding: clamp(16px, 4vw, 20px);
+  margin-bottom: 20px;
+  color: white;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(16px, 4vw, 24px);
+}
+
+.cardBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.cardNumber {
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.cardBottom {
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(10px, 3vw, 12px);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- BALANCE ---------- */
+.balanceDisplay {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.balanceAmount {
+  font-size: clamp(22px, 6vw, 28px);
+  font-weight: 500;
+  color: white;
+  margin-bottom: 16px;
+}
+.balanceText{
+  font-weight: 200;
+  color:white;
+  font-size: clamp(19px, 2.5vw, 21px);
+}
+/* ---------- ACTION BUTTONS ---------- */
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  flex: 1;
+  min-width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.actionBtn:hover {
+  color: var(--primary);
+}
+
+/* ---------- QUICK AMOUNT ---------- */
+.quickAmountSection {
+  margin-bottom: 24px;
+}
+
+.quickAmountLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.amountPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.amountPill {
+  flex: 1;
+  min-width: 70px;
+  text-align: center;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.amountPill:hover {
+  border-color: var(--primary);
+}
+
+.amountPillActive {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* ---------- TRANSACTIONS ---------- */
+.transactionSection {
+  margin-bottom: 20px;
+}
+
+.transactionTitle {
+  font-size: clamp(14px, 4vw, 16px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.transactionList {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+/* ---------- ACTION BUTTONS (disabled state) ---------- */
+.actionBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.actionBtn:disabled:hover {
+  color: var(--text-muted); /* override the hover color so it doesn't look interactive */
+}
+
+/* ─── Account Box (shows when account exists) ────────────────────────────── */
+.accountBox {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.accountBoxTitle {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.accountBoxContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accountBoxBank {
+  font-size: 11px;
+  color: #6B7280;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.accountBoxNumber {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.5px;
+}
+
+.accountBoxCopyBtn {
+  border: none;
+  background: #E5E7EB;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s;
+}
+
+.accountBoxCopyBtn:hover {
+  background: #D1D5DB;
+}
+
+/* ─── Account Box Empty (shows when no account) ──────────────────────────── */
+.accountBoxEmpty {
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.accountBoxEmptyText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400E;
+}
+
+.accountBoxEmptySub {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #78350F;
+}
+
+/* ─── Fund Wallet Button ──────────────────────────────────────────────────── */
+.fundWalletBtn {
+  width: 100%;
+  padding: 14px;
+  background: #1A56DB;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.3s, transform 0.1s;
+  margin-bottom: 20px;
+}
+
+.fundWalletBtn:hover:not(:disabled) {
+  background: #1E40AF;
+}
+
+.fundWalletBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.fundWalletBtn:disabled {
+  background: #93A3C4;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.fundWalletIcon {
+  margin-right: 4px;
+}
+
+
+
+/* ---------- EMPTY STATE ---------- */
+.emptyState {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 32px 16px;
+}
+.transactionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(12px, 3vw, 14px);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.transactionRow:last-child {
+  border-bottom: none;
+}
+
+.txIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.txInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.txTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txDate {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.txAmount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.txCredit {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.txDebit {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+@keyframes ctPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes ctScaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* WalletPage.module.css - Add these styles at the end */
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal Container */
+.modalContainer {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modalCloseBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #6B7280;
+  transition: color 0.2s;
+}
+
+.modalCloseBtn:hover {
+  color: #111827;
+}
+
+/* KYC Required Content */
+.kycContent {
+  margin-top: 16px;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.kycIconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #FEF3C7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.kycTitle {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #D97706;
+}
+
+.kycDescription {
+  margin: 0 0 4px 0;
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.kycInstruction {
+  margin: 12px 0 0 0;
+  color: #1A56DB;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.kycButton {
+  margin-top: 20px;
+  padding: 12px 32px;
+  background: #1A56DB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.kycButton:hover {
+  background: #1E40AF;
+}
+
+/* Error Content */
+.errorContent {
+  margin-top: 16px;
+  padding: 12px;
+  background: #FEF2F2;
+  border-radius: 8px;
+  color: #DC2626;
+}
+
+/* Virtual Account Content */
+.vaContent {
+  margin-top: 16px;
+}
+
+.vaLabel {
+  color: #6B7280;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.vaCard {
+  background: #F3F4F6;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.vaAccountLabel {
+  margin: 0;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.vaAccountRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.vaAccountNumber {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.vaCopyBtn {
+  border: none;
+  background: #E5E7EB;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s;
+}
+
+.vaCopyBtn:hover {
+  background: #D1D5DB;
+}
+
+.vaBankLabel {
+  margin: 12px 0 0 0;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.vaBankName {
+  margin: 4px 0 0 0;
+  font-weight: 600;
+  color: #111827;
+}
+
+.vaChecking {
+  font-size: 13px;
+  color: #1A56DB;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vaPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1A56DB;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+/* Success Content */
+.successContent {
+  margin-top: 16px;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.successIconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.successTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.successAmount {
+  margin: 8px 0 0 0;
+  color: #6B7280;
+  font-size: 14px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 480px) {
+  .pageHeader {
+    flex-direction: row;
+  }
+
+  .actionButtons {
+    justify-content: space-between;
+  }
+
+  .transactionRow {
+    padding: 12px;
+  }
+
+  .cardBottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------- TABLET ---------- */
+@media (min-width: 768px) {
+  .pageHeader {
+    padding: 20px 0;
+  }
+
+  .nfcCard {
+    padding: 24px;
+  }
+
+  .transactionRow {
+    padding: 16px;
+  }
+}
+
+/* ---------- LARGE SCREENS ---------- */
+@media (min-width: 1024px) {
+  .balanceAmount {
+    font-size: 32px;
+  }
+
+  .pageTitle {
+    font-size: 22px;
+  }
+}

@@ -1,0 +1,69 @@
+@import '../../styles/tokens.css';
+
+/* ==========================================================================
+   DESKTOP BASE (≥ 1024px) — full-width app shell with sidebar space
+   ========================================================================== */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.main {
+  flex: 1;
+  padding-bottom: 15px;
+  overflow-y: auto;
+  max-width: 1280px;
+  width: 100%;
+  margin-left: 300px; 
+  box-sizing: border-box;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 150;
+}
+
+/* ==========================================================================
+   TABLET (max-width: 1023px)
+   ========================================================================== */
+@media (max-width: 1023px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .main {
+    max-width: 100%;
+    padding-bottom: 25px;
+    margin-left: 0; /* ← no sidebar offset, drawer is hidden */
+  }
+}
+
+/* ==========================================================================
+   MOBILE (max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .shell {
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .main {
+    max-width: 100%;
+    padding-bottom: 65px;
+    margin-left: 0; /* ← no sidebar offset on mobile */
+  }
+
+  .overlay {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}

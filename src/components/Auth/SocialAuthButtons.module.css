@@ -1,0 +1,92 @@
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.dividerText {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.socialButtonsRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.socialButton {
+  flex: 1;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 0;
+}
+
+.socialButton:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.socialButton:focus {
+  outline: none;
+  border-color: #1a56db;
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
+}
+
+.socialButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  font-size: 20px;
+  color: #374151;
+}
+
+.socialButton:hover:not(:disabled) .icon {
+  color: #1a56db;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .socialButton {
+    height: 40px;
+  }
+
+  .icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .socialButtonsRow {
+    gap: 8px;
+  }
+
+  .socialButton {
+    height: 36px;
+  }
+
+  .icon {
+    font-size: 16px;
+  }
+}

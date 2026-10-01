@@ -1,0 +1,279 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+  position: relative;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: rgba(226, 232, 240, 0.6);
+  color: #64748b;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(226, 232, 240, 1);
+  color: #1e293b;
+}
+
+.closeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Header Section */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.header strong {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* OTP Container */
+.otpContainer {
+  margin-bottom: 2rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.otpInputs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.8rem;
+}
+
+.otpInput {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.8rem;
+  background: white;
+  color: #1e293b;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: text;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.otpInput::placeholder {
+  color: #cbd5e1;
+}
+
+.otpInput:focus {
+  border-color: #2563eb;
+  background: #f8fbff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.otpInput.filled {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  color: #2563eb;
+}
+
+.otpInput.invalid {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.otpInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+/* Error Message */
+.errorMessage {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 0.8rem;
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Success Message */
+.successMessage {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  padding: 0.8rem;
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Verify Button */
+.verifyBtn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.verifyBtn:hover:not(:disabled) {
+  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+}
+
+.verifyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Resend Section */
+.resendSection {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.resendSection p {
+  margin: 0 0 0.6rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.3rem 0.6rem;
+}
+
+.resendBtn:hover:not(:disabled) {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.resendBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: #cbd5e1;
+}
+
+/* Help Text */
+.helpText {
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.helpText p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 2rem;
+    width: 95%;
+  }
+
+  .header h2 {
+    font-size: 1.3rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .otpInputs {
+    gap: 0.6rem;
+  }
+
+  .otpInput {
+    font-size: 1.2rem;
+    border-radius: 0.6rem;
+  }
+
+  .closeBtn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    top: 0.8rem;
+    right: 0.8rem;
+  }
+
+  .verifyBtn {
+    padding: 0.9rem;
+    font-size: 0.9rem;
+  }
+}

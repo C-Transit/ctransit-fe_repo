@@ -1,0 +1,51 @@
+{
+  "name": "c-transit",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env VITE_APP_TARGET=web vite --host 0.0.0.0 --port 3000",
+    "dev:web": "cross-env VITE_APP_TARGET=web vite --mode web --host 0.0.0.0 --port 3000",
+    "dev:admin": "cross-env VITE_APP_TARGET=admin vite --mode admin --host 0.0.0.0 --port 3001",
+    "dev:agent": "cross-env VITE_APP_TARGET=agent vite --mode agent --host 0.0.0.0 --port 3002",
+    "dev:driver": "cross-env VITE_APP_TARGET=driver vite --mode driver --host 0.0.0.0 --port 3003",
+    "build": "cross-env VITE_APP_TARGET=web vite build --mode web",
+    "build:web": "cross-env VITE_APP_TARGET=web vite build --mode web",
+    "build:admin": "cross-env VITE_APP_TARGET=admin vite build --mode admin",
+    "build:agent": "cross-env VITE_APP_TARGET=agent vite build --mode agent",
+    "build:driver": "cross-env VITE_APP_TARGET=driver vite build --mode driver",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "classnames": "^2.5.1",
+    "framer-motion": "^10.18.0",
+    "gsap": "^3.15.0",
+    "lucide-react": "^1.38.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
+    "react-is": "^18.2.0",
+    "react-router-dom": "^7.13.0",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^8.57.0",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^6.0.3",
+    "autoprefixer": "^10.4.16",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "globals": "^16.5.0",
+    "vite": "^8.1.2",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

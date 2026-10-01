@@ -1,0 +1,54 @@
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #e2ebff;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(30, 58, 138, 0.06);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.85rem 0.95rem;
+  border-bottom: 1px solid #eef3ff;
+  font-size: 0.88rem;
+}
+
+.table th {
+  color: #475569;
+  font-weight: 700;
+  background: #f8faff;
+}
+
+.table td {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.statusTag {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}

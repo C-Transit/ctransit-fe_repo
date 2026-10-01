@@ -1,0 +1,467 @@
+.profilePage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8fbff 100%);
+  padding: 2rem 1rem;
+}
+
+:global(html[data-theme="dark"]) .profilePage {
+  background: linear-gradient(135deg, #0b1220 0%, #111827 100%);
+}
+
+:global(html[data-theme="dark"]) .profileCard,
+:global(html[data-theme="dark"]) .statsCard,
+:global(html[data-theme="dark"]) .emergencyCard,
+:global(html[data-theme="dark"]) .modal {
+  background: #0f1724;
+  color: #e2e8f0;
+}
+
+:global(html[data-theme="dark"]) .header h1,
+:global(html[data-theme="dark"]) .infoSection h2,
+:global(html[data-theme="dark"]) .statsCard h3,
+:global(html[data-theme="dark"]) .emergencyCard h3,
+:global(html[data-theme="dark"]) .modal h2,
+:global(html[data-theme="dark"]) .infoItem p,
+:global(html[data-theme="dark"]) .statValue,
+:global(html[data-theme="dark"]) .placeholder {
+  color: #e2e8f0;
+}
+
+:global(html[data-theme="dark"]) .statItem,
+:global(html[data-theme="dark"]) .backBtn,
+:global(html[data-theme="dark"]) .secondaryBtn,
+:global(html[data-theme="dark"]) .cancelBtn,
+:global(html[data-theme="dark"]) .formGroup input {
+  background: #111827;
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+}
+
+:global(html[data-theme="dark"]) .infoItem label,
+:global(html[data-theme="dark"]) .statLabel,
+:global(html[data-theme="dark"]) .formGroup label {
+  color: #7dd3fc;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: #2563eb;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #1e293b;
+  flex: 1;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+ 
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatarBtn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatarBtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.infoSection h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  color: #1e293b;
+  text-align: center;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.infoItem label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.infoItem p {
+  margin: 0;
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.actionButtons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+}
+
+.primaryBtn:hover {
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.3);
+}
+
+.secondaryBtn {
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: #2563eb;
+}
+
+.secondaryBtn:hover {
+  border-color: #2563eb;
+  background: #f8fbff;
+}
+
+/* Stats Card */
+.statsCard {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+}
+
+.statsCard h3 {
+  margin: 0 0 1.5rem;
+  font-size: 1.2rem;
+  color: #1e293b;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.statItem {
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  border-radius: 1rem;
+}
+
+.statValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Emergency Card */
+.emergencyCard {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  border: 2px solid #fee2e2;
+}
+
+.emergencyCard h3 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.placeholder {
+  margin: 0 0 1rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.addBtn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addBtn:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+}
+
+.modal h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.3rem;
+  color: #1e293b;
+}
+
+.formGroup {
+  margin-bottom: 1.2rem;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.85rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.8rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #f8fbff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.errorMessage {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 0.8rem;
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.modalActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancelBtn,
+.submitBtn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+}
+
+.cancelBtn:hover {
+  background: #e2e8f0;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+}
+
+.submitBtn:hover {
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.3);
+}
+
+.successToast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  padding: 1rem 1.2rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+  z-index: 1000;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+:global(html[data-theme="dark"]) .successToast {
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .profilePage {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .header h1 {
+    font-size: 1.2rem;;
+  }
+
+  .profileCard,
+  .statsCard,
+  .emergencyCard {
+    padding: 1.5rem;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modalActions {
+    grid-template-columns: 1fr;
+  }
+}
