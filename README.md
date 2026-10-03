@@ -67,6 +67,18 @@ npm run build
 
 ---
 
+## Service Worker & Cache Versioning
+
+The passenger app is served by a hand-written service worker at [public/service-worker.js](public/service-worker.js).
+
+**Bumping the cache version.** `CACHE_VERSION` must be bumped in the same commit as any change to `service-worker.js`. The `activate` handler deletes every cache whose name is not the current `CACHE_NAME`, so stale caches are cleared only when the version changes. Editing the worker without bumping `CACHE_VERSION` leaves older caches alive alongside the new one.
+
+**Cache behaviour.** Navigations and app-shell requests (`/`, `/index.html`) are network-first with a cache fallback, and the shell cache is refreshed on every successful response. Requests under `/api` are network-only and never cached. All other static assets are cache-first.
+
+**Known limitation — open tabs across a deploy.** A tab already open when a new build deploys can still white-screen. The worker calls `skipWaiting()` and `clients.claim()`, so a new worker takes control immediately while the old page is still running the previous build; that page can then request a hashed asset chunk that no longer exists and receive an empty 404. This is an accepted trade-off: the alternatives are dropping `skipWaiting()` and prompting the user to reload, or retaining previous caches on activate. There is deliberately no "update available" prompt.
+
+---
+
 ## Vercel Multi-Project Deployment Setup
 
 To deploy the three subdomains from this single GitHub repository, create three projects in Vercel:

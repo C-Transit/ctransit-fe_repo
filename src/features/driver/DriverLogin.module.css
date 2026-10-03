@@ -191,3 +191,32 @@
 .backLink:hover {
   color: #0284c7;
 }
+
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 1rem;
+  }
+
+  .container {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .inputWrapper:has(.togglePasswordBtn) .input {
+    padding-right: 2.75rem;
+  }
+
+  .togglePasswordBtn {
+    right: 0.125rem;
+    padding: 0.875rem;
+  }
+
+  .devBtn {
+    min-height: 44px;
+  }
+
+  .backLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

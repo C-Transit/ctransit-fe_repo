@@ -8,7 +8,6 @@ import {
   Bell,
   CreditCard,
   LogOut,
-  Bus,
   Radio,
 } from "lucide-react";
 import useDriverAuth from "../../../hooks/useDriverAuth";
@@ -17,12 +16,12 @@ import {
   generateTerminalDisplayId,
 } from "../../../utils/identifierUtils";
 import { fetchDriverNotifications, fetchDriverTerminalStatus } from "../../../api/driverApi";
+import logo from "../../../assets/images/c-transit-icon.svg"
 import styles from "./DriverLayout.module.css";
 
 export default function DriverLayout({ children }) {
   const { driver, logout } = useDriverAuth();
   const location = useLocation();
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [terminalStatus, setTerminalStatus] = useState(driver?.terminalStatus || "ONLINE");
@@ -111,7 +110,7 @@ export default function DriverLayout({ children }) {
       <header className={styles.header}>
         <Link to="/driver" className={styles.headerBrand}>
           <div className={styles.logoIcon}>
-            <Bus size={22} />
+            <img src = {logo}>  </img>
           </div>
           <div className={styles.brandTextGroup}>
             <div className={styles.brandTitle}>

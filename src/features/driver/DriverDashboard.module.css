@@ -438,3 +438,22 @@
   color: #b91c1c;
   cursor: pointer;
 }
+
+@media (max-width: 480px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .refreshBtn,
+  .withdrawBtn,
+  .verifyBtn,
+  .retrySmallBtn,
+  .viewAllLink {
+    min-height: 44px;
+  }
+
+  .verifyInput {
+    min-width: 0;
+    min-height: 44px;
+  }
+}

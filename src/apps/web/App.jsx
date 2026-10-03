@@ -24,11 +24,6 @@ import ForgotPasswordPage from '../../features/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../../features/auth/ResetPasswordPage';
 import AuthGuard from '../../components/guards/AuthGuard';
 import DriverAuthGuard, { PublicDriverRoute } from '../../components/guards/DriverAuthGuard';
-import AgentLogin from '../../features/agent/AgentLogin';
-import AgentDashboard from '../../features/agent/AgentDashboard';
-import AdminLogin from '../../features/admin/AdminLogin';
-import AdminDashboard from '../../features/admin/AdminDashboard';
-import { isAdminAuthenticated } from '../../api/adminAuth';
 import {
   DriverLogin,
   DriverDashboard,
@@ -46,24 +41,6 @@ const safeGetItem = (key) => {
     return null;
   }
 };
-
-const isAgentAuthenticated = () => Boolean(safeGetItem('agentSession'));
-
-function ProtectedAgentRoute({ children }) {
-  return isAgentAuthenticated() ? children : <Navigate to="/agent/login" replace />;
-}
-
-function PublicAgentRoute({ children }) {
-  return isAgentAuthenticated() ? <Navigate to="/agent/dashboard" replace /> : children;
-}
-
-function ProtectedAdminRoute({ children }) {
-  return isAdminAuthenticated() ? children : <Navigate to="/admin/login" replace />;
-}
-
-function PublicAdminRoute({ children }) {
-  return isAdminAuthenticated() ? <Navigate to="/admin/dashboard" replace /> : children;
-}
 
 function PublicAuthRoute({ children }) {
   const isAuthenticated = Boolean(safeGetItem('authToken'));
@@ -169,6 +146,9 @@ export default function WebApp() {
             />
 
             {/* Driver Portal Routes */}
+            {/* TODO: driver has no ctransit-driver Vercel project yet — routes
+                live here so ctransit.me/driver/* stays reachable. Move to a
+                dedicated entry once the driver subdomain ships. */}
             <Route
               path="/driver/login"
               element={
@@ -227,58 +207,6 @@ export default function WebApp() {
                 <DriverAuthGuard>
                   <DriverCardLink />
                 </DriverAuthGuard>
-              }
-            />
-
-            {/* Agent Portal Routes */}
-            <Route
-              path="/agent/login"
-              element={
-                <PublicAgentRoute>
-                  <AgentLogin />
-                </PublicAgentRoute>
-              }
-            />
-            <Route
-              path="/agent"
-              element={
-                <ProtectedAgentRoute>
-                  <AgentDashboard />
-                </ProtectedAgentRoute>
-              }
-            />
-            <Route
-              path="/agent/dashboard"
-              element={
-                <ProtectedAgentRoute>
-                  <AgentDashboard />
-                </ProtectedAgentRoute>
-              }
-            />
-
-            {/* Admin Portal Routes */}
-            <Route
-              path="/admin/login"
-              element={
-                <PublicAdminRoute>
-                  <AdminLogin />
-                </PublicAdminRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
               }
             />
 

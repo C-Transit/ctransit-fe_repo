@@ -220,3 +220,26 @@
   font-weight: 700;
   color: #0f172a;
 }
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.25rem;
+  }
+
+  .actionButtons {
+    flex-wrap: wrap;
+  }
+
+  .stepsProgressBar {
+    gap: 0.5rem;
+  }
+
+  .stepLabel {
+    font-size: 0.68rem;
+    text-align: center;
+  }
+
+  .receiptRow {
+    gap: 0.75rem;
+  }
+}

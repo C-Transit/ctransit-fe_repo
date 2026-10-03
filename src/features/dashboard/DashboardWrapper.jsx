@@ -105,7 +105,7 @@ export default function DashboardWrapper() {
       try {
         const tripsResponse = await axios.get(
           `${USER_API_URL}/transactions/history`,
-          { headers, params: { limit: 5 } }
+          { headers, params: { limit: 10 } }
         );
 
         const tripsResData = tripsResponse.data;
@@ -128,7 +128,7 @@ export default function DashboardWrapper() {
             status: t.type === "RIDE" ? "success" : "pending",
           }));
 
-          setRecentTaps(normalized.slice(0, 5));
+          setRecentTaps(normalized.slice(0, 10));
         } else {
           setRecentTaps([]);
         }

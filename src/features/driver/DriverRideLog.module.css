@@ -357,3 +357,20 @@
   align-items: center;
   gap: 0.75rem;
 }
+
+@media (max-width: 480px) {
+  .statusTab,
+  .dateSelect,
+  .pageBtn,
+  .searchInput {
+    min-height: 44px;
+  }
+
+  .closeBtn {
+    padding: 0.75rem;
+  }
+
+  .receiptGrid {
+    grid-template-columns: 1fr;
+  }
+}

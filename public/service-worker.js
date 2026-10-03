@@ -1,5 +1,6 @@
 // 1. BUMP THE CACHE VERSION TO FORCE AN UPDATE
-const CACHE_NAME = "c-transit-cache-v6";
+const CACHE_VERSION = "v7";
+const CACHE_NAME = `c-transit-cache-${CACHE_VERSION}`;
 
 // 2. REAL STATIC ASSETS (use existing SVG icons)
 const STATIC_ASSETS = [
@@ -81,25 +82,56 @@ self.addEventListener("fetch", (event) => {
   // 3. Navigation requests — network first, fallback to cached index or offline page or synthetic HTML
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(CACHE_NAME);
-        const cachedOffline = await cache.match("/offline.html");
-        if (cachedOffline) return cachedOffline;
+      fetch(request)
+        .then(async (response) => {
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put("/index.html", response.clone());
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          const cachedOffline = await cache.match("/offline.html");
+          if (cachedOffline) return cachedOffline;
 
-        const cachedIndex =
-          (await cache.match("/index.html")) || (await cache.match("/"));
-        if (cachedIndex) return cachedIndex;
+          const cachedIndex =
+            (await cache.match("/index.html")) || (await cache.match("/"));
+          if (cachedIndex) return cachedIndex;
 
-        return new Response(
-          "<!doctype html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>C-Transit Offline</title></head><body style='font-family:sans-serif;text-align:center;padding:40px;'><h2>You are offline</h2><p>Please check your connection and reload.</p><button onclick='location.reload()'>Retry</button></body></html>",
-          { headers: { "Content-Type": "text/html" }, status: 200 },
-        );
-      }),
+          return new Response(
+            "<!doctype html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>C-Transit Offline</title></head><body style='font-family:sans-serif;text-align:center;padding:40px;'><h2>You are offline</h2><p>Please check your connection and reload.</p><button onclick='location.reload()'>Retry</button></body></html>",
+            { headers: { "Content-Type": "text/html" }, status: 200 },
+          );
+        }),
     );
     return;
   }
 
-  // 4. Static assets — cache first, then network
+  // 4. App shell HTML outside navigations — network first, refresh cache, then fall back
+  if (url.pathname === "/" || url.pathname === "/index.html") {
+    event.respondWith(
+      fetch(request)
+        .then(async (response) => {
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put("/index.html", response.clone());
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          return (
+            (await cache.match("/index.html")) ||
+            (await cache.match("/")) ||
+            new Response("", { status: 503 })
+          );
+        }),
+    );
+    return;
+  }
+
+  // 5. Static assets — cache first, then network
   event.respondWith(
     caches.match(request).then(
       (cached) =>

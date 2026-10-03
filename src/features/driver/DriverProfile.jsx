@@ -74,21 +74,9 @@ export default function DriverProfile() {
             </div>
             <button
               type="button"
+              className={styles.syncBtn}
               onClick={loadProfile}
               disabled={loading}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                padding: "0.5rem 0.9rem",
-                borderRadius: "8px",
-                border: "1px solid #cbd5e1",
-                background: "#ffffff",
-                color: "#0284c7",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
             >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               <span>{loading ? "Refreshing..." : "Sync Profile"}</span>

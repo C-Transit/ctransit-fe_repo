@@ -317,6 +317,32 @@
   }
 }
 
+@media (max-width: 480px) {
+  .header {
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+  }
+
+  .headerActions {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+    column-gap: 0.5rem;
+  }
+
+  .logoutBtn {
+    min-height: 44px;
+  }
+
+  .notifBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .navLink {
+    min-height: 44px;
+  }
+}
+
 /* Modal */
 .modalOverlay {
   position: fixed;
