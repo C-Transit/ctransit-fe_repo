@@ -705,7 +705,7 @@ function KYCSection({ onToast }) {
       icon: <FaCheckCircle />,
       desc: "Your identity has been successfully verified.",
     },
-    // ✅ Added — backend can return REJECTED
+    //  Added — backend can return REJECTED
     rejected: {
       label: "Verification Rejected",
       color: styles.kycBadgeRed,
@@ -889,7 +889,7 @@ function PrivacySettings({ onDownload, onDelete, onShowInfo }) {
       <div className={styles.sectionGroup}>
         <h3>Legal</h3>
         <div className={styles.legalLinks}>
-          <a href="/policy" className={styles.link}>
+          <a href="/privacy" className={styles.link}>
             {" "}
             Privacy Policy
           </a>
