@@ -110,7 +110,7 @@ export default function DriverLayout({ children }) {
       <header className={styles.header}>
         <Link to="/driver" className={styles.headerBrand}>
           <div className={styles.logoIcon}>
-            <img src = {logo}>  </img>
+            <img src = {logo} alt = "Ctransit logo"/>
           </div>
           <div className={styles.brandTextGroup}>
             <div className={styles.brandTitle}>

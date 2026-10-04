@@ -274,14 +274,47 @@ export default function DashboardWrapper() {
     );
   }
 
-  if (error) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <p>{error}</p>
-        <button onClick={fetchDashboardData}>Retry</button>
-      </div>
-    );
-  }
+ const styles = {
+  errorBox: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    background: "transparent",
+    borderRadius: "25px",
+    padding: "24px",
+    gap: "12px",
+    minHeight: "100vh",  
+    width: "100%", 
+  },
+  errorText: {
+    color: "#b91c1c",
+    fontSize: "1.15rem",
+    margin: 0,
+  },
+  retryBtn: {
+    padding: "8px 20px",
+    border: "none",
+    borderRadius: "8px",
+    background: "#0284c7",
+    color: "#fff",
+    fontWeight: 500,
+    cursor: "pointer",
+  },
+};
+
+// then in your component
+if (error) {
+  return (
+    <div style={styles.errorBox}>
+      <p style={styles.errorText}>{error}</p>
+      <button style={styles.retryBtn} onClick={fetchDashboardData}>
+        Retry
+      </button>
+    </div>
+  );
+}
 
   return (
     <DashboardLayout
