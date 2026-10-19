@@ -153,17 +153,6 @@ export default function DriverLayout({ children }) {
               <span className={styles.driverId}>{driverDisplayId}</span>
             </div>
           </div>
-
-          {/* Logout Button */}
-          <button
-            type="button"
-            className={styles.logoutBtn}
-            onClick={() => setShowLogoutModal(true)}
-            title="Sign out of Driver Portal"
-          >
-            <LogOut size={16} />
-            <span>Exit</span>
-          </button>
         </div>
       </header>
 

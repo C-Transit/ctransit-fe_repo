@@ -147,13 +147,6 @@ export default function DriverLogin() {
         </form>
 
         <div className={styles.devHelperSection}>
-          <button
-            type="button"
-            className={styles.devBtn}
-            onClick={handleFillDevCredentials}
-          >
-            ⚡ Autofill Driver Demo Credentials
-          </button>
           <Link to="/" className={styles.backLink}>
             ← Back to C-Transit Home
           </Link>
