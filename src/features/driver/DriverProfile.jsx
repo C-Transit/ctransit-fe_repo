@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   RefreshCw,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
 import useDriverAuth from "../../hooks/useDriverAuth";
 import { fetchDriverProfile } from "../../api/driverApi";
@@ -16,8 +17,10 @@ import {
 import DriverLayout from "./components/DriverLayout";
 import styles from "./DriverProfile.module.css";
 
+
 export default function DriverProfile() {
-  const { driver } = useDriverAuth();
+  const { driver, logout } = useDriverAuth();
+   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(driver || null);
   const [error, setError] = useState(null);
@@ -237,8 +240,16 @@ export default function DriverProfile() {
             </div>
           </div>
         </div>
-
-        {/* Security & Privacy Compliance Note */}
+        {/* Logout Button */}
+                  <button
+                    type="button"
+                    className={styles.logoutBtn}
+                    onClick={() => setShowLogoutModal(true)}
+                    title="Sign out of Driver Portal"
+                  >
+                    <LogOut size={16} />
+                    <span>Exit</span>
+                  </button>{/* Security & Privacy Compliance Note */}
         <div className={styles.securityNoteBox}>
           <ShieldCheck size={24} color="#16a34a" style={{ flexShrink: 0 }} />
           <div>
@@ -248,6 +259,36 @@ export default function DriverProfile() {
             </p>
           </div>
         </div>
+          {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowLogoutModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Sign Out</h3>
+            <p className={styles.modalDescription}>
+              Are you sure you want to end your driver shift and sign out of the Driver Portal?
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmLogoutBtn}
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  logout();
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </DriverLayout>
   );

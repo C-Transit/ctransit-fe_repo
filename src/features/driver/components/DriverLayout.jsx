@@ -90,6 +90,8 @@ export default function DriverLayout({ children }) {
     { label: "Ride Log", path: "/driver/history", icon: History },
     { label: "Withdraw", path: "/driver/withdrawals", icon: Wallet },
     { label: "Profile", path: "/driver/profile", icon: User },
+    { label: "Link Card", path: "/driver/link-card", icon: CreditCard },
+    { label: "Notifications", path: "/driver/notifications", icon: Bell },
   ];
 
   const driverDisplayId = generateDriverDisplayId(
