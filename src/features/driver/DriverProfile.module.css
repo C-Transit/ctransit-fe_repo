@@ -129,6 +129,26 @@
   padding-bottom: 0.85rem;
 }
 
+.verifiedBadge,
+.unverifiedBadge {
+  margin-left: auto;
+  padding: 0.22rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.verifiedBadge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.unverifiedBadge {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .fieldList {
   display: flex;
   flex-direction: column;

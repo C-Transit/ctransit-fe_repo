@@ -8,16 +8,50 @@ import {
   RefreshCw,
   Info,
   ShieldCheck,
+  Eye,
+  EyeOff,
+  Loader2,
+  Pencil,
 } from "lucide-react";
 import useDriverAuth from "../../hooks/useDriverAuth";
 import {
   fetchDriverWithdrawals,
   requestDriverWithdrawal,
   fetchDriverDashboard,
+  fetchDriverBanks,
+  resolveDriverBank,
   verifyDriverBank,
 } from "../../api/driverApi";
 import DriverLayout from "./components/DriverLayout";
+import BankPicker from "./components/BankPicker";
 import styles from "./DriverWithdrawals.module.css";
+
+const MIN_WITHDRAWAL = 1000;
+const FEE_RATE = 0.04;
+
+const formatNaira = (value) =>
+  `₦${Number(value || 0).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+const formatDate = (isoStr) => {
+  if (!isoStr) return "N/A";
+  const date = new Date(isoStr);
+  if (Number.isNaN(date.getTime())) return isoStr;
+  return date.toLocaleString("en-NG", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const maskAccount = (value) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length > 4 ? `••••${digits.slice(-4)}` : digits || "—";
+};
 
 export default function DriverWithdrawals() {
   const { driver } = useDriverAuth();
@@ -30,78 +64,142 @@ export default function DriverWithdrawals() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form State
+  // Withdrawal form
   const [amount, setAmount] = useState("");
   const [remarks, setRemarks] = useState("");
-  const [customBankName, setCustomBankName] = useState(driver?.bankName || "");
-  const [bankCode, setBankCode] = useState(driver?.bankCode || "058");
-  const [customAccountNumber, setCustomAccountNumber] = useState(
-    driver?.accountNumber || ""
+  const [withdrawPin, setWithdrawPin] = useState("");
+  const [showWithdrawPin, setShowWithdrawPin] = useState(false);
+
+  // Payout account form
+  const [banks, setBanks] = useState([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [banksError, setBanksError] = useState("");
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [resolvedName, setResolvedName] = useState("");
+  const [resolving, setResolving] = useState(false);
+  const [resolveError, setResolveError] = useState("");
+  const [bankError, setBankError] = useState("");
+  const [bankPin, setBankPin] = useState("");
+  const [showBankPin, setShowBankPin] = useState(false);
+  const [savingBank, setSavingBank] = useState(false);
+  const [savedBank, setSavedBank] = useState(null);
+  const [editingBank, setEditingBank] = useState(false);
+
+  const activeBank =
+    savedBank ||
+    (driver?.bankVerified
+      ? {
+          bankCode: driver.bankCode,
+          bankName: driver.bankName,
+          accountNumber: driver.accountNumber,
+          accountName: driver.accountName,
+        }
+      : null);
+
+  const verified = Boolean(
+    activeBank?.accountNumber && activeBank?.accountName
   );
-  const [verifyingBank, setVerifyingBank] = useState(false);
-  const [verifiedAccountName, setVerifiedAccountName] = useState("");
-  const [bankVerifyError, setBankVerifyError] = useState("");
+  const bankFormVisible = !verified || editingBank;
 
-  const minWithdrawal = 1000;
+  const gross = Number(amount) || 0;
+  const fee = Math.round(gross * FEE_RATE * 100) / 100;
+  const net = Math.max(0, Math.round((gross - fee) * 100) / 100);
 
-  const handleVerifyBankAccount = async () => {
-    const cleanAcc = customAccountNumber.trim().replace(/\D/g, "");
-    if (cleanAcc.length !== 10) {
-      setBankVerifyError("Account number must be exactly 10 digits.");
-      return;
-    }
-    if (!bankCode.trim()) {
-      setBankVerifyError("Please provide a bank code.");
-      return;
-    }
+  // Pull the bank list once. The driver never types or sees a bank code.
+  useEffect(() => {
+    let cancelled = false;
 
-    setVerifyingBank(true);
-    setBankVerifyError("");
-    setVerifiedAccountName("");
-
-    try {
-      const res = await verifyDriverBank({
-        bankCode: bankCode.trim(),
-        accountNumber: cleanAcc,
-      });
-
-      const accName =
-        res?.accountName ||
-        res?.data?.accountName ||
-        res?.account_name ||
-        res?.data?.account_name;
-
-      if (accName) {
-        setVerifiedAccountName(accName);
-      } else {
-        setBankVerifyError("Account name could not be resolved by bank.");
+    (async () => {
+      setBanksLoading(true);
+      setBanksError("");
+      try {
+        const res = await fetchDriverBanks();
+        const list = res?.data || res?.banks || [];
+        if (!cancelled) setBanks(Array.isArray(list) ? list : []);
+      } catch (err) {
+        if (!cancelled) {
+          setBanksError(
+            err.userMessage ||
+              err.response?.data?.message ||
+              err.response?.data?.error ||
+              "Could not load the bank list. Check your connection and try again."
+          );
+        }
+      } finally {
+        if (!cancelled) setBanksLoading(false);
       }
-    } catch (err) {
-      setBankVerifyError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to verify bank details with bank network."
-      );
-    } finally {
-      setVerifyingBank(false);
-    }
-  };
+    })();
 
-  // Driver Settlement Bank Details
-  const bankDetails = {
-    bankName: driver?.bankName || customBankName || "Pending Configuration",
-    accountNumber: driver?.accountNumber
-      ? `••••${driver.accountNumber.slice(-4)}`
-      : customAccountNumber
-      ? `••••${customAccountNumber.slice(-4)}`
-      : "Not on file",
-    accountName:
-      verifiedAccountName ||
-      `${driver?.firstname || "Driver"} ${driver?.lastname || ""}`
-        .trim()
-        .toUpperCase() ||
-      "AUTHORIZED DRIVER",
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Keep the form in sync when the profile arrives from the server.
+  useEffect(() => {
+    if (driver?.bankCode) {
+      setSelectedBank(
+        (prev) => prev || { code: driver.bankCode, name: driver.bankName || "" }
+      );
+    }
+    if (driver?.accountNumber) {
+      setAccountNumber((prev) => prev || driver.accountNumber);
+    }
+    if (driver?.accountName) {
+      setResolvedName((prev) => prev || driver.accountName);
+    }
+  }, [
+    driver?.bankCode,
+    driver?.bankName,
+    driver?.accountNumber,
+    driver?.accountName,
+  ]);
+
+  // Resolve the account name automatically once bank + 10 digits are present.
+  useEffect(() => {
+    if (!bankFormVisible || !selectedBank?.code || accountNumber.length !== 10) {
+      setResolving(false);
+      setResolveError("");
+      return;
+    }
+
+    let cancelled = false;
+    setResolving(true);
+    setResolveError("");
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await resolveDriverBank({
+          bankCode: selectedBank.code,
+          accountNumber,
+        });
+        const data = res?.data || res;
+        const name = data?.accountName || data?.account_name;
+
+        if (cancelled) return;
+        if (!name) throw new Error("No account name was returned.");
+        setResolvedName(name);
+      } catch (err) {
+        if (cancelled) return;
+        setResolvedName("");
+        setResolveError(
+          err.userMessage ||
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            err.message ||
+            "Could not check this account. Confirm the bank and number."
+        );
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    }, 500);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [bankFormVisible, selectedBank?.code, accountNumber]);
 
   const loadWithdrawalData = useCallback(async () => {
     setLoading(true);
@@ -155,46 +253,90 @@ export default function DriverWithdrawals() {
     loadWithdrawalData();
   }, [loadWithdrawalData]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSaveBank = async (event) => {
+    event.preventDefault();
+    setBankError("");
+    setSuccessMsg("");
+
+    if (!selectedBank?.code) {
+      setBankError("Choose your bank first.");
+      return;
+    }
+    if (accountNumber.length !== 10) {
+      setBankError("Enter the 10-digit account number.");
+      return;
+    }
+    if (!resolvedName) {
+      setBankError("Wait for the account name to appear, then try again.");
+      return;
+    }
+    if (!/^\d{4}$/.test(bankPin)) {
+      setBankError("Enter your 4-digit PIN to save this account.");
+      return;
+    }
+
+    setSavingBank(true);
+    try {
+      const res = await verifyDriverBank({
+        bankCode: selectedBank.code,
+        accountNumber,
+        pin: bankPin,
+      });
+      const data = res?.data || res;
+      const bank = {
+        bankCode: data?.bankCode || selectedBank.code,
+        bankName: data?.bankName || selectedBank.name,
+        accountNumber: data?.accountNumber || accountNumber,
+        accountName: data?.accountName || resolvedName,
+      };
+
+      setSavedBank(bank);
+      setEditingBank(false);
+      setBankPin("");
+      setSuccessMsg(
+        `Payout account saved: ${bank.bankName} • ${maskAccount(
+          bank.accountNumber
+        )} • ${bank.accountName}`
+      );
+    } catch (err) {
+      setBankError(
+        err.userMessage ||
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Could not save this account. Please try again."
+      );
+    } finally {
+      setSavingBank(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError(null);
     setSuccessMsg("");
 
     const numAmount = Number(amount);
-    if (!numAmount || isNaN(numAmount)) {
-      setError("Please enter a valid withdrawal amount.");
+    if (!numAmount || Number.isNaN(numAmount)) {
+      setError("Enter the amount you want to withdraw.");
       return;
     }
-
-    if (numAmount < minWithdrawal) {
+    if (numAmount < MIN_WITHDRAWAL) {
       setError(
-        `Minimum withdrawal amount is ₦${minWithdrawal.toLocaleString(
-          "en-NG"
-        )}.`
+        `Minimum withdrawal is ₦${MIN_WITHDRAWAL.toLocaleString("en-NG")}.`
       );
       return;
     }
-
     if (numAmount > availableBalance) {
-      setError(
-        `Requested amount exceeds your available balance of ₦${availableBalance.toLocaleString(
-          "en-NG"
-        )}.`
-      );
+      setError(`You can withdraw up to ${formatNaira(availableBalance)}.`);
       return;
     }
-
-    const targetBankName = (driver?.bankName || customBankName || "").trim();
-    const targetAccountNumber = (
-      driver?.accountNumber ||
-      customAccountNumber ||
-      ""
-    ).trim();
-
-    if (!targetBankName || !targetAccountNumber) {
-      setError(
-        "Please specify your settlement bank name and 10-digit account number."
-      );
+    if (!verified) {
+      setError("Save your payout account before withdrawing.");
+      return;
+    }
+    if (!/^\d{4}$/.test(withdrawPin)) {
+      setError("Enter your 4-digit PIN to confirm the withdrawal.");
       return;
     }
 
@@ -202,449 +344,488 @@ export default function DriverWithdrawals() {
     try {
       const res = await requestDriverWithdrawal({
         amount: numAmount,
-        bankName: targetBankName,
-        accountNumber: targetAccountNumber,
-        accountName: bankDetails.accountName,
+        pin: withdrawPin,
         remarks: remarks.trim() || undefined,
       });
+      const data = res?.data || res?.withdrawal || res || {};
 
-      if (res?.success || res?.status === "success" || res?.data) {
+      setWithdrawPin("");
+      setAmount("");
+      setRemarks("");
+
+      if (data.status === "FAILED") {
+        setError(
+          "The bank could not complete this payout. Your money has been returned to your wallet. Please try again."
+        );
+      } else {
         setSuccessMsg(
-          `Withdrawal request of ₦${numAmount.toLocaleString(
-            "en-NG"
-          )} submitted successfully!`
+          `Withdrawal sent. ${formatNaira(
+            Number(data.netAmount ?? numAmount * (1 - FEE_RATE))
+          )} is on its way to ${activeBank?.bankName || "your bank"}.`
         );
-        setAmount("");
-        setRemarks("");
-        loadWithdrawalData();
-      } else {
-        throw new Error(res?.message || "Withdrawal request failed.");
       }
+
+      loadWithdrawalData();
     } catch (err) {
-      if (err.response?.status === 404 || err.response?.status === 501) {
-        setError(
-          "Settlement service is not yet connected on the backend server."
-        );
-      } else {
-        setError(
+      setError(
+        err.userMessage ||
           err.response?.data?.message ||
-            err.message ||
-            "Unable to submit withdrawal request. Please verify connection."
-        );
-      }
+          err.response?.data?.error ||
+          err.message ||
+          "Could not submit the withdrawal. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const formatNaira = (val) => {
-    return `₦${Number(val || 0).toLocaleString("en-NG", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
-
-  const formatDate = (isoStr) => {
-    if (!isoStr) return "N/A";
-    const d = new Date(isoStr);
-    if (isNaN(d.getTime())) return isoStr;
-    return d.toLocaleString("en-NG", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const statusClass = (status) => {
+    if (status === "SUCCESS" || status === "COMPLETED") {
+      return styles.statusCompleted;
+    }
+    if (status === "PROCESSING") return styles.statusProcessing;
+    if (status === "FAILED") return styles.statusFailed;
+    if (status === "CANCELLED") return styles.statusCancelled;
+    return styles.statusPending;
   };
 
   return (
     <DriverLayout>
       <div className={styles.pageContainer}>
-        {/* Header */}
         <div className={styles.pageHeader}>
-          <h1 className={styles.title}>Withdrawal & Settlement</h1>
+          <h1 className={styles.title}>Withdraw your money</h1>
           <p className={styles.subtitle}>
-            Transfer your verified fare earnings directly to your registered
-            bank account
+            Send your fare earnings to your bank account. We charge 4% per
+            withdrawal.
           </p>
         </div>
 
         {error && (
-          <div
-            style={{
-              padding: "0.85rem 1.25rem",
-              background: "#fee2e2",
-              border: "1px solid #fca5a5",
-              borderRadius: "10px",
-              color: "#b91c1c",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
+          <div className={styles.bannerError}>
             <AlertCircle size={18} />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div
-            style={{
-              padding: "0.85rem 1.25rem",
-              background: "#dcfce7",
-              border: "1px solid #86efac",
-              borderRadius: "10px",
-              color: "#15803d",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
+          <div className={styles.bannerSuccess}>
             <CheckCircle2 size={18} />
             <span>{successMsg}</span>
           </div>
         )}
 
-        {/* 2-Column Grid: Form & Settlement Account */}
         <div className={styles.grid}>
-          {/* Left Column: Balance & Request Form */}
+          {/* Left: withdraw money */}
           <div className={styles.card}>
             <div className={styles.balanceBanner}>
               <span className={styles.balanceLabel}>
-                Available Withdrawable Balance
+                Money available to withdraw
               </span>
               <div className={styles.balanceValue}>
                 {formatNaira(availableBalance)}
               </div>
               <span className={styles.balanceSub}>
-                • Minimum payout threshold: ₦
-                {minWithdrawal.toLocaleString("en-NG")} • Automatic daily
-                settlement available
+                Minimum ₦1,000 • 4% fee per withdrawal
               </span>
             </div>
 
+            {!verified && (
+              <div className={styles.notice}>
+                <Info size={18} />
+                <span>
+                  Add your bank account first. You only need to do this once.
+                </span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Withdrawal Amount (₦)</label>
-                <div className={styles.inputWrapper}>
-                  <span className={styles.currencyPrefix}>₦</span>
+                <label className={styles.label} htmlFor="withdraw-amount">
+                  How much do you want to withdraw?
+                </label>
+                <div className={styles.amountBox}>
+                  <span className={styles.amountCurrency}>₦</span>
                   <input
+                    id="withdraw-amount"
                     type="number"
-                    min={minWithdrawal}
-                    max={availableBalance || 1000000}
-                    step="100"
-                    placeholder="Enter amount (e.g. 5000)"
+                    inputMode="numeric"
+                    min={MIN_WITHDRAWAL}
+                    max={availableBalance || undefined}
+                    step="1"
+                    placeholder="0"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className={styles.input}
+                    onChange={(event) => setAmount(event.target.value)}
+                    className={styles.amountInput}
+                    disabled={!verified}
                     required
                   />
                 </div>
               </div>
 
-              {/* Preset Chips */}
-              <div className={styles.presetChips}>
-                {[1000, 5000, 10000].map((preset) => (
+              <div className={styles.amountGrid}>
+                {[1000, 2000, 5000, 10000, 20000, 50000].map((preset) => (
                   <button
                     key={preset}
                     type="button"
-                    className={styles.chip}
+                    className={`${styles.amountTile} ${
+                      Number(amount) === preset ? styles.amountTileActive : ""
+                    }`}
                     onClick={() => setAmount(String(preset))}
-                    disabled={preset > availableBalance}
+                    disabled={!verified || preset > availableBalance}
                   >
                     ₦{preset.toLocaleString("en-NG")}
                   </button>
                 ))}
-                {availableBalance >= minWithdrawal && (
+                {availableBalance >= MIN_WITHDRAWAL && (
                   <button
                     type="button"
-                    className={styles.chip}
-                    style={{
-                      background: "#e0f2fe",
-                      color: "#0369a1",
-                      borderColor: "#7dd3fc",
-                    }}
+                    className={`${styles.amountTile} ${styles.amountTileAll} ${
+                      Number(amount) === Math.floor(availableBalance)
+                        ? styles.amountTileActive
+                        : ""
+                    }`}
                     onClick={() =>
                       setAmount(String(Math.floor(availableBalance)))
                     }
+                    disabled={!verified}
                   >
-                    Max (₦{Math.floor(availableBalance).toLocaleString("en-NG")}
-                    )
+                    <span>All my money</span>
+                    <small>
+                      ₦{Math.floor(availableBalance).toLocaleString("en-NG")}
+                    </small>
                   </button>
                 )}
               </div>
 
-              {(!driver?.bankName || !driver?.accountNumber) && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.85rem",
-                    padding: "0.85rem",
-                    background: "#f8fafc",
-                    borderRadius: "8px",
-                    border: "1px solid #e2e8f0",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "0.75rem" }}>
-                    <div className={styles.formGroup} style={{ flex: 2 }}>
-                      <label className={styles.label}>
-                        Settlement Commercial Bank
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. GTBank, Access Bank"
-                        value={customBankName}
-                        onChange={(e) => setCustomBankName(e.target.value)}
-                        style={{
-                          padding: "0.65rem 0.85rem",
-                          borderRadius: "8px",
-                          border: "1px solid #cbd5e1",
-                          fontSize: "0.88rem",
-                        }}
-                        required
-                      />
-                    </div>
-                    <div className={styles.formGroup} style={{ flex: 1 }}>
-                      <label className={styles.label}>Bank Code</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 058"
-                        value={bankCode}
-                        onChange={(e) => setBankCode(e.target.value)}
-                        style={{
-                          padding: "0.65rem 0.85rem",
-                          borderRadius: "8px",
-                          border: "1px solid #cbd5e1",
-                          fontSize: "0.88rem",
-                        }}
-                        required
-                      />
-                    </div>
+              {gross > 0 && (
+                <div className={styles.feeBox}>
+                  <div className={styles.feeRow}>
+                    <span>You withdraw</span>
+                    <strong>{formatNaira(gross)}</strong>
                   </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>
-                      10-Digit NUBAN Account Number
-                    </label>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <input
-                        type="text"
-                        maxLength={10}
-                        placeholder="e.g. 0123456789"
-                        value={customAccountNumber}
-                        onChange={(e) =>
-                          setCustomAccountNumber(
-                            e.target.value.replace(/\D/g, "")
-                          )
-                        }
-                        style={{
-                          flex: 1,
-                          padding: "0.65rem 0.85rem",
-                          borderRadius: "8px",
-                          border: "1px solid #cbd5e1",
-                          fontSize: "0.88rem",
-                        }}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={handleVerifyBankAccount}
-                        disabled={
-                          verifyingBank || customAccountNumber.length !== 10
-                        }
-                        style={{
-                          padding: "0.65rem 1rem",
-                          background: "#0284c7",
-                          color: "#ffffff",
-                          border: "none",
-                          borderRadius: "8px",
-                          fontSize: "0.82rem",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {verifyingBank ? "Verifying..." : "Verify Account"}
-                      </button>
-                    </div>
+                  <div className={styles.feeRow}>
+                    <span>Service fee (4%)</span>
+                    <strong>-{formatNaira(fee)}</strong>
                   </div>
-
-                  {bankVerifyError && (
-                    <div
-                      style={{
-                        padding: "0.5rem 0.75rem",
-                        background: "#fee2e2",
-                        border: "1px solid #fca5a5",
-                        borderRadius: "6px",
-                        color: "#b91c1c",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {bankVerifyError}
-                    </div>
-                  )}
-
-                  {verifiedAccountName && (
-                    <div
-                      style={{
-                        padding: "0.6rem 0.75rem",
-                        background: "#f0fdf4",
-                        border: "1px solid #86efac",
-                        borderRadius: "6px",
-                        color: "#166534",
-                        fontSize: "0.82rem",
-                      }}
-                    >
-                      <strong>Verified Account Name:</strong>{" "}
-                      {verifiedAccountName}
-                    </div>
-                  )}
+                  <div className={`${styles.feeRow} ${styles.feeTotal}`}>
+                    <span>You receive</span>
+                    <strong>{formatNaira(net)}</strong>
+                  </div>
                 </div>
               )}
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Optional Settlement Remarks
+                <label className={styles.label} htmlFor="withdraw-remarks">
+                  Note (optional)
                 </label>
                 <input
+                  id="withdraw-remarks"
                   type="text"
-                  placeholder="e.g. Shift settlement for Monday"
+                  placeholder="e.g. Monday shift"
                   value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                  style={{
-                    padding: "0.65rem 0.85rem",
-                    borderRadius: "8px",
-                    border: "1px solid #cbd5e1",
-                    fontSize: "0.88rem",
-                  }}
+                  onChange={(event) => setRemarks(event.target.value)}
+                  className={styles.inputPlain}
+                  disabled={!verified}
                 />
               </div>
+
+              {verified && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label} htmlFor="withdraw-pin">
+                    Enter your 4-digit PIN to confirm
+                  </label>
+                  <div className={styles.pinRow}>
+                    <input
+                      id="withdraw-pin"
+                      type={showWithdrawPin ? "text" : "password"}
+                      inputMode="numeric"
+                      maxLength={4}
+                      autoComplete="off"
+                      placeholder="••••"
+                      value={withdrawPin}
+                      onChange={(event) =>
+                        setWithdrawPin(
+                          event.target.value.replace(/\D/g, "").slice(0, 4)
+                        )
+                      }
+                      className={styles.pinInput}
+                    />
+                    <button
+                      type="button"
+                      className={styles.pinToggle}
+                      onClick={() => setShowWithdrawPin((prev) => !prev)}
+                      aria-label={
+                        showWithdrawPin ? "Hide PIN" : "Show PIN"
+                      }
+                    >
+                      {showWithdrawPin ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
+                    </button>
+                  </div>
+                  <p className={styles.fieldHint}>
+                    This is the same PIN you use to log in.
+                  </p>
+                </div>
+              )}
 
               <button
                 type="submit"
                 className={styles.submitBtn}
-                disabled={submitting || availableBalance < minWithdrawal}
+                disabled={
+                  submitting || !verified || availableBalance < MIN_WITHDRAWAL
+                }
               >
-                <Wallet size={16} />
-                <span>
-                  {submitting
-                    ? "Processing Settlement..."
-                    : "Confirm & Withdraw"}
-                </span>
+                {submitting ? (
+                  <>
+                    <Loader2 size={18} className={styles.spinner} />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet size={18} />
+                    <span>
+                      Withdraw {gross > 0 ? formatNaira(net) : "money"}
+                    </span>
+                  </>
+                )}
               </button>
             </form>
           </div>
 
-          {/* Right Column: Bank Details & Rules */}
+          {/* Right: payout account */}
           <div className={styles.card}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                fontWeight: "700",
-                color: "#0f172a",
-                fontSize: "1.05rem",
-              }}
-            >
-              <Building2 size={20} color="#0284c7" />
-              <span>Registered Bank Account</span>
-            </div>
-
-            <div className={styles.bankInfoBox}>
-              <div className={styles.bankRow}>
-                <span className={styles.bankLabel}>Bank Name</span>
-                <span className={styles.bankVal}>{bankDetails.bankName}</span>
+            <div className={styles.sectionHeader}>
+              <div className={styles.bankHeader}>
+                <Building2 size={20} />
+                <span>Your payout account</span>
               </div>
-              <div className={styles.bankRow}>
-                <span className={styles.bankLabel}>Account Number</span>
-                <span className={styles.bankVal}>
-                  {bankDetails.accountNumber}
+              {verified && (
+                <span className={styles.verifiedBadge}>
+                  <ShieldCheck size={14} />
+                  Verified
                 </span>
-              </div>
-              <div className={styles.bankRow}>
-                <span className={styles.bankLabel}>Account Name</span>
-                <span className={styles.bankVal}>
-                  {bankDetails.accountName}
-                </span>
-              </div>
+              )}
             </div>
 
-            <div
-              style={{
-                padding: "1rem",
-                background: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                borderRadius: "10px",
-                display: "flex",
-                gap: "0.75rem",
-                fontSize: "0.82rem",
-                color: "#166534",
-              }}
-            >
-              <ShieldCheck size={20} style={{ flexShrink: 0 }} />
-              <div>
-                <strong>Secure Direct Payouts</strong>
-                <p style={{ marginTop: "0.25rem", lineHeight: "1.4" }}>
-                  Funds are settled straight to your registered commercial bank
-                  account via NIBSS instant transfer.
-                </p>
-              </div>
-            </div>
+            {verified && !editingBank ? (
+              <>
+                <div className={styles.accountCard}>
+                  <span className={styles.accountLabel}>Bank</span>
+                  <span className={styles.accountValue}>
+                    {activeBank.bankName}
+                  </span>
+                  <span className={styles.accountLabel}>Account number</span>
+                  <span className={styles.accountValue}>
+                    {maskAccount(activeBank.accountNumber)}
+                  </span>
+                  <span className={styles.accountLabel}>Account name</span>
+                  <span className={styles.accountName}>
+                    {activeBank.accountName}
+                  </span>
+                </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "0.5rem",
-                fontSize: "0.78rem",
-                color: "#64748b",
-              }}
-            >
-              <Info size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
-              <span>
-                To change your bank account details, contact your Campus
-                Transport Supervisor or Field Agent.
-              </span>
-            </div>
+                <button
+                  type="button"
+                  className={styles.changeBtn}
+                  onClick={() => {
+                    setEditingBank(true);
+                    setBankPin("");
+                    setShowBankPin(false);
+                    setBankError("");
+                    setResolveError("");
+                    setSuccessMsg("");
+                  }}
+                >
+                  <Pencil size={16} />
+                  Change payout account
+                </button>
+
+                <div className={styles.helperBox}>
+                  <ShieldCheck size={18} />
+                  <span>
+                    Your money is sent only to this account. To change it, we
+                    ask for your PIN.
+                  </span>
+                </div>
+              </>
+            ) : (
+              <form onSubmit={handleSaveBank} className={styles.form}>
+                {verified && editingBank && (
+                  <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    onClick={() => {
+                      setEditingBank(false);
+                      setBankPin("");
+                      setShowBankPin(false);
+                      setBankError("");
+                      setResolveError("");
+                    }}
+                  >
+                    Cancel change
+                  </button>
+                )}
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>1. Choose your bank</label>
+                  <BankPicker
+                    banks={banks}
+                    value={selectedBank?.code || ""}
+                    onChange={(bank) => {
+                      setSelectedBank(bank);
+                      setResolvedName("");
+                      setResolveError("");
+                      setBankError("");
+                    }}
+                    loading={banksLoading}
+                    error={banksError}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label} htmlFor="account-number">
+                    2. Enter your 10-digit account number
+                  </label>
+                  <input
+                    id="account-number"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="0123456789"
+                    value={accountNumber}
+                    onChange={(event) => {
+                      setAccountNumber(
+                        event.target.value.replace(/\D/g, "").slice(0, 10)
+                      );
+                      setResolvedName("");
+                      setResolveError("");
+                      setBankError("");
+                    }}
+                    className={styles.inputPlain}
+                  />
+                  {accountNumber.length > 0 && accountNumber.length < 10 && (
+                    <p className={styles.fieldHint}>
+                      {10 - accountNumber.length} more digit
+                      {10 - accountNumber.length === 1 ? "" : "s"} needed.
+                    </p>
+                  )}
+                </div>
+
+                {resolving && (
+                  <div className={styles.resolveStatus}>
+                    <Loader2 size={16} className={styles.spinner} />
+                    <span>Checking the account name...</span>
+                  </div>
+                )}
+
+                {!resolving && resolvedName && (
+                  <div className={styles.resolveOk}>
+                    <CheckCircle2 size={18} />
+                    <span>
+                      Account name: <strong>{resolvedName}</strong>
+                    </span>
+                  </div>
+                )}
+
+                {!resolving && resolveError && (
+                  <div className={styles.resolveErr}>
+                    <AlertCircle size={18} />
+                    <span>{resolveError}</span>
+                  </div>
+                )}
+
+                {resolvedName && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="bank-pin">
+                      3. Enter your 4-digit PIN to save
+                    </label>
+                    <div className={styles.pinRow}>
+                      <input
+                        id="bank-pin"
+                        type={showBankPin ? "text" : "password"}
+                        inputMode="numeric"
+                        maxLength={4}
+                        autoComplete="off"
+                        placeholder="••••"
+                        value={bankPin}
+                        onChange={(event) =>
+                          setBankPin(
+                            event.target.value.replace(/\D/g, "").slice(0, 4)
+                          )
+                        }
+                        className={styles.pinInput}
+                      />
+                      <button
+                        type="button"
+                        className={styles.pinToggle}
+                        onClick={() => setShowBankPin((prev) => !prev)}
+                        aria-label={showBankPin ? "Hide PIN" : "Show PIN"}
+                      >
+                        {showBankPin ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    <p className={styles.fieldHint}>
+                      This is the same PIN you use to log in.
+                    </p>
+                  </div>
+                )}
+
+                {bankError && (
+                  <div className={styles.resolveErr}>
+                    <AlertCircle size={18} />
+                    <span>{bankError}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={
+                    savingBank ||
+                    !selectedBank?.code ||
+                    accountNumber.length !== 10 ||
+                    !resolvedName ||
+                    bankPin.length !== 4
+                  }
+                >
+                  {savingBank ? (
+                    <>
+                      <Loader2 size={18} className={styles.spinner} />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={18} />
+                      <span>Save payout account</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
 
-        {/* Withdrawal History Log */}
+        {/* Withdrawal history */}
         <section className={styles.historySection}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: "700",
-                color: "#0f172a",
-              }}
-            >
-              Withdrawal History & Status
-            </h2>
+          <div className={styles.historyHeader}>
+            <h2 className={styles.sectionTitle}>Withdrawal history</h2>
             <button
               type="button"
               onClick={loadWithdrawalData}
               disabled={loading}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#0284c7",
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
+              className={styles.refreshBtn}
             >
-              <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+              <RefreshCw
+                size={13}
+                className={loading ? styles.spinner : undefined}
+              />
               <span>{loading ? "Refreshing..." : "Refresh"}</span>
             </button>
           </div>
@@ -663,34 +844,20 @@ export default function DriverWithdrawals() {
                   </div>
 
                   <span
-                    className={`${styles.statusPill} ${
-                      w.status === "COMPLETED"
-                        ? styles.statusCompleted
-                        : w.status === "PROCESSING"
-                        ? styles.statusProcessing
-                        : w.status === "FAILED"
-                        ? styles.statusFailed
-                        : styles.statusPending
-                    }`}
+                    className={`${styles.statusPill} ${statusClass(w.status)}`}
                   >
                     {w.status}
                   </span>
                 </div>
               ))
             ) : (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "2rem",
-                  color: "#64748b",
-                }}
-              >
+              <div className={styles.emptyHistory}>
                 <Clock
                   size={32}
                   color="#cbd5e1"
                   style={{ margin: "0 auto 0.5rem" }}
                 />
-                <p>No withdrawal requests found in your history.</p>
+                <p>No withdrawal requests yet.</p>
               </div>
             )}
           </div>

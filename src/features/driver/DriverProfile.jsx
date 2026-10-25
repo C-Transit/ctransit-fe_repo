@@ -206,6 +206,11 @@ export default function DriverProfile() {
             <div className={styles.cardHeader}>
               <Building2 size={18} color="#0284c7" />
               <span>Settlement Account</span>
+              {currentDriver?.bankVerified || currentDriver?.bank_verified ? (
+                <span className={styles.verifiedBadge}>Verified</span>
+              ) : (
+                <span className={styles.unverifiedBadge}>Not verified</span>
+              )}
             </div>
 
             <div className={styles.fieldList}>
@@ -228,7 +233,14 @@ export default function DriverProfile() {
               <div className={styles.fieldItem}>
                 <span className={styles.fieldLabel}>Account Name</span>
                 <span className={styles.fieldValue}>
-                  {`${currentDriver?.firstname || "Driver"} ${currentDriver?.lastname || ""}`.trim().toUpperCase()}
+                  {currentDriver?.accountName ||
+                    currentDriver?.account_name ||
+                    `${currentDriver?.firstname || "Driver"} ${
+                      currentDriver?.lastname || ""
+                    }`
+                      .trim()
+                      .toUpperCase() ||
+                    "Not Configured"}
                 </span>
               </div>
               <div className={styles.fieldItem}>

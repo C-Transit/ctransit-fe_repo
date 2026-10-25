@@ -14,6 +14,39 @@ const driverApi = axios.create({
   },
 });
 
+const MAX_RATE_LIMIT_RETRIES = 1;
+const MAX_RATE_LIMIT_RETRY_DELAY_MS = 5000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const parseRetryAfterMs = (retryAfter) => {
+  if (!retryAfter) return null;
+
+  const seconds = Number(retryAfter);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+
+  const retryDate = Date.parse(retryAfter);
+  if (!Number.isNaN(retryDate)) return Math.max(0, retryDate - Date.now());
+
+  return null;
+};
+
+const getRateLimitMessage = (retryAfterMs) => {
+  if (!retryAfterMs) {
+    return "Too many requests. Please wait a moment and try again.";
+  }
+
+  const seconds = Math.ceil(retryAfterMs / 1000);
+  if (seconds < 60) {
+    return `Too many requests. Please wait ${seconds} seconds and try again.`;
+  }
+
+  const minutes = Math.ceil(seconds / 60);
+  return `Too many requests. Please wait ${minutes} minute${
+    minutes === 1 ? "" : "s"
+  } and try again.`;
+};
+
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -99,6 +132,32 @@ driverApi.interceptors.response.use(
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
+      }
+    }
+
+    if (error.response?.status === 429) {
+      const retryAfterHeader =
+        error.response.headers?.["retry-after"] ??
+        error.response.headers?.get?.("retry-after");
+      const retryAfterMs = parseRetryAfterMs(retryAfterHeader);
+
+      error.isRateLimited = true;
+      error.retryAfterMs = retryAfterMs;
+      error.userMessage = getRateLimitMessage(retryAfterMs);
+
+      const request = error.config;
+      const isGet = request?.method?.toLowerCase() === "get";
+      const retryCount = request?._rateLimitRetryCount || 0;
+      const canRetry =
+        isGet &&
+        retryCount < MAX_RATE_LIMIT_RETRIES &&
+        (retryAfterMs === null ||
+          retryAfterMs <= MAX_RATE_LIMIT_RETRY_DELAY_MS);
+
+      if (canRetry) {
+        request._rateLimitRetryCount = retryCount + 1;
+        await sleep(retryAfterMs ?? 1000 * 2 ** retryCount);
+        return driverApi(request);
       }
     }
 
@@ -222,36 +281,16 @@ export const fetchDriverWithdrawals = async ({ page = 1, limit = 20 } = {}) => {
 
 /**
  * 6. Request Driver Withdrawal
- * POST /api/drivers/withdraw (fallback /api/drivers/withdrawals, /api/wallets/withdraw)
+ * POST /api/drivers/withdraw
  */
-export const requestDriverWithdrawal = async ({
-  amount,
-  bankName,
-  accountNumber,
-  accountName,
-  bankCode,
-  remarks,
-}) => {
+export const requestDriverWithdrawal = async ({ amount, pin, remarks }) => {
   const payload = {
     amount: Number(amount),
-    ...(bankName ? { bankName: bankName.trim() } : {}),
-    ...(accountNumber ? { accountNumber: accountNumber.trim() } : {}),
-    ...(accountName ? { accountName: accountName.trim() } : {}),
-    ...(bankCode ? { bankCode: bankCode.trim() } : {}),
+    pin: String(pin || "").trim(),
     ...(remarks ? { remarks: remarks.trim() } : {}),
   };
 
-  return requestDriverWithFallback(
-    "post",
-    "/drivers/withdraw",
-    [
-      "/drivers/withdrawals",
-      "/wallets/withdraw",
-      "/drivers/settlements/request",
-    ],
-    payload,
-    true
-  );
+  return requestDriverWithFallback("post", "/drivers/withdraw", [], payload, true);
 };
 
 /**
@@ -298,28 +337,6 @@ export const markAllDriverNotificationsAsRead = async () => {
     ["/notifications/mark-all-read", "/notifications/read-all"],
     {},
     true
-  );
-};
-
-/**
- * 10. Fetch Driver Assigned Terminal Status
- * GET /api/terminals/:terminalId or /api/drivers/terminal
- */
-export const fetchDriverTerminalStatus = async (terminalId) => {
-  const path = terminalId
-    ? `/terminals/${encodeURIComponent(terminalId)}`
-    : "/terminals/my-terminal";
-  return requestDriverWithFallback(
-    "get",
-    path,
-    [
-      terminalId ? `/terminals/${encodeURIComponent(terminalId)}/status` : null,
-      terminalId
-        ? `/drivers/terminal/${encodeURIComponent(terminalId)}`
-        : "/drivers/terminal",
-      "/terminals/status",
-      "/admin/terminals",
-    ].filter(Boolean)
   );
 };
 
@@ -399,14 +416,43 @@ export const linkDriverCard = async ({ otp, pin }) => {
 };
 
 /**
- * 12. Driver adds / verifies bank account
- * POST /api/drivers/bank/verify
+ * 12. Fetch supported banks for the payout dropdown
+ * GET /api/drivers/banks
+ */
+export const fetchDriverBanks = async () => {
+  return requestDriverWithFallback("get", "/drivers/banks", [], {});
+};
+
+/**
+ * 13. Resolve an account name (read-only, nothing is saved)
+ * POST /api/drivers/bank/resolve
  * req.body: { bankCode, accountNumber }
  */
-export const verifyDriverBank = async ({ bankCode, accountNumber }) => {
+export const resolveDriverBank = async ({ bankCode, accountNumber }) => {
   const payload = {
     bankCode: String(bankCode || "").trim(),
     accountNumber: String(accountNumber || "").trim(),
+  };
+
+  return requestDriverWithFallback(
+    "post",
+    "/drivers/bank/resolve",
+    [],
+    payload,
+    true
+  );
+};
+
+/**
+ * 14. Driver adds / verifies bank account (PIN required, saves the destination)
+ * POST /api/drivers/bank/verify
+ * req.body: { bankCode, accountNumber, pin }
+ */
+export const verifyDriverBank = async ({ bankCode, accountNumber, pin }) => {
+  const payload = {
+    bankCode: String(bankCode || "").trim(),
+    accountNumber: String(accountNumber || "").trim(),
+    pin: String(pin || "").trim(),
   };
 
   return requestDriverWithFallback(
