@@ -62,7 +62,13 @@ export default function DriverNotifications() {
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to mark notification as read.");
+      setError(
+        err.userMessage ||
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Failed to mark notification as read."
+      );
     }
   };
 
@@ -71,7 +77,13 @@ export default function DriverNotifications() {
       await markAllDriverNotificationsAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to mark all notifications as read.");
+      setError(
+        err.userMessage ||
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Failed to mark all notifications as read."
+      );
     }
   };
 

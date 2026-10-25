@@ -131,6 +131,7 @@
 
 .input {
   width: 100%;
+  min-height: 48px;
   padding: 0.75rem 1rem 0.75rem 2.25rem;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
@@ -153,7 +154,8 @@
 }
 
 .chip {
-  padding: 0.35rem 0.75rem;
+  min-height: 40px;
+  padding: 0.5rem 0.85rem;
   border-radius: 6px;
   border: 1px solid #cbd5e1;
   background: #f8fafc;
@@ -171,6 +173,7 @@
 }
 
 .submitBtn {
+  min-height: 50px;
   padding: 0.85rem 1.25rem;
   border-radius: 8px;
   border: none;
@@ -273,4 +276,488 @@
 .statusCancelled {
   background: #f1f5f9;
   color: #64748b;
+}
+
+/* ─── Feedback banners ─────────────────────────────────────────────────── */
+
+.bannerError,
+.bannerSuccess {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.bannerError {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.bannerSuccess {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #15803d;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  color: #92400e;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+/* ─── Withdrawal form extras ───────────────────────────────────────────── */
+
+.chipActive {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #7dd3fc;
+}
+
+.feeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem 1.1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.feeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  color: #475569;
+}
+
+.feeTotal {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 0.55rem;
+  margin-top: 0.15rem;
+  font-size: 0.98rem;
+  color: #0f172a;
+}
+
+.inputPlain {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.inputPlain:focus {
+  outline: none;
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.inputPlain:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pinRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pinInput {
+  width: 100%;
+  min-height: 50px;
+  padding: 0.85rem 3.1rem 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1.3rem;
+  letter-spacing: 0.5rem;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.pinInput:focus {
+  outline: none;
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.pinToggle {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.pinToggle:hover {
+  background: #e2e8f0;
+}
+
+.fieldHint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.spinner {
+  animation: ctransit-spin 0.9s linear infinite;
+}
+
+@keyframes ctransit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Payout account card ──────────────────────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bankHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 9999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.accountCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.accountLabel {
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.accountLabel:first-child {
+  margin-top: 0;
+}
+
+.accountValue {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.accountName {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.changeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0369a1;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.changeBtn:hover {
+  background: #f0f9ff;
+  border-color: #7dd3fc;
+}
+
+.helperBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #166534;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.cancelBtn {
+  align-self: flex-start;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: #f1f5f9;
+}
+
+.resolveStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.resolveOk {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  color: #166534;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.resolveErr {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ─── History ──────────────────────────────────────────────────────────── */
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #0284c7;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #f0f9ff;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.emptyHistory {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+/* Amount entry: one large numeric box plus preset tiles */
+
+.amountBox {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 1rem;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.amountBox:focus-within {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+}
+
+.amountCurrency {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.amountInput {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.amountInput::placeholder {
+  color: #cbd5e1;
+}
+
+.amountInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Hide native number spinners so the amount box stays clean */
+.amountInput::-webkit-outer-spin-button,
+.amountInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.amountInput[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.amountGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+@media (max-width: 420px) {
+  .amountGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.amountTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 64px;
+  padding: 0.6rem 0.4rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.amountTile small {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.amountTile:hover:not(:disabled) {
+  border-color: #7dd3fc;
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.amountTileActive {
+  border-color: #0284c7;
+  background: #e0f2fe;
+  color: #0369a1;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.amountTileActive small {
+  color: #0369a1;
+}
+
+.amountTile:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.amountTileAll {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: 0.5rem;
+  min-height: 54px;
+  background: #f8fafc;
+}
+
+.amountTileAll small {
+  font-size: 0.82rem;
 }

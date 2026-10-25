@@ -20,7 +20,6 @@ import {
   fetchDriverRides,
   fetchDriverWithdrawals,
   verifyDriverPayment,
-  fetchDriverTerminalStatus,
 } from "../../api/driverApi";
 import {
   generateStudentDisplayId,
@@ -45,7 +44,7 @@ export default function DriverDashboard() {
   const [recentRides, setRecentRides] = useState([]);
   const [terminalInfo, setTerminalInfo] = useState({
     id: driver?.terminalId || "TRM-01",
-    status: driver?.terminalStatus || "ONLINE",
+    status: (driver?.terminalStatus || "ONLINE").toUpperCase(),
     lastSync: "Just now",
   });
 
@@ -60,11 +59,10 @@ export default function DriverDashboard() {
 
     try {
       // 1. Fetch dashboard / earnings / transactions
-      const [dashRes, ridesRes, withRes, termRes] = await Promise.allSettled([
+      const [dashRes, ridesRes, withRes] = await Promise.allSettled([
         fetchDriverDashboard(),
         fetchDriverRides({ page: 1, limit: 6 }),
         fetchDriverWithdrawals({ page: 1, limit: 1 }),
-        fetchDriverTerminalStatus(driver?.terminalId),
       ]);
 
       let currentEarnings = 0;
@@ -165,25 +163,22 @@ export default function DriverDashboard() {
         }
       }
 
-      // Process Terminal Status
-      if (termRes.status === "fulfilled" && termRes.value) {
-        const t = termRes.value?.data || termRes.value?.terminal || termRes.value;
-        setTerminalInfo({
-          id: t.terminalId || t.id || driver?.terminalId || "TRM-01",
-          status: (t.status || "ONLINE").toUpperCase(),
-          lastSync: t.lastSync || "Just now",
-        });
-      }
-
-      if (dashRes.status === "rejected" && ridesRes.status === "rejected") {
-        setError("Unable to synchronize latest driver records. Tap refresh to retry.");
+      if (dashRes.status === "rejected") {
+        const reason = dashRes.reason || ridesRes.reason;
+        setError(
+          reason?.userMessage ||
+            "Unable to synchronize latest driver records. Tap refresh to retry."
+        );
       }
     } catch (err) {
-      setError("Unable to synchronize latest driver records. Tap refresh to retry.");
+      setError(
+        err?.userMessage ||
+          "Unable to synchronize latest driver records. Tap refresh to retry."
+      );
     } finally {
       setLoading(false);
     }
-  }, [driver?.terminalId]);
+  }, []);
 
   useEffect(() => {
     loadDashboardData();

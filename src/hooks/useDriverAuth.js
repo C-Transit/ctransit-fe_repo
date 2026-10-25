@@ -91,10 +91,23 @@ export default function useDriverAuth() {
                 profileData.bankName ||
                 profileData.bank_name ||
                 storedProfile?.bankName,
+              bankCode:
+                profileData.bankCode ||
+                profileData.bank_code ||
+                storedProfile?.bankCode,
               accountNumber:
                 profileData.accountNumber ||
                 profileData.account_number ||
                 storedProfile?.accountNumber,
+              accountName:
+                profileData.accountName ||
+                profileData.account_name ||
+                storedProfile?.accountName,
+              bankVerified:
+                profileData.bankVerified ??
+                profileData.bank_verified ??
+                storedProfile?.bankVerified ??
+                false,
             };
             setDriver(updated);
             setDriverSession(

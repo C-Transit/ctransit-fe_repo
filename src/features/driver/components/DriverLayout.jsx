@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -7,7 +7,6 @@ import {
   User,
   Bell,
   CreditCard,
-  LogOut,
   Radio,
 } from "lucide-react";
 import useDriverAuth from "../../../hooks/useDriverAuth";
@@ -15,65 +14,109 @@ import {
   generateDriverDisplayId,
   generateTerminalDisplayId,
 } from "../../../utils/identifierUtils";
-import { fetchDriverNotifications, fetchDriverTerminalStatus } from "../../../api/driverApi";
+import {
+  fetchDriverNotifications,
+  fetchDriverProfile,
+} from "../../../api/driverApi";
 import logo from "../../../assets/images/c-transit-icon.svg"
 import styles from "./DriverLayout.module.css";
+
+const HEADER_POLL_INTERVAL_MS = 3 * 60 * 1000;
 
 export default function DriverLayout({ children }) {
   const { driver, logout } = useDriverAuth();
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [terminalStatus, setTerminalStatus] = useState(driver?.terminalStatus || "ONLINE");
-  const [terminalId, setTerminalId] = useState(driver?.terminalId || "TRM-01");
-
-  useEffect(() => {
-    if (driver?.terminalStatus) {
-      setTerminalStatus(driver.terminalStatus);
-    }
-    if (driver?.terminalId) {
-      setTerminalId(driver.terminalId);
-    }
-  }, [driver?.terminalStatus, driver?.terminalId]);
+  const [terminal, setTerminal] = useState({
+    id: driver?.terminalId || "TRM-01",
+    status: (driver?.terminalStatus || "ONLINE").toUpperCase(),
+  });
+  const lastHeaderFetchRef = useRef(0);
 
   const currentPath = location.pathname;
+  const terminalStatus = terminal.status;
+  const terminalId = terminal.id;
 
-  // Load notification count and terminal status
-  const loadHeaderData = useCallback(async () => {
-    try {
-      const notifRes = await fetchDriverNotifications({ limit: 20 });
-      const list =
-        notifRes?.data?.notifications ||
-        notifRes?.notifications ||
-        (Array.isArray(notifRes?.data) ? notifRes.data : []) ||
-        (Array.isArray(notifRes) ? notifRes : []);
+  useEffect(() => {
+    if (!driver?.terminalId && !driver?.terminalStatus) return;
 
-      const unread = list.filter((n) => !n.isRead && !n.read).length;
-      setUnreadCount(unread);
-    } catch {
-      // Non-blocking
-    }
+    setTerminal((prev) => ({
+      id: driver.terminalId || prev.id,
+      status: (driver.terminalStatus || prev.status).toUpperCase(),
+    }));
+  }, [driver?.terminalId, driver?.terminalStatus]);
 
-    try {
-      const termRes = await fetchDriverTerminalStatus(terminalId);
-      const status =
-        termRes?.status ||
-        termRes?.data?.status ||
-        termRes?.terminal?.status ||
-        "ONLINE";
-      setTerminalStatus(status);
-      if (termRes?.terminalId || termRes?.id) {
-        setTerminalId(termRes.terminalId || termRes.id);
+  // Poll the unread count; refresh terminal status from /drivers/me occasionally.
+  const loadHeaderData = useCallback(
+    async ({ refreshProfile = false } = {}) => {
+      if (document.visibilityState === "hidden") return;
+
+      lastHeaderFetchRef.current = Date.now();
+
+      const [notifRes, profileRes] = await Promise.allSettled([
+        fetchDriverNotifications({ limit: 20 }),
+        refreshProfile ? fetchDriverProfile() : Promise.resolve(null),
+      ]);
+
+      if (notifRes.status === "fulfilled") {
+        const payload = notifRes.value;
+        const list =
+          payload?.data?.notifications ||
+          payload?.notifications ||
+          (Array.isArray(payload?.data) ? payload.data : []) ||
+          (Array.isArray(payload) ? payload : []);
+
+        const unread = list.filter((n) => !n.isRead && !n.read).length;
+        setUnreadCount(unread);
       }
-    } catch {
-      // Default to driver's stored terminal status
-    }
-  }, [terminalId]);
+
+      if (profileRes.status === "fulfilled" && profileRes.value) {
+        const profile =
+          profileRes.value?.data?.profile ||
+          profileRes.value?.data?.driver ||
+          profileRes.value?.data?.user ||
+          profileRes.value?.profile ||
+          profileRes.value?.driver ||
+          profileRes.value?.data ||
+          profileRes.value;
+
+        const nextId = profile?.terminalId || profile?.terminal_id;
+        const nextStatus =
+          profile?.terminalStatus || profile?.terminal_status;
+
+        if (nextId || nextStatus) {
+          setTerminal((prev) => ({
+            id: nextId || prev.id,
+            status: (nextStatus || prev.status).toUpperCase(),
+          }));
+        }
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     loadHeaderData();
-    const interval = setInterval(loadHeaderData, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(
+      () => loadHeaderData({ refreshProfile: true }),
+      HEADER_POLL_INTERVAL_MS
+    );
+
+    const handleVisibilityChange = () => {
+      const canRefresh =
+        Date.now() - lastHeaderFetchRef.current > 30 * 1000;
+      if (document.visibilityState === "visible" && canRefresh) {
+        loadHeaderData({ refreshProfile: true });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [loadHeaderData]);
 
   const navItems = [
