@@ -242,6 +242,14 @@
   color: #64748b;
 }
 
+.historyReason {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #b91c1c;
+  max-width: 28rem;
+  word-break: break-word;
+}
+
 .statusPill {
   display: inline-flex;
   align-items: center;

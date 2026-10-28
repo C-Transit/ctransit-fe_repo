@@ -53,6 +53,17 @@ const maskAccount = (value) => {
   return digits.length > 4 ? `••••${digits.slice(-4)}` : digits || "—";
 };
 
+const friendlyWithdrawalFailure = (reason) => {
+  const text = String(reason || "").toLowerCase();
+  if (text.includes("whitelist") || text.includes("unauthorized")) {
+    return "Payouts are temporarily unavailable. Your money has been returned to your wallet. Please contact support with your withdrawal reference.";
+  }
+  if (text.includes("insufficient")) {
+    return "The payout provider could not complete this withdrawal. Your money has been returned to your wallet. Please try again later.";
+  }
+  return "The bank could not complete this payout. Your money has been returned to your wallet. Please try again.";
+};
+
 export default function DriverWithdrawals() {
   const { driver } = useDriverAuth();
 
@@ -238,6 +249,7 @@ export default function DriverWithdrawals() {
             w.createdAt || w.created_at || w.date || new Date().toISOString(),
           reference: w.reference || w.txnRef || w.id || "N/A",
           remarks: w.remarks || "Direct driver settlement",
+          failureReason: w.failureReason || w.failure_reason || "",
         }));
 
         setWithdrawals(normalized);
@@ -354,9 +366,7 @@ export default function DriverWithdrawals() {
       setRemarks("");
 
       if (data.status === "FAILED") {
-        setError(
-          "The bank could not complete this payout. Your money has been returned to your wallet. Please try again."
-        );
+        setError(friendlyWithdrawalFailure(data.failureReason));
       } else {
         setSuccessMsg(
           `Withdrawal sent. ${formatNaira(
@@ -841,6 +851,11 @@ export default function DriverWithdrawals() {
                     <span className={styles.historyDate}>
                       {formatDate(w.date)} • Ref: {w.reference}
                     </span>
+                    {w.status === "FAILED" && w.failureReason && (
+                      <span className={styles.historyReason}>
+                        {friendlyWithdrawalFailure(w.failureReason)}
+                      </span>
+                    )}
                   </div>
 
                   <span
