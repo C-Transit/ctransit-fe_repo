@@ -283,11 +283,12 @@ export const fetchDriverWithdrawals = async ({ page = 1, limit = 20 } = {}) => {
  * 6. Request Driver Withdrawal
  * POST /api/drivers/withdraw
  */
-export const requestDriverWithdrawal = async ({ amount, pin, remarks }) => {
+export const requestDriverWithdrawal = async ({ amount, pin, remarks, idempotencyKey }) => {
   const payload = {
     amount: Number(amount),
     pin: String(pin || "").trim(),
     ...(remarks ? { remarks: remarks.trim() } : {}),
+    ...(idempotencyKey ? { idempotencyKey } : {}),
   };
 
   return requestDriverWithFallback("post", "/drivers/withdraw", [], payload, true);
