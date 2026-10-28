@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   X,
   Wallet,
@@ -83,6 +83,7 @@ export default function DriverWithdrawals() {
   });
   const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
 
   // Withdrawal form
   const [amount, setAmount] = useState("");
@@ -355,32 +356,44 @@ export default function DriverWithdrawals() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setError(null);
     setSuccessMsg("");
 
     const numAmount = Number(amount);
     if (!numAmount || Number.isNaN(numAmount)) {
       setError("Enter the amount you want to withdraw.");
+      submitLockRef.current = false;
       return;
     }
     if (numAmount < MIN_WITHDRAWAL) {
       setError(
         `Minimum withdrawal is ₦${MIN_WITHDRAWAL.toLocaleString("en-NG")}.`
       );
+      submitLockRef.current = false;
       return;
     }
     if (numAmount > availableBalance) {
       setError(`You can withdraw up to ${formatNaira(availableBalance)}.`);
+      submitLockRef.current = false;
       return;
     }
     if (!verified) {
       setError("Save your payout account before withdrawing.");
+      submitLockRef.current = false;
       return;
     }
     if (!/^\d{4}$/.test(withdrawPin)) {
       setError("Enter your 4-digit PIN to confirm the withdrawal.");
+      submitLockRef.current = false;
       return;
     }
+
+    const idempotencyKey =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     setSubmitting(true);
     try {
@@ -388,6 +401,7 @@ export default function DriverWithdrawals() {
         amount: numAmount,
         pin: withdrawPin,
         remarks: remarks.trim() || undefined,
+        idempotencyKey,
       });
       const data = res?.data || res?.withdrawal || res || {};
 
@@ -423,6 +437,7 @@ export default function DriverWithdrawals() {
       setError(message);
       window.alert(message);
     } finally {
+      submitLockRef.current = false;
       setSubmitting(false);
     }
   };
