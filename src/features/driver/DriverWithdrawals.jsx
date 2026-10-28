@@ -881,7 +881,12 @@ export default function DriverWithdrawals() {
           <div className={styles.historyList}>
             {withdrawals.length > 0 ? (
               withdrawals.map((w) => (
-                <div key={w.id} className={styles.historyItem}>
+                <button
+                  type="button"
+                  key={w.id}
+                  className={styles.historyItem}
+                  onClick={() => setSelectedWithdrawal(w)}
+                >
                   <div className={styles.historyLeft}>
                     <span className={styles.historyAmount}>
                       {formatNaira(w.amount)}
@@ -902,15 +907,8 @@ export default function DriverWithdrawals() {
                     >
                       {w.status}
                     </span>
-                    <button
-                      type="button"
-                      className={styles.viewBtn}
-                      onClick={() => setSelectedWithdrawal(w)}
-                    >
-                      View
-                    </button>
                   </div>
-                </div>
+                </button>
               ))
             ) : (
               <div className={styles.emptyHistory}>
