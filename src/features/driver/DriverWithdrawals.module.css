@@ -933,3 +933,34 @@
   font-size: 0.85rem;
   line-height: 1.4;
 }
+
+.historyItem {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.historyItem:hover {
+  background: #f0f9ff;
+  border-color: #93c5fd;
+}
+
+.historyItem:active {
+  transform: scale(0.995);
+}
+
+@media (max-width: 640px) {
+  .historyItem {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .historyActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
