@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
+  X,
   Wallet,
   Building2,
   AlertCircle,
@@ -73,6 +74,14 @@ export default function DriverWithdrawals() {
 
   const [availableBalance, setAvailableBalance] = useState(0);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [withdrawalPage, setWithdrawalPage] = useState(1);
+  const [withdrawalPagination, setWithdrawalPagination] = useState({
+    page: 1,
+    limit: 8,
+    total: 0,
+    totalPages: 1,
+  });
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Withdrawal form
@@ -212,13 +221,13 @@ export default function DriverWithdrawals() {
     };
   }, [bankFormVisible, selectedBank?.code, accountNumber]);
 
-  const loadWithdrawalData = useCallback(async () => {
+  const loadWithdrawalData = useCallback(async (page = withdrawalPage) => {
     setLoading(true);
     setError(null);
     try {
       const [dashRes, withRes] = await Promise.allSettled([
         fetchDriverDashboard(),
-        fetchDriverWithdrawals({ page: 1, limit: 30 }),
+        fetchDriverWithdrawals({ page, limit: 8 }),
       ]);
 
       if (dashRes.status === "fulfilled" && dashRes.value) {
@@ -235,21 +244,42 @@ export default function DriverWithdrawals() {
       }
 
       if (withRes.status === "fulfilled" && withRes.value) {
+        const res = withRes.value;
         const rawWith =
-          withRes.value?.data?.withdrawals ||
-          withRes.value?.withdrawals ||
-          (Array.isArray(withRes.value?.data) ? withRes.value.data : []) ||
-          (Array.isArray(withRes.value) ? withRes.value : []);
+          res?.data?.withdrawals ||
+          res?.withdrawals ||
+          (Array.isArray(res?.data) ? res.data : []) ||
+          (Array.isArray(res) ? res : []);
+
+        const pagination =
+          res?.data?.pagination ||
+          res?.pagination ||
+          res?.data?.meta ||
+          {};
+
+        setWithdrawalPage(pagination.page || page);
+        setWithdrawalPagination({
+          page: pagination.page || page,
+          limit: pagination.limit || 8,
+          total: pagination.total || rawWith.length,
+          totalPages: pagination.totalPages || 1,
+        });
 
         const normalized = (Array.isArray(rawWith) ? rawWith : []).map((w) => ({
           id: w.id || w._id || w.reference || `WTH-${Date.now()}`,
           amount: Number(w.amount || 0),
+          fee: Number(w.fee || 0),
+          netAmount: Number(w.netAmount ?? w.net_amount ?? w.amount ?? 0),
           status: (w.status || "PENDING").toUpperCase(),
           date:
             w.createdAt || w.created_at || w.date || new Date().toISOString(),
           reference: w.reference || w.txnRef || w.id || "N/A",
           remarks: w.remarks || "Direct driver settlement",
           failureReason: w.failureReason || w.failure_reason || "",
+          bankName: w.bankName || w.bank_name || "",
+          accountNumber: w.accountNumber || w.account_number || "",
+          accountName: w.accountName || w.account_name || "",
+          koraReference: w.koraReference || w.kora_reference || "",
         }));
 
         setWithdrawals(normalized);
@@ -259,7 +289,7 @@ export default function DriverWithdrawals() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [withdrawalPage]);
 
   useEffect(() => {
     loadWithdrawalData();
@@ -366,7 +396,9 @@ export default function DriverWithdrawals() {
       setRemarks("");
 
       if (data.status === "FAILED") {
-        setError(friendlyWithdrawalFailure(data.failureReason));
+        const message = friendlyWithdrawalFailure(data.failureReason);
+        setError(message);
+        window.alert(message);
       } else {
         setSuccessMsg(
           `Withdrawal sent. ${formatNaira(
@@ -375,15 +407,21 @@ export default function DriverWithdrawals() {
         );
       }
 
-      loadWithdrawalData();
+      loadWithdrawalData(withdrawalPage);
     } catch (err) {
-      setError(
-        err.userMessage ||
+      const failureReason =
+        err.response?.data?.data?.failureReason ||
+        err.response?.data?.withdrawal?.failureReason ||
+        err.response?.data?.failureReason;
+      const message = failureReason
+        ? friendlyWithdrawalFailure(failureReason)
+        : err.userMessage ||
           err.response?.data?.message ||
           err.response?.data?.error ||
           err.message ||
-          "Could not submit the withdrawal. Please try again."
-      );
+          "Could not submit the withdrawal. Please try again.";
+      setError(message);
+      window.alert(message);
     } finally {
       setSubmitting(false);
     }
@@ -858,11 +896,20 @@ export default function DriverWithdrawals() {
                     )}
                   </div>
 
-                  <span
-                    className={`${styles.statusPill} ${statusClass(w.status)}`}
-                  >
-                    {w.status}
-                  </span>
+                  <div className={styles.historyActions}>
+                    <span
+                      className={`${styles.statusPill} ${statusClass(w.status)}`}
+                    >
+                      {w.status}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.viewBtn}
+                      onClick={() => setSelectedWithdrawal(w)}
+                    >
+                      View
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -876,8 +923,152 @@ export default function DriverWithdrawals() {
               </div>
             )}
           </div>
+
+          {withdrawalPagination.totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                type="button"
+                className={styles.pageBtn}
+                disabled={withdrawalPage <= 1 || loading}
+                onClick={() => loadWithdrawalData(withdrawalPage - 1)}
+              >
+                Previous
+              </button>
+              <span className={styles.pageInfo}>
+                Page {withdrawalPagination.page} of{" "}
+                {withdrawalPagination.totalPages} •{" "}
+                {withdrawalPagination.total} total
+              </span>
+              <button
+                type="button"
+                className={styles.pageBtn}
+                disabled={
+                  withdrawalPage >= withdrawalPagination.totalPages || loading
+                }
+                onClick={() => loadWithdrawalData(withdrawalPage + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
       </div>
+
+      {selectedWithdrawal && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setSelectedWithdrawal(null)}
+        >
+          <div
+            className={styles.modalCard}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Withdrawal details</h3>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={() => setSelectedWithdrawal(null)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>Amount</span>
+                <span className={styles.modalValue}>
+                  {formatNaira(selectedWithdrawal.amount)}
+                </span>
+              </div>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>Fee (4%)</span>
+                <span className={styles.modalValue}>
+                  -{formatNaira(selectedWithdrawal.fee)}
+                </span>
+              </div>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>You receive</span>
+                <span className={styles.modalValue}>
+                  {formatNaira(selectedWithdrawal.netAmount)}
+                </span>
+              </div>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>Status</span>
+                <span
+                  className={`${styles.statusPill} ${statusClass(
+                    selectedWithdrawal.status
+                  )}`}
+                >
+                  {selectedWithdrawal.status}
+                </span>
+              </div>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>Date</span>
+                <span className={styles.modalValue}>
+                  {formatDate(selectedWithdrawal.date)}
+                </span>
+              </div>
+              <div className={styles.modalRow}>
+                <span className={styles.modalLabel}>Reference</span>
+                <span className={styles.modalValue}>
+                  {selectedWithdrawal.reference}
+                </span>
+              </div>
+              {selectedWithdrawal.koraReference && (
+                <div className={styles.modalRow}>
+                  <span className={styles.modalLabel}>Kora reference</span>
+                  <span className={styles.modalValue}>
+                    {selectedWithdrawal.koraReference}
+                  </span>
+                </div>
+              )}
+              {selectedWithdrawal.bankName && (
+                <div className={styles.modalRow}>
+                  <span className={styles.modalLabel}>Bank</span>
+                  <span className={styles.modalValue}>
+                    {selectedWithdrawal.bankName}
+                  </span>
+                </div>
+              )}
+              {selectedWithdrawal.accountNumber && (
+                <div className={styles.modalRow}>
+                  <span className={styles.modalLabel}>Account number</span>
+                  <span className={styles.modalValue}>
+                    {maskAccount(selectedWithdrawal.accountNumber)}
+                  </span>
+                </div>
+              )}
+              {selectedWithdrawal.accountName && (
+                <div className={styles.modalRow}>
+                  <span className={styles.modalLabel}>Account name</span>
+                  <span className={styles.modalValue}>
+                    {selectedWithdrawal.accountName}
+                  </span>
+                </div>
+              )}
+              {selectedWithdrawal.remarks && (
+                <div className={styles.modalRow}>
+                  <span className={styles.modalLabel}>Note</span>
+                  <span className={styles.modalValue}>
+                    {selectedWithdrawal.remarks}
+                  </span>
+                </div>
+              )}
+              {selectedWithdrawal.status === "FAILED" &&
+                selectedWithdrawal.failureReason && (
+                  <div className={styles.modalFailure}>
+                    {friendlyWithdrawalFailure(
+                      selectedWithdrawal.failureReason
+                    )}
+                  </div>
+                )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </DriverLayout>
   );
 }
